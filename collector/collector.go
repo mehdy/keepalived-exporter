@@ -8,6 +8,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
+	"github.com/sparrc/go-ping"
 )
 
 //KCollector is Keepalived collector
@@ -64,6 +65,7 @@ func NewKCollector(useJSON bool) *KCollector {
 	k.metrics = map[string]*prometheus.Desc{
 		"keepalived_up":                  prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state":          prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
+		"keepalived_ping_packet_loss":    prometheus.NewDesc("keepalived_ping_packet_loss", "Ping packet loss status to each vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_advert_rcvd":         prometheus.NewDesc("keepalived_advert_rcvd", "Advertisements received", lables, nil),
 		"keepalived_advert_sent":         prometheus.NewDesc("keepalived_advert_sent", "Advertisements sent", lables, nil),
 		"keepalived_become_master":       prometheus.NewDesc("keepalived_become_master", "Became master", lables, nil),
@@ -146,6 +148,7 @@ func (k *KCollector) Collect(ch chan<- prometheus.Metric) {
 		k.collectMetric(ch, "keepalived_pri_zero_sent", float64(st.Stats.PRIZeroSent), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
 
 		k.collectVRRPState(ch, st.Data)
+		k.collectPing(ch, st.Data)
 	}
 }
 
@@ -154,9 +157,43 @@ func (k *KCollector) collectVRRPState(ch chan<- prometheus.Metric, data KData) {
 		ipAddr := strings.Split(ip, " ")[0]
 		intf := strings.Split(ip, " ")[2]
 
-		metric, err := prometheus.NewConstMetric(k.metrics["keepalived_vrrp_state"], prometheus.GaugeValue, float64(data.State), data.IName, intf, strconv.Itoa(data.VRID), ipAddr)
+		metric, err := prometheus.NewConstMetric(
+			k.metrics["keepalived_vrrp_state"],
+			prometheus.GaugeValue,
+			float64(data.State),
+			data.IName, intf, strconv.Itoa(data.VRID), ipAddr,
+		)
 		if err != nil {
-			logrus.Error("Failed to register metric for vip: ", ipAddr, " intf: ", intf, " err: ", err)
+			logrus.Error("Failed to register metric on job collectVRRPState for vip: ", ipAddr, " intf: ", intf, " err: ", err)
+			continue
+		}
+
+		ch <- metric
+	}
+}
+
+func (k *KCollector) collectPing(ch chan<- prometheus.Metric, data KData) {
+	for _, ip := range data.VIPs {
+		ipAddr := strings.Split(ip, " ")[0]
+		intf := strings.Split(ip, " ")[2]
+
+		pinger, err := ping.NewPinger(ipAddr)
+		if err != nil {
+			logrus.Error("Faild on creating new instance for pinger", " err: ", err)
+			continue
+		}
+		pinger.SetPrivileged(true)
+		pinger.Count = 1
+		pinger.Run()
+
+		metric, err := prometheus.NewConstMetric(
+			k.metrics["keepalived_ping_packet_loss"],
+			prometheus.GaugeValue,
+			pinger.Statistics().PacketLoss,
+			data.IName, intf, strconv.Itoa(data.VRID), ipAddr,
+		)
+		if err != nil {
+			logrus.Error("Failed to register metric on job collectPing for vip: ", ipAddr, " intf: ", intf, " err: ", err)
 			continue
 		}
 
