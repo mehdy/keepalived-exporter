@@ -2,6 +2,7 @@ package collector
 
 import (
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -36,7 +37,7 @@ type KStats struct {
 
 //KData is keepalived data structure
 type KData struct {
-	Name           string   `json:"iname"`
+	IName          string   `json:"iname"`
 	State          int      `json:"state"`
 	WantState      int      `json:"wantstate"`
 	Intf           string   `json:"ifp_ifname"`
@@ -59,10 +60,10 @@ func NewKCollector(useJSON bool) *KCollector {
 		useJSON: useJSON,
 	}
 
-	lables := []string{"name", "intf", "vrid", "state"}
+	lables := []string{"iname", "intf", "vrid", "state"}
 	k.metrics = map[string]*prometheus.Desc{
 		"keepalived_up":                  prometheus.NewDesc("keepalived_up", "Status", nil, nil),
-		"keepalived_script":              prometheus.NewDesc("keepalived_script", "Check script status", nil, nil),
+		"keepalived_vrrp_state":          prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_advert_rcvd":         prometheus.NewDesc("keepalived_advert_rcvd", "Advertisements received", lables, nil),
 		"keepalived_advert_sent":         prometheus.NewDesc("keepalived_advert_sent", "Advertisements sent", lables, nil),
 		"keepalived_become_master":       prometheus.NewDesc("keepalived_become_master", "Became master", lables, nil),
@@ -102,11 +103,11 @@ func (k *KCollector) Collect(ch chan<- prometheus.Metric) {
 	k.mutex.Lock()
 	defer k.mutex.Unlock()
 
-	var kStats []Stats
+	var stats []Stats
 	var err error
 
 	if k.useJSON {
-		kStats, err = k.json()
+		stats, err = k.json()
 		if err != nil {
 			logrus.Error("Keepalived Exporter didn't export anything for json use", " err: ", err)
 			metric, err := prometheus.NewConstMetric(k.metrics["keepalived_up"], prometheus.GaugeValue, 0)
@@ -122,27 +123,44 @@ func (k *KCollector) Collect(ch chan<- prometheus.Metric) {
 		ch <- metric
 	}
 
-	for _, st := range kStats {
+	for _, st := range stats {
 		state := ""
 		ok := false
 		if state, ok = state2string[st.Data.State]; !ok {
-			logrus.Warn("Unknown State found for vrrp: ", st.Data.Name)
+			logrus.Warn("Unknown State found for vrrp: ", st.Data.IName)
 		}
 
-		k.collectMetric(ch, "keepalived_advert_rcvd", float64(st.Stats.AdvertRcvd), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_advert_sent", float64(st.Stats.AdvertSent), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_become_master", float64(st.Stats.BecomeMaster), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_release_master", float64(st.Stats.ReleaseMaster), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_packet_len_err", float64(st.Stats.PacketLenErr), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_advert_interval_err", float64(st.Stats.AdvertIntervalErr), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_ip_ttl_err", float64(st.Stats.IPTTLErr), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_invalid_type_rcvd", float64(st.Stats.InvalidTypeRcvd), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_addr_list_err", float64(st.Stats.AddrListErr), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_invalid_authtype", float64(st.Stats.InvalidAuthType), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_authtype_mismatch", float64(st.Stats.AuthFailure), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_auth_failure", float64(st.Stats.AuthFailure), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_pri_zero_rcvd", float64(st.Stats.PRIZeroRcvd), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
-		k.collectMetric(ch, "keepalived_pri_zero_sent", float64(st.Stats.PRIZeroSent), st.Data.Name, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_advert_rcvd", float64(st.Stats.AdvertRcvd), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_advert_sent", float64(st.Stats.AdvertSent), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_become_master", float64(st.Stats.BecomeMaster), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_release_master", float64(st.Stats.ReleaseMaster), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_packet_len_err", float64(st.Stats.PacketLenErr), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_advert_interval_err", float64(st.Stats.AdvertIntervalErr), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_ip_ttl_err", float64(st.Stats.IPTTLErr), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_invalid_type_rcvd", float64(st.Stats.InvalidTypeRcvd), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_addr_list_err", float64(st.Stats.AddrListErr), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_invalid_authtype", float64(st.Stats.InvalidAuthType), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_authtype_mismatch", float64(st.Stats.AuthFailure), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_auth_failure", float64(st.Stats.AuthFailure), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_pri_zero_rcvd", float64(st.Stats.PRIZeroRcvd), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+		k.collectMetric(ch, "keepalived_pri_zero_sent", float64(st.Stats.PRIZeroSent), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
+
+		k.collectVRRPState(ch, st.Data)
+	}
+}
+
+func (k *KCollector) collectVRRPState(ch chan<- prometheus.Metric, data KData) {
+	for _, ip := range data.VIPs {
+		ipAddr := strings.Split(ip, " ")[0]
+		intf := strings.Split(ip, " ")[2]
+
+		metric, err := prometheus.NewConstMetric(k.metrics["keepalived_vrrp_state"], prometheus.GaugeValue, float64(data.State), data.IName, intf, strconv.Itoa(data.VRID), ipAddr)
+		if err != nil {
+			logrus.Error("Failed to register metric for vip: ", ipAddr, " intf: ", intf, " err: ", err)
+			continue
+		}
+
+		ch <- metric
 	}
 }
 
