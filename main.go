@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/cafebazaar/keepalived-exporter/collector"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 )
@@ -12,9 +14,14 @@ import (
 func main() {
 	listenAddr := flag.String("web.listen-address", ":2112", "Address to listen on for web interface and telemetry.")
 	metricsPath := flag.String("web.telemetry-path", "/metrics", "A path under which to expose metrics.")
+	keepalivedJSON := flag.Bool("ka.json", false, "Send SIGJSON and decode JSON file instead of parsing text files.")
 
 	flag.Parse()
 
+	coll := collector.NewKCollector(*keepalivedJSON)
+	prometheus.MustRegister(coll)
+
+	logrus.Info("Listening on address: ", *listenAddr)
 	http.Handle(*metricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
@@ -26,7 +33,7 @@ func main() {
              </html>`))
 	})
 	if err := http.ListenAndServe(*listenAddr, nil); err != nil {
-		logrus.Error("Error starting HTTP server", "err", err)
+		logrus.Error("Error starting HTTP server", " err", err)
 		os.Exit(1)
 	}
 }
