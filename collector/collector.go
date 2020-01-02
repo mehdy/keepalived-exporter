@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"sync"
@@ -18,8 +19,8 @@ type KCollector struct {
 	metrics map[string]*prometheus.Desc
 }
 
-//KStats is Keepalived stats structure
-type KStats struct {
+//VRRPStats is Keepalived stats structure
+type VRRPStats struct {
 	AdvertRcvd        int `json:"advert_rcvd"`
 	AdvertSent        int `json:"advert_sent"`
 	BecomeMaster      int `json:"become_master"`
@@ -36,23 +37,34 @@ type KStats struct {
 	PRIZeroSent       int `json:"pri_zero_sent"`
 }
 
-//KData is keepalived data structure
-type KData struct {
-	IName          string   `json:"iname"`
-	State          int      `json:"state"`
-	WantState      int      `json:"wantstate"`
-	Intf           string   `json:"ifp_ifname"`
-	LastTransition float64  `json:"last_transition"`
-	VRID           int      `json:"vrid"`
-	VipSet         bool     `json:"vipset"`
-	SMTPAlert      bool     `json:"smtp_alert"`
-	VIPs           []string `json:"vips"`
+//VRRPData is keepalived data structure
+type VRRPData struct {
+	IName     string   `json:"iname"`
+	State     int      `json:"state"`
+	WantState int      `json:"wantstate"`
+	Intf      string   `json:"ifp_ifname"`
+	GArpDelay int      `json:"garp_delay"`
+	VRID      int      `json:"vrid"`
+	VIPs      []string `json:"vips"`
 }
 
-//Stats is statistics for keepalived to export
+//VRRPScript is keepalived VRRP Script data section structure
+type VRRPScript struct {
+	Name   string
+	Status string
+	State  string
+}
+
+//Stats is statistics for keepalived
 type Stats struct {
-	Data  KData  `json:"data"`
-	Stats KStats `json:"stats"`
+	Data  VRRPData  `json:"data"`
+	Stats VRRPStats `json:"stats"`
+}
+
+//KStats is Keepalived Exporter structure to be export
+type KStats struct {
+	Stats   []Stats
+	Scripts []VRRPScript
 }
 
 //NewKCollector is creating new instance of KCollector
@@ -66,6 +78,7 @@ func NewKCollector(useJSON bool) *KCollector {
 		"keepalived_up":                  prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state":          prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_ping_packet_loss":    prometheus.NewDesc("keepalived_ping_packet_loss", "Ping packet loss status to each vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
+		"keepalived_garp_delay":          prometheus.NewDesc("keepalived_garp_deplay", "Gratuitous ARP delay", lables, nil),
 		"keepalived_advert_rcvd":         prometheus.NewDesc("keepalived_advert_rcvd", "Advertisements received", lables, nil),
 		"keepalived_advert_sent":         prometheus.NewDesc("keepalived_advert_sent", "Advertisements sent", lables, nil),
 		"keepalived_become_master":       prometheus.NewDesc("keepalived_become_master", "Became master", lables, nil),
@@ -80,6 +93,8 @@ func NewKCollector(useJSON bool) *KCollector {
 		"keepalived_auth_failure":        prometheus.NewDesc("keepalived_auth_failure", "Authentication failure", lables, nil),
 		"keepalived_pri_zero_rcvd":       prometheus.NewDesc("keepalived_pri_zero_rcvd", "Priority zero received", lables, nil),
 		"keepalived_pri_zero_sent":       prometheus.NewDesc("keepalived_pri_zero_sent", "Priority zero sent", lables, nil),
+		"keepalived_script_status":       prometheus.NewDesc("keepalived_script_status", "Tracker Script Status", []string{"name"}, nil),
+		"keepalived_script_state":        prometheus.NewDesc("keepalived_script_state", "Tracker Script State", []string{"name"}, nil),
 	}
 
 	return k
@@ -105,13 +120,23 @@ func (k *KCollector) Collect(ch chan<- prometheus.Metric) {
 	k.mutex.Lock()
 	defer k.mutex.Unlock()
 
-	var stats []Stats
+	var kStats *KStats
 	var err error
 
 	if k.useJSON {
-		stats, err = k.json()
+		kStats, err = k.json()
 		if err != nil {
 			logrus.Error("Keepalived Exporter didn't export anything for json use", " err: ", err)
+			metric, err := prometheus.NewConstMetric(k.metrics["keepalived_up"], prometheus.GaugeValue, 0)
+			if err != nil {
+				ch <- metric
+			}
+			return
+		}
+	} else {
+		kStats, err = k.text()
+		if err != nil {
+			logrus.Error("Keepalived Exporter didn't export anything for text use", " err: ", err)
 			metric, err := prometheus.NewConstMetric(k.metrics["keepalived_up"], prometheus.GaugeValue, 0)
 			if err != nil {
 				ch <- metric
@@ -125,13 +150,14 @@ func (k *KCollector) Collect(ch chan<- prometheus.Metric) {
 		ch <- metric
 	}
 
-	for _, st := range stats {
+	for _, st := range kStats.Stats {
 		state := ""
 		ok := false
-		if state, ok = state2string[st.Data.State]; !ok {
+		if state, ok = st.Data.state2string(st.Data.State); !ok {
 			logrus.Warn("Unknown State found for vrrp: ", st.Data.IName)
 		}
 
+		//Keppalived Stats
 		k.collectMetric(ch, "keepalived_advert_rcvd", float64(st.Stats.AdvertRcvd), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
 		k.collectMetric(ch, "keepalived_advert_sent", float64(st.Stats.AdvertSent), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
 		k.collectMetric(ch, "keepalived_become_master", float64(st.Stats.BecomeMaster), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
@@ -147,12 +173,28 @@ func (k *KCollector) Collect(ch chan<- prometheus.Metric) {
 		k.collectMetric(ch, "keepalived_pri_zero_rcvd", float64(st.Stats.PRIZeroRcvd), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
 		k.collectMetric(ch, "keepalived_pri_zero_sent", float64(st.Stats.PRIZeroSent), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
 
+		//Keepalived Data
+		k.collectMetric(ch, "keepalived_garp_delay", float64(st.Data.GArpDelay), st.Data.IName, st.Data.Intf, strconv.Itoa(st.Data.VRID), state)
 		k.collectVRRPState(ch, st.Data)
 		k.collectPing(ch, st.Data)
 	}
+
+	for _, script := range kStats.Scripts {
+		if scriptStatus, ok := script.string2status(script.Status); ok {
+			k.collectMetric(ch, "keepalived_script_status", float64(scriptStatus), script.Name)
+		} else {
+			logrus.Warn("Unknown status for script: ", script.Name, " status: ", script.Status)
+		}
+
+		if scriptState, ok := script.string2state(script.State); ok {
+			k.collectMetric(ch, "keepalived_script_state", float64(scriptState), script.Name)
+		} else {
+			logrus.Warn("Unknown state for script: ", script.Name, " state: ", script.State)
+		}
+	}
 }
 
-func (k *KCollector) collectVRRPState(ch chan<- prometheus.Metric, data KData) {
+func (k *KCollector) collectVRRPState(ch chan<- prometheus.Metric, data VRRPData) {
 	for _, ip := range data.VIPs {
 		ipAddr := strings.Split(ip, " ")[0]
 		intf := strings.Split(ip, " ")[2]
@@ -172,7 +214,7 @@ func (k *KCollector) collectVRRPState(ch chan<- prometheus.Metric, data KData) {
 	}
 }
 
-func (k *KCollector) collectPing(ch chan<- prometheus.Metric, data KData) {
+func (k *KCollector) collectPing(ch chan<- prometheus.Metric, data VRRPData) {
 	for _, ip := range data.VIPs {
 		ipAddr := strings.Split(ip, " ")[0]
 		intf := strings.Split(ip, " ")[2]
@@ -208,13 +250,68 @@ func (k *KCollector) Describe(ch chan<- *prometheus.Desc) {
 	}
 }
 
-func (k *KCollector) json() ([]Stats, error) {
-	s := make([]Stats, 0)
-
+func (k *KCollector) json() (*KStats, error) {
 	err := k.signal(syscall.Signal(SIGJSON))
 	if err != nil {
-		return s, err
+		return nil, err
 	}
 
-	return k.parseJSON()
+	s, err := k.parseJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	return &KStats{
+		Stats:   s,
+		Scripts: make([]VRRPScript, 0),
+	}, nil
+}
+
+func (k *KCollector) text() (*KStats, error) {
+	stats := make([]Stats, 0)
+
+	err := k.signal(syscall.Signal(SIGDATA))
+	if err != nil {
+		logrus.Error("Failed to send DATA signal to keepalived", " err: ", err)
+		return nil, err
+	}
+
+	err = k.signal(syscall.Signal(SIGSTATS))
+	if err != nil {
+		logrus.Error("Failed to send STATS signal to keepalived", " err: ", err)
+		return nil, err
+	}
+
+	vrrpData, err := k.parseVRRPData()
+	if err != nil {
+		return nil, err
+	}
+
+	vrrpStats, err := k.parseStats()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(vrrpData) != len(vrrpStats) {
+		logrus.Error("keepalived.data and keepalived.stats datas are not synced")
+		return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
+	}
+
+	for i := 0; i < len(vrrpData); i++ {
+		s := Stats{
+			Data:  vrrpData[i],
+			Stats: vrrpStats[i],
+		}
+		stats = append(stats, s)
+	}
+
+	scripts, err := k.parseVRRPScript()
+	if err != nil {
+		return nil, err
+	}
+
+	return &KStats{
+		Stats:   stats,
+		Scripts: scripts,
+	}, nil
 }
