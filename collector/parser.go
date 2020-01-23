@@ -265,8 +265,7 @@ func (k *KCollector) parseStats() ([]VRRPStats, error) {
 	s := VRRPStats{}
 	scanner := bufio.NewScanner(bufio.NewReader(f))
 
-	section := ""
-	instance := ""
+	var instance, section string
 
 	for scanner.Scan() {
 		l := scanner.Text()
@@ -274,7 +273,6 @@ func (k *KCollector) parseStats() ([]VRRPStats, error) {
 			if instance != "" {
 				stats = append(stats, s)
 				s = VRRPStats{}
-				instance = ""
 			}
 
 			sp := strings.Split(strings.TrimSpace(l), prop)

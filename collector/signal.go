@@ -21,7 +21,8 @@ var (
 )
 
 func sigNum(sig string) int {
-	out, err := exec.Command("bash", "-c", "keepalived --signum="+sig).Output()
+	sigNumCommand := "keepalived --signum=" + sig
+	out, err := exec.Command("bash", "-c", sigNumCommand).Output()
 	if err != nil {
 		logrus.Fatal("Error getting signum for signal: ", sig, " err: ", err)
 	}

@@ -14,7 +14,7 @@ output:
 # all available settings of specific linters
 linters-settings:
   lll:
-    line-length: 160
+    line-length: 190
 
 linters:
   enable:

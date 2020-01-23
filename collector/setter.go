@@ -8,7 +8,7 @@ import (
 )
 
 func (v *VRRPData) setState(state string) error {
-	ok := true
+	var ok bool
 	if v.State, ok = v.string2state(state); !ok {
 		logrus.Error("Unknown state found: ", state, " iname: ", v.IName)
 		return errors.New("Unknown state found: " + state + " iname: " + v.IName)
@@ -18,7 +18,7 @@ func (v *VRRPData) setState(state string) error {
 }
 
 func (v *VRRPData) setWantState(wantState string) error {
-	ok := true
+	var ok bool
 	if v.WantState, ok = v.string2state(wantState); !ok {
 		logrus.Error("Unknown wantstate found: ", wantState)
 		return errors.New("Unknown wantstate found: " + wantState)

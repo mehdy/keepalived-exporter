@@ -24,13 +24,16 @@ func main() {
 	logrus.Info("Listening on address: ", *listenAddr)
 	http.Handle(*metricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`<html>
+		_, err := w.Write([]byte(`<html>
              <head><title>Keepalived Exporter</title></head>
              <body>
              <h1>Keepalived Exporter</h1>
              <p><a href='` + *metricsPath + `'>Metrics</a></p>
              </body>
-             </html>`))
+			 </html>`))
+		if err != nil {
+			logrus.Warn("Error on returning home page", " err: ", err)
+		}
 	})
 	if err := http.ListenAndServe(*listenAddr, nil); err != nil {
 		logrus.Error("Error starting HTTP server", " err", err)
