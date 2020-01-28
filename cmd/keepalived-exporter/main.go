@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/cafebazaar/keepalived-exporter/collector"
+	"github.com/cafebazaar/keepalived-exporter/internal/collector"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"

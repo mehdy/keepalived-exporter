@@ -19,7 +19,7 @@ lint: lintdeps ## to lint the files
 	$(LINTER) run --config=.golangci-lint.yml ./...
 
 build: dep ## Build the binary file
-	@go build -i -v $(PKG)
+	@go build -i -v $(PKG)/cmd/$(PROJECT_NAME)
 
 clean: ## Remove previous build
 	@rm -f $(PROJECT_NAME)
