@@ -112,10 +112,14 @@ func (k *KCollector) parseJSON() ([]Stats, error) {
 	return stats, nil
 }
 
+func (k *KCollector) readVRRPData() (*os.File, error) {
+	return os.Open("/tmp/keepalived.data")
+}
+
 func (k *KCollector) parseVRRPData() ([]VRRPData, error) {
 	data := make([]VRRPData, 0)
 
-	f, err := os.Open("/tmp/keepalived.data")
+	f, err := k.readVRRPData()
 	if err != nil {
 		logrus.Error("Failed on opening /tmp/keepalived.data", "err: ", err)
 		return data, err
@@ -201,7 +205,7 @@ func (v *VRRPData) parseVIPs(VIPNums string, scanner *bufio.Scanner) error {
 func (k *KCollector) parseVRRPScript() ([]VRRPScript, error) {
 	scripts := make([]VRRPScript, 0)
 
-	f, err := os.Open("/tmp/keepalived.data")
+	f, err := k.readVRRPData()
 	if err != nil {
 		logrus.Error("Failed on opening /tmp/keepalived.data", "err: ", err)
 		return scripts, err
@@ -249,10 +253,14 @@ func (k *KCollector) parseVRRPScript() ([]VRRPScript, error) {
 	return scripts, nil
 }
 
+func (k *KCollector) readVRRPStats() (*os.File, error) {
+	return os.Open("/tmp/keepalived.stats")
+}
+
 func (k *KCollector) parseStats() ([]VRRPStats, error) {
 	stats := make([]VRRPStats, 0)
 
-	f, err := os.Open("/tmp/keepalived.stats")
+	f, err := k.readVRRPStats()
 	if err != nil {
 		logrus.Error("Failed to open /tmp/keepalived.stats", " err: ", err)
 		return stats, err
