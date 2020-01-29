@@ -3,7 +3,7 @@ PKG := "github.com/cafebazaar/$(PROJECT_NAME)"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 LINTER = golangci-lint
-LINTER_VERSION = v1.22.2
+LINTER_VERSION = v1.23.1
 
 .PHONY: all dep lint build clean
 
