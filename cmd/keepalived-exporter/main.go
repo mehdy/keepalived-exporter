@@ -32,7 +32,7 @@ func main() {
              </body>
 			 </html>`))
 		if err != nil {
-			logrus.Warn("Error on returning home page", " err: ", err)
+			logrus.Warn("Error on returning home page err: ", err)
 		}
 	})
 	if err := http.ListenAndServe(*listenAddr, nil); err != nil {
