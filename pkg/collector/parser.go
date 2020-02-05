@@ -3,6 +3,8 @@ package collector
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -10,127 +12,142 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (v *VRRPScript) string2status(status string) (int, bool) {
-	const (
-		Bad = iota
-		Good
-	)
+var VRRPScriptStatuses = []string{"BAD", "GOOD"}
+var VRRPScriptStates = []string{"idle", "running", "requested termination", "forcing termination"}
+var VRRPStates = []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 
-	switch status {
-	case "BAD":
-		return Bad, true
-	case "GOOD":
-		return Good, true
+func (VRRPScript) getIntStatus(status string) (int, bool) {
+	for i, s := range VRRPScriptStatuses {
+		if s == status {
+			return i, true
+		}
 	}
-
 	return -1, false
 }
 
-func (v *VRRPScript) string2state(state string) (int, bool) {
-	const (
-		Idle = iota
-		Running
-		RequestedTermination
-		ForcingTermination
-	)
-
-	switch state {
-	case "idle":
-		return Idle, true
-	case "running":
-		return Running, true
-	case "requested termination":
-		return RequestedTermination, true
-	case "forcing termination":
-		return ForcingTermination, true
+func (VRRPScript) getIntState(state string) (int, bool) {
+	for i, s := range VRRPScriptStates {
+		if s == state {
+			return i, true
+		}
 	}
-
 	return -1, false
 }
 
-func (v *VRRPData) state2string(state int) (string, bool) {
-	const (
-		Init = iota
-		Backup
-		Master
-		Fault
-	)
-
-	switch state {
-	case Init:
-		return "INIT", true
-	case Backup:
-		return "BACKUP", true
-	case Master:
-		return "MASTER", true
-	case Fault:
-		return "FAULT", true
+func (VRRPData) getStringState(state int) (string, bool) {
+	if len(VRRPStates) <= state {
+		return VRRPStates[state], true
 	}
-
 	return "", false
 }
 
-func (v *VRRPData) string2state(state string) (int, bool) {
-	const (
-		Init = iota
-		Backup
-		Master
-		Fault
-	)
-
-	switch state {
-	case "INIT":
-		return Init, true
-	case "BACKUP":
-		return Backup, true
-	case "MASTER":
-		return Master, true
-	case "FAULT":
-		return Fault, true
+func (VRRPData) getIntState(state string) (int, bool) {
+	for i, s := range VRRPStates {
+		if s == state {
+			return i, true
+		}
 	}
-
 	return -1, false
 }
 
-func (k *KCollector) parseJSON() ([]Stats, error) {
-	stats := make([]Stats, 0)
-
-	f, err := os.Open("/tmp/keepalived.json")
-	if err != nil {
-		logrus.Error("Failed to open /tmp/keepalived.json", " err: ", err)
-		return stats, err
+func (k *KeepalivedCollector) stats() (*KeepalivedStats, error) {
+	stats := &KeepalivedStats{
+		VRRPs:   make([]VRRP, 0),
+		Scripts: make([]VRRPScript, 0),
 	}
-	defer f.Close()
 
-	decoder := json.NewDecoder(f)
-	err = decoder.Decode(&stats)
+	if k.useJSON {
+		err := k.signal(k.SIGJSON)
+		if err != nil {
+			logrus.Error("Failed to send JSON signal to keepalived: ", err)
+			return nil, err
+		}
+
+		f, err := os.Open("/tmp/keepalived.json")
+		if err != nil {
+			logrus.Error("Failed to open /tmp/keepalived.json: ", err)
+			return nil, err
+		}
+		defer f.Close()
+
+		stats.VRRPs, err = k.parseJSON(f)
+		if err != nil {
+			logrus.Error("Failed to decode keepalived.json to VRRPStats array structure: ", err)
+			return nil, err
+		}
+	} else {
+		err := k.signal(k.SIGSTATS)
+		if err != nil {
+			logrus.Error("Failed to send STATS signal to keepalived: ", err)
+			return nil, err
+		}
+		f, err := os.Open("/tmp/keepalived.stats")
+		if err != nil {
+			logrus.Error("Failed to open /tmp/keepalived.stats: ", err)
+			return nil, err
+		}
+		vrrpStats, err := k.parseStats(f)
+		if err != nil {
+			return nil, err
+		}
+		f.Close()
+
+		err = k.signal(k.SIGDATA)
+		if err != nil {
+			logrus.Error("Failed to send DATA signal to keepalived", " err: ", err)
+			return nil, err
+		}
+
+		f, err = os.Open("/tmp/keepalived.data")
+		if err != nil {
+			logrus.Error("Failed to open /tmp/keepalived.data: ", err)
+			return nil, err
+		}
+		defer f.Close()
+
+		vrrpData, err := k.parseVRRPData(f)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(vrrpData) != len(vrrpStats) {
+			logrus.Error("keepalived.data and keepalived.stats datas are not synced")
+			return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
+		}
+
+		for i := 0; i < len(vrrpData); i++ {
+			s := VRRP{
+				Data:  vrrpData[i],
+				Stats: vrrpStats[i],
+			}
+			stats.VRRPs = append(stats.VRRPs, s)
+		}
+
+		stats.Scripts = k.parseVRRPScript(f)
+	}
+
+	return stats, nil
+}
+
+func (k *KeepalivedCollector) parseJSON(i io.Reader) ([]VRRP, error) {
+	stats := make([]VRRP, 0)
+
+	err := json.NewDecoder(i).Decode(&stats)
 	if err != nil {
-		logrus.Error("Failed to decode keepalived.json to VRRPStats array structure", " err: ", err)
 		return stats, err
 	}
 
 	return stats, nil
 }
 
-func (k *KCollector) readVRRPData() (*os.File, error) {
-	return os.Open("/tmp/keepalived.data")
-}
-
-func (k *KCollector) parseVRRPData() ([]VRRPData, error) {
+func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 	data := make([]VRRPData, 0)
-
-	f, err := k.readVRRPData()
-	if err != nil {
-		logrus.Error("Failed on opening /tmp/keepalived.data", "err: ", err)
-		return data, err
-	}
-	defer f.Close()
 
 	sep := "VRRP Instance"
 	prop := "="
 
 	d := VRRPData{}
-	scanner := bufio.NewScanner(bufio.NewReader(f))
+	scanner := bufio.NewScanner(bufio.NewReader(i))
 
 	for scanner.Scan() {
 		l := scanner.Text()
@@ -202,21 +219,14 @@ func (v *VRRPData) parseVIPs(VIPNums string, scanner *bufio.Scanner) error {
 	return nil
 }
 
-func (k *KCollector) parseVRRPScript() ([]VRRPScript, error) {
+func (k *KeepalivedCollector) parseVRRPScript(i io.Reader) []VRRPScript {
 	scripts := make([]VRRPScript, 0)
-
-	f, err := k.readVRRPData()
-	if err != nil {
-		logrus.Error("Failed on opening /tmp/keepalived.data", "err: ", err)
-		return scripts, err
-	}
-	defer f.Close()
 
 	sep := "VRRP Script"
 	prop := "="
 
 	script := VRRPScript{}
-	scanner := bufio.NewScanner(bufio.NewReader(f))
+	scanner := bufio.NewScanner(bufio.NewReader(i))
 
 	for scanner.Scan() {
 		l := scanner.Text()
@@ -250,28 +260,17 @@ func (k *KCollector) parseVRRPScript() ([]VRRPScript, error) {
 		scripts = append(scripts, script)
 	}
 
-	return scripts, nil
+	return scripts
 }
 
-func (k *KCollector) readVRRPStats() (*os.File, error) {
-	return os.Open("/tmp/keepalived.stats")
-}
-
-func (k *KCollector) parseStats() ([]VRRPStats, error) {
+func (k *KeepalivedCollector) parseStats(i io.Reader) ([]VRRPStats, error) {
 	stats := make([]VRRPStats, 0)
-
-	f, err := k.readVRRPStats()
-	if err != nil {
-		logrus.Error("Failed to open /tmp/keepalived.stats", " err: ", err)
-		return stats, err
-	}
-	defer f.Close()
 
 	sep := "VRRP Instance"
 	prop := ":"
 
 	s := VRRPStats{}
-	scanner := bufio.NewScanner(bufio.NewReader(f))
+	scanner := bufio.NewScanner(bufio.NewReader(i))
 
 	var instance, section string
 
