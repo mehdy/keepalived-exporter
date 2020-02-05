@@ -35,7 +35,7 @@ func (VRRPScript) getIntState(state string) (int, bool) {
 }
 
 func (VRRPData) getStringState(state int) (string, bool) {
-	if len(VRRPStates) <= state {
+	if state < len(VRRPStates) && state >= 0 {
 		return VRRPStates[state], true
 	}
 	return "", false
@@ -183,8 +183,18 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 					return data, err
 				}
 			case "Virtual IP":
-				if err := d.parseVIPs(val, scanner); err != nil {
+				vipNums, err := strconv.Atoi(val)
+				if err != nil {
+					logrus.Error("Failed to convert string to int in parseVIPS VIPNums: ", val, " err: ", err)
 					return data, err
+				}
+				for i := 0; i < vipNums; i++ {
+					if scanner.Scan() {
+						vip := scanner.Text()
+						d.setVIP(vip)
+					} else {
+						return data, io.ErrUnexpectedEOF
+					}
 				}
 			}
 		} else {
@@ -201,22 +211,6 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 	}
 
 	return data, nil
-}
-
-func (v *VRRPData) parseVIPs(VIPNums string, scanner *bufio.Scanner) error {
-	vipNums, err := strconv.Atoi(VIPNums)
-	if err != nil {
-		logrus.Error("Failed to convert string to int in parseVIPS VIPNums: ", VIPNums, " err: ", err)
-		return err
-	}
-
-	for i := 0; i < vipNums; i++ {
-		l := scanner.Text()
-		l = strings.TrimSpace(l)
-		v.VIPs = append(v.VIPs, l)
-	}
-
-	return nil
 }
 
 func (k *KeepalivedCollector) parseVRRPScript(i io.Reader) []VRRPScript {

@@ -3,6 +3,7 @@ package collector
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -45,4 +46,9 @@ func (v *VRRPData) setVRID(vrid string) error {
 	}
 
 	return nil
+}
+
+func (v *VRRPData) setVIP(vip string) {
+	vip = strings.TrimSpace(vip)
+	v.VIPs = append(v.VIPs, vip)
 }

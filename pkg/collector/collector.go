@@ -149,7 +149,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 		state := ""
 		ok := false
 		if state, ok = vrrp.Data.getStringState(vrrp.Data.State); !ok {
-			logrus.Warn("Unknown State found for vrrp: ", vrrp.Data.IName)
+			logrus.WithField("state", vrrp.Data.State).Warn("Unknown State found for vrrp: ", vrrp.Data.IName)
 		}
 
 		k.newConstMetric(ch, "keepalived_advert_rcvd", float64(vrrp.Stats.AdvertRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
