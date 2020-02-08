@@ -1,0 +1,36 @@
+# options for analysis running
+run:
+  concurrency: 1
+  deadline: 5m
+
+  # include test files or not
+  tests: true
+
+# output configuration options
+output:
+  # colored-line-number|line-number|json|tab|checkstyle
+  format: colored-line-number
+
+linters:
+  enable:
+    - errcheck
+    - unused
+    - dupl
+    - gosimple
+    - goconst
+    - maligned
+    - misspell
+    - unparam
+    - nakedret
+    - golint
+    - megacheck
+    - deadcode
+    - varcheck
+    - structcheck
+    - unconvert
+    - ineffassign
+    - gofmt
+    - gosec
+    - interfacer
+    - govet
+    - gosimple
