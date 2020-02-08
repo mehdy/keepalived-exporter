@@ -12,9 +12,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var VRRPScriptStatuses = []string{"BAD", "GOOD"}
-var VRRPScriptStates = []string{"idle", "running", "requested termination", "forcing termination"}
-var VRRPStates = []string{"INIT", "BACKUP", "MASTER", "FAULT"}
+var (
+	// VRRPScriptStatuses contains VRRP Script statuses
+	VRRPScriptStatuses = []string{"BAD", "GOOD"}
+	// VRRPScriptStates contains VRRP Script states
+	VRRPScriptStates = []string{"idle", "running", "requested termination", "forcing termination"}
+	// VRRPStates contains VRRP states
+	VRRPStates = []string{"INIT", "BACKUP", "MASTER", "FAULT"}
+)
 
 func (VRRPScript) getIntStatus(status string) (int, bool) {
 	for i, s := range VRRPScriptStatuses {
@@ -50,62 +55,102 @@ func (VRRPData) getIntState(state string) (int, bool) {
 	return -1, false
 }
 
+func (k *KeepalivedCollector) jsonVrrps() ([]VRRP, error) {
+	err := k.signal(k.SIGJSON)
+	if err != nil {
+		logrus.Error("Failed to send JSON signal to keepalived: ", err)
+		return nil, err
+	}
+
+	f, err := os.Open("/tmp/keepalived.json")
+	if err != nil {
+		logrus.Error("Failed to open /tmp/keepalived.json: ", err)
+		return nil, err
+	}
+	defer f.Close()
+
+	VRRPs, err := k.parseJSON(f)
+	if err != nil {
+		logrus.Error("Failed to decode keepalived.json to VRRPStats array structure: ", err)
+		return nil, err
+	}
+
+	return VRRPs, nil
+}
+
+func (k *KeepalivedCollector) statsVrrps() ([]VRRPStats, error) {
+	err := k.signal(k.SIGSTATS)
+	if err != nil {
+		logrus.Error("Failed to send STATS signal to keepalived: ", err)
+		return nil, err
+	}
+	f, err := os.Open("/tmp/keepalived.stats")
+	if err != nil {
+		logrus.Error("Failed to open /tmp/keepalived.stats: ", err)
+		return nil, err
+	}
+	defer f.Close()
+
+	vrrpStats, err := k.parseStats(f)
+	if err != nil {
+		return nil, err
+	}
+
+	return vrrpStats, nil
+}
+
+func (k *KeepalivedCollector) dataVrrps() ([]VRRPData, error) {
+	err := k.signal(k.SIGDATA)
+	if err != nil {
+		logrus.Error("Failed to send DATA signal to keepalived: ", err)
+		return nil, err
+	}
+
+	f, err := os.Open("/tmp/keepalived.data")
+	if err != nil {
+		logrus.Error("Failed to open /tmp/keepalived.data: ", err)
+		return nil, err
+	}
+	defer f.Close()
+
+	vrrpData, err := k.parseVRRPData(f)
+	if err != nil {
+		return nil, err
+	}
+
+	return vrrpData, nil
+}
+
+func (k *KeepalivedCollector) scriptVrrps() ([]VRRPScript, error) {
+	f, err := os.Open("/tmp/keepalived.data")
+	if err != nil {
+		logrus.Error("Failed to open /tmp/keepalived.data: ", err)
+		return nil, err
+	}
+	defer f.Close()
+
+	return k.parseVRRPScript(f), nil
+}
+
 func (k *KeepalivedCollector) stats() (*KeepalivedStats, error) {
 	stats := &KeepalivedStats{
 		VRRPs:   make([]VRRP, 0),
 		Scripts: make([]VRRPScript, 0),
 	}
+	var err error
 
 	if k.useJSON {
-		err := k.signal(k.SIGJSON)
+		stats.VRRPs, err = k.jsonVrrps()
 		if err != nil {
-			logrus.Error("Failed to send JSON signal to keepalived: ", err)
-			return nil, err
-		}
-
-		f, err := os.Open("/tmp/keepalived.json")
-		if err != nil {
-			logrus.Error("Failed to open /tmp/keepalived.json: ", err)
-			return nil, err
-		}
-		defer f.Close()
-
-		stats.VRRPs, err = k.parseJSON(f)
-		if err != nil {
-			logrus.Error("Failed to decode keepalived.json to VRRPStats array structure: ", err)
 			return nil, err
 		}
 	} else {
-		err := k.signal(k.SIGSTATS)
+		vrrpStats, err := k.statsVrrps()
 		if err != nil {
-			logrus.Error("Failed to send STATS signal to keepalived: ", err)
-			return nil, err
-		}
-		f, err := os.Open("/tmp/keepalived.stats")
-		if err != nil {
-			logrus.Error("Failed to open /tmp/keepalived.stats: ", err)
-			return nil, err
-		}
-		vrrpStats, err := k.parseStats(f)
-		if err != nil {
-			return nil, err
-		}
-		f.Close()
-
-		err = k.signal(k.SIGDATA)
-		if err != nil {
-			logrus.Error("Failed to send DATA signal to keepalived", " err: ", err)
 			return nil, err
 		}
 
-		f, err = os.Open("/tmp/keepalived.data")
-		if err != nil {
-			logrus.Error("Failed to open /tmp/keepalived.data: ", err)
-			return nil, err
-		}
-		defer f.Close()
-
-		vrrpData, err := k.parseVRRPData(f)
+		vrrpData, err := k.dataVrrps()
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +168,10 @@ func (k *KeepalivedCollector) stats() (*KeepalivedStats, error) {
 			stats.VRRPs = append(stats.VRRPs, s)
 		}
 
-		stats.Scripts = k.parseVRRPScript(f)
+		stats.Scripts, err = k.scriptVrrps()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return stats, nil
@@ -185,7 +233,7 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 			case "Virtual IP":
 				vipNums, err := strconv.Atoi(val)
 				if err != nil {
-					logrus.Error("Failed to convert string to int in parseVIPS VIPNums: ", val, " err: ", err)
+					logrus.WithField("VIPNums", val).Error("Failed to convert string to int in parseVIPS: ", err)
 					return data, err
 				}
 				for i := 0; i < vipNums; i++ {
@@ -193,7 +241,7 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 						vip := scanner.Text()
 						d.setVIP(vip)
 					} else {
-						return data, io.ErrUnexpectedEOF
+						return data, scanner.Err()
 					}
 				}
 			}
@@ -288,7 +336,7 @@ func (k *KeepalivedCollector) parseStats(i io.Reader) ([]VRRPStats, error) {
 
 			value, err := strconv.Atoi(val)
 			if err != nil {
-				logrus.Error("Unknown metric value from keepalived.stats for key: ", key, " value: ", val, " err: ", err)
+				logrus.WithFields(logrus.Fields{"key": key, "val": val}).Error("Unknown metric value from keepalived.stats: ", err)
 				return stats, err
 			}
 
@@ -338,7 +386,7 @@ func (k *KeepalivedCollector) parseStats(i io.Reader) ([]VRRPStats, error) {
 
 			value, err := strconv.Atoi(val)
 			if err != nil {
-				logrus.Error("Unknown metric value from keepalived.stats for key: ", key, " value: ", val, " err: ", err)
+				logrus.WithFields(logrus.Fields{"key": key, "val": val}).Error("Unknown metric value from keepalived.stats: ", err)
 				return stats, err
 			}
 

@@ -11,7 +11,7 @@ import (
 func (v *VRRPData) setState(state string) error {
 	var ok bool
 	if v.State, ok = v.getIntState(state); !ok {
-		logrus.Error("Unknown state found: ", state, " iname: ", v.IName)
+		logrus.WithFields(logrus.Fields{"state": state, "iname": v.IName}).Error("Unknown state found")
 		return errors.New("Unknown state found: " + state + " iname: " + v.IName)
 	}
 
@@ -21,7 +21,7 @@ func (v *VRRPData) setState(state string) error {
 func (v *VRRPData) setWantState(wantState string) error {
 	var ok bool
 	if v.WantState, ok = v.getIntState(wantState); !ok {
-		logrus.Error("Unknown wantstate found: ", wantState)
+		logrus.WithField("wantstate", wantState).Error("Unknown wantstate found")
 		return errors.New("Unknown wantstate found: " + wantState)
 	}
 
@@ -31,7 +31,7 @@ func (v *VRRPData) setWantState(wantState string) error {
 func (v *VRRPData) setGArpDelay(delay string) error {
 	var err error
 	if v.GArpDelay, err = strconv.Atoi(delay); err != nil {
-		logrus.Error("Failed to parse GArpDelay to int delay: ", delay, " err: ", err)
+		logrus.WithField("delay", delay).Error("Failed to parse GArpDelay to int delay: ", err)
 		return err
 	}
 
@@ -41,7 +41,7 @@ func (v *VRRPData) setGArpDelay(delay string) error {
 func (v *VRRPData) setVRID(vrid string) error {
 	var err error
 	if v.VRID, err = strconv.Atoi(vrid); err != nil {
-		logrus.Error("Failed to parse vrid to int vrid: ", vrid, " err: ", err)
+		logrus.WithField("vrid", vrid).Error("Failed to parse vrid to int: ", err)
 		return err
 	}
 

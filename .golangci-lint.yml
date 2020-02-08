@@ -11,11 +11,6 @@ output:
   # colored-line-number|line-number|json|tab|checkstyle
   format: colored-line-number
 
-# all available settings of specific linters
-linters-settings:
-  lll:
-    line-length: 170
-
 linters:
   enable:
     - errcheck
@@ -35,7 +30,6 @@ linters:
     - unconvert
     - ineffassign
     - gofmt
-    - lll
     - gosec
     - interfacer
     - govet

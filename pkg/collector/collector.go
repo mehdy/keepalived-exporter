@@ -80,10 +80,9 @@ func NewKeepalivedCollector(useJSON, ping bool, pidPath string) *KeepalivedColle
 
 	commonLabels := []string{"iname", "intf", "vrid", "state"}
 	kc.metrics = map[string]*prometheus.Desc{
-		"keepalived_up":         prometheus.NewDesc("keepalived_up", "Status", nil, nil),
-		"keepalived_vrrp_state": prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
-		"keepalived_ping_packet_loss": prometheus.NewDesc(
-			"keepalived_ping_packet_loss", "Ping packet loss status to each vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
+		"keepalived_up":                  prometheus.NewDesc("keepalived_up", "Status", nil, nil),
+		"keepalived_vrrp_state":          prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
+		"keepalived_ping_packet_loss":    prometheus.NewDesc("keepalived_ping_packet_loss", "Ping packet loss status to each vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_garp_delay":          prometheus.NewDesc("keepalived_garp_deplay", "Gratuitous ARP delay", commonLabels, nil),
 		"keepalived_advert_rcvd":         prometheus.NewDesc("keepalived_advert_rcvd", "Advertisements received", commonLabels, nil),
 		"keepalived_advert_sent":         prometheus.NewDesc("keepalived_advert_sent", "Advertisements sent", commonLabels, nil),
