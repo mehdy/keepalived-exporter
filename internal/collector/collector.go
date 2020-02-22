@@ -102,7 +102,9 @@ func NewKeepalivedCollector(useJSON, ping bool, pidPath string) *KeepalivedColle
 		"keepalived_script_state":        prometheus.NewDesc("keepalived_script_state", "Tracker Script State", []string{"name"}, nil),
 	}
 
-	kc.SIGJSON = sigNum("JSON")
+	if kc.useJSON {
+		kc.SIGJSON = sigNum("JSON")
+	}
 	kc.SIGDATA = sigNum("DATA")
 	kc.SIGSTATS = sigNum("STATS")
 
