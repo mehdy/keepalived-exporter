@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -57,4 +58,35 @@ func (k *KeepalivedCollector) signal(signal int) error {
 	// Wait 10ms for Keepalived to create its files
 	time.Sleep(10 * time.Millisecond)
 	return nil
+}
+
+func (k *KeepalivedCollector) signalHandler(signum int) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	finishedSignal := make(chan bool)
+	defer cancel()
+
+	if !k.runningSignal {
+		k.runningSignal = true
+		go func() {
+			err := k.signal(signum)
+			if err != nil {
+				logrus.WithField("SigNum", signum).Error("Failed to send signal to keepalived: ", err)
+			}
+			k.runningSignal = false
+			finishedSignal <- true
+		}()
+	}
+
+	select {
+	case <-ctx.Done():
+		logrus.WithField("SigNum", signum).Warn("Failed get response from signal less than 1 seconds")
+		if signum == k.SIGSTATS {
+			k.failedStatsSignal = true
+		}
+	case <-finishedSignal:
+		logrus.WithField("SigNum", signum).Info("Signal process finished successfully")
+		if signum == k.SIGSTATS {
+			k.failedStatsSignal = false
+		}
+	}
 }
