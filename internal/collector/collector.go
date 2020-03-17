@@ -111,11 +111,11 @@ func NewKeepalivedCollector(useJSON, ping bool, pidPath string) *KeepalivedColle
 	return kc
 }
 
-func (k *KeepalivedCollector) newConstMetric(ch chan<- prometheus.Metric, name string, value float64, lableValues ...string) {
+func (k *KeepalivedCollector) newConstMetric(ch chan<- prometheus.Metric, name string, valueType prometheus.ValueType, value float64, lableValues ...string) {
 	// TODO: Why constMetric?
 	pm, err := prometheus.NewConstMetric(
 		k.metrics[name],
-		prometheus.GaugeValue,
+		valueType,
 		value,
 		lableValues...,
 	)
@@ -140,7 +140,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 		keepalivedUp = 0
 	}
 
-	k.newConstMetric(ch, "keepalived_up", keepalivedUp)
+	k.newConstMetric(ch, "keepalived_up", prometheus.GaugeValue, keepalivedUp)
 
 	if keepalivedUp == 0 {
 		return
@@ -153,27 +153,27 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			logrus.WithField("state", vrrp.Data.State).Warn("Unknown State found for vrrp: ", vrrp.Data.IName)
 		}
 
-		k.newConstMetric(ch, "keepalived_advert_rcvd", float64(vrrp.Stats.AdvertRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_advert_sent", float64(vrrp.Stats.AdvertSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_become_master", float64(vrrp.Stats.BecomeMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_release_master", float64(vrrp.Stats.ReleaseMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_packet_len_err", float64(vrrp.Stats.PacketLenErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_advert_interval_err", float64(vrrp.Stats.AdvertIntervalErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_ip_ttl_err", float64(vrrp.Stats.IPTTLErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_invalid_type_rcvd", float64(vrrp.Stats.InvalidTypeRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_addr_list_err", float64(vrrp.Stats.AddrListErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_invalid_authtype", float64(vrrp.Stats.InvalidAuthType), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_authtype_mismatch", float64(vrrp.Stats.AuthFailure), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_auth_failure", float64(vrrp.Stats.AuthFailure), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_pri_zero_rcvd", float64(vrrp.Stats.PRIZeroRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_pri_zero_sent", float64(vrrp.Stats.PRIZeroSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_garp_delay", float64(vrrp.Data.GArpDelay), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_advert_rcvd", prometheus.CounterValue, float64(vrrp.Stats.AdvertRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_advert_sent", prometheus.CounterValue, float64(vrrp.Stats.AdvertSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_become_master", prometheus.CounterValue, float64(vrrp.Stats.BecomeMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_release_master", prometheus.CounterValue, float64(vrrp.Stats.ReleaseMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_packet_len_err", prometheus.GaugeValue, float64(vrrp.Stats.PacketLenErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_advert_interval_err", prometheus.CounterValue, float64(vrrp.Stats.AdvertIntervalErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_ip_ttl_err", prometheus.CounterValue, float64(vrrp.Stats.IPTTLErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_invalid_type_rcvd", prometheus.CounterValue, float64(vrrp.Stats.InvalidTypeRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_addr_list_err", prometheus.CounterValue, float64(vrrp.Stats.AddrListErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_invalid_authtype", prometheus.CounterValue, float64(vrrp.Stats.InvalidAuthType), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_authtype_mismatch", prometheus.CounterValue, float64(vrrp.Stats.AuthFailure), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_auth_failure", prometheus.CounterValue, float64(vrrp.Stats.AuthFailure), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_pri_zero_rcvd", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_pri_zero_sent", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_garp_delay", prometheus.CounterValue, float64(vrrp.Data.GArpDelay), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
 
 		for _, ip := range vrrp.Data.VIPs {
 			ipAddr := strings.Split(ip, " ")[0]
 			intf := strings.Split(ip, " ")[2]
 
-			k.newConstMetric(ch, "keepalived_vrrp_state", float64(vrrp.Data.State), vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
+			k.newConstMetric(ch, "keepalived_vrrp_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 
 			if k.ping {
 				pingResult, err := pingVIP(ipAddr)
@@ -182,7 +182,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 					continue
 				}
 
-				k.newConstMetric(ch, "keepalived_ping_packet_loss", pingResult.PacketLoss, vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
+				k.newConstMetric(ch, "keepalived_ping_packet_loss", prometheus.GaugeValue, pingResult.PacketLoss, vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 			}
 		}
 	}
@@ -191,13 +191,13 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 		if scriptStatus, ok := script.getIntStatus(script.Status); !ok {
 			logrus.WithFields(logrus.Fields{"status": script.Status, "name": script.Name}).Warn("Unknown status")
 		} else {
-			k.newConstMetric(ch, "keepalived_script_status", float64(scriptStatus), script.Name)
+			k.newConstMetric(ch, "keepalived_script_status", prometheus.GaugeValue, float64(scriptStatus), script.Name)
 		}
 
 		if scriptState, ok := script.getIntState(script.State); !ok {
 			logrus.WithFields(logrus.Fields{"state": script.State, "name": script.Name}).Warn("Unknown state")
 		} else {
-			k.newConstMetric(ch, "keepalived_script_state", float64(scriptState), script.Name)
+			k.newConstMetric(ch, "keepalived_script_state", prometheus.GaugeValue, float64(scriptState), script.Name)
 		}
 	}
 }
