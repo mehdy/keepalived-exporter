@@ -13,13 +13,15 @@ import (
 // KeepalivedCollector implements prometheus.Collector interface and stores required info to collect data
 type KeepalivedCollector struct {
 	sync.Mutex
-	useJSON  bool
-	ping     bool
-	pidPath  string
-	SIGDATA  int
-	SIGJSON  int
-	SIGSTATS int
-	metrics  map[string]*prometheus.Desc
+	runningSignal     bool
+	failedStatsSignal bool
+	useJSON           bool
+	ping              bool
+	pidPath           string
+	SIGDATA           int
+	SIGJSON           int
+	SIGSTATS          int
+	metrics           map[string]*prometheus.Desc
 }
 
 // VRRPStats represents Keepalived stats about VRRP
@@ -73,9 +75,11 @@ type KeepalivedStats struct {
 // NewKeepalivedCollector is creating new instance of KeepalivedCollector
 func NewKeepalivedCollector(useJSON, ping bool, pidPath string) *KeepalivedCollector {
 	kc := &KeepalivedCollector{
-		useJSON: useJSON,
-		ping:    ping,
-		pidPath: pidPath,
+		useJSON:           useJSON,
+		ping:              ping,
+		pidPath:           pidPath,
+		runningSignal:     false,
+		failedStatsSignal: false,
 	}
 
 	commonLabels := []string{"iname", "intf", "vrid", "state"}
