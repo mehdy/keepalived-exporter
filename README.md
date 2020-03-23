@@ -20,6 +20,7 @@ ka.json            | Send SIGJSON and decode JSON file instead of parsing text f
 ka.pid-path        | A path for Keepalived PID, defaults to `/var/run/keepalived.pid`.
 ping               | Export VIP ping status, defaults to `false`.
 ping.count         | ICMP packet counts to be sent, defaults to `1`.
+ping.timeout       | Ping timeout in miliseconds, defaults to `1000`.
 
 **Note:** For `ka.json` option requirement is to have Keepalived compiled with `--enable-json` configure option.
 
