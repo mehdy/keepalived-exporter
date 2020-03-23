@@ -17,8 +17,9 @@ Name               | Description
 web.listen-address | Address to listen on for web interface and telemetry, defaults to `:2112`.
 web.telemetry-path | A path under which to expose metrics, defaults to `/metrics`.
 ka.json            | Send SIGJSON and decode JSON file instead of parsing text files, defaults to `false`.
-ping               | Export VIP ping status, defaults to `false`.
 ka.pid-path        | A path for Keepalived PID, defaults to `/var/run/keepalived.pid`.
+ping               | Export VIP ping status, defaults to `false`.
+ping.count         | ICMP packet counts to be sent, defaults to `1`.
 
 **Note:** For `ka.json` option requirement is to have Keepalived compiled with `--enable-json` configure option.
 

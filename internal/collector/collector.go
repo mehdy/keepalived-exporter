@@ -17,6 +17,7 @@ type KeepalivedCollector struct {
 	failedStatsSignal bool
 	useJSON           bool
 	ping              bool
+	pingCount         int
 	pidPath           string
 	SIGDATA           int
 	SIGJSON           int
@@ -73,10 +74,11 @@ type KeepalivedStats struct {
 }
 
 // NewKeepalivedCollector is creating new instance of KeepalivedCollector
-func NewKeepalivedCollector(useJSON, ping bool, pidPath string) *KeepalivedCollector {
+func NewKeepalivedCollector(useJSON, ping bool, pidPath string, pingCount int) *KeepalivedCollector {
 	kc := &KeepalivedCollector{
 		useJSON:           useJSON,
 		ping:              ping,
+		pingCount:         pingCount,
 		pidPath:           pidPath,
 		runningSignal:     false,
 		failedStatsSignal: false,
@@ -180,7 +182,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			k.newConstMetric(ch, "keepalived_vrrp_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 
 			if k.ping {
-				pingResult, err := pingVIP(ipAddr)
+				pingResult, err := k.pingVIP(ipAddr)
 				if err != nil {
 					logrus.WithField("VIP", ipAddr).Error("Faild to ping: ", err)
 					continue
@@ -206,13 +208,13 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func pingVIP(ipAddr string) (*ping.Statistics, error) {
+func (k *KeepalivedCollector) pingVIP(ipAddr string) (*ping.Statistics, error) {
 	pinger, err := ping.NewPinger(ipAddr)
 	if err != nil {
 		return nil, err
 	}
 	pinger.SetPrivileged(true)
-	pinger.Count = 1
+	pinger.Count = k.pingCount
 	pinger.Run()
 	return pinger.Statistics(), nil
 }
