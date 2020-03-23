@@ -56,7 +56,11 @@ func (VRRPData) getIntState(state string) (int, bool) {
 }
 
 func (k *KeepalivedCollector) jsonVrrps() ([]VRRP, error) {
-	k.signalHandler(k.SIGJSON)
+	err := k.signal(k.SIGJSON)
+	if err != nil {
+		logrus.Error("Failed to send JSON signal to keepalived: ", err)
+		return nil, err
+	}
 
 	f, err := os.Open("/tmp/keepalived.json")
 	if err != nil {
@@ -75,7 +79,11 @@ func (k *KeepalivedCollector) jsonVrrps() ([]VRRP, error) {
 }
 
 func (k *KeepalivedCollector) statsVrrps() ([]VRRPStats, error) {
-	k.signalHandler(k.SIGSTATS)
+	err := k.signal(k.SIGSTATS)
+	if err != nil {
+		logrus.Error("Failed to send STATS signal to keepalived: ", err)
+		return nil, err
+	}
 
 	f, err := os.Open("/tmp/keepalived.stats")
 	if err != nil {
@@ -93,8 +101,10 @@ func (k *KeepalivedCollector) statsVrrps() ([]VRRPStats, error) {
 }
 
 func (k *KeepalivedCollector) dataVrrps() ([]VRRPData, error) {
-	if !k.failedStatsSignal {
-		k.signalHandler(k.SIGDATA)
+	err := k.signal(k.SIGDATA)
+	if err != nil {
+		logrus.Error("Failed to send DATA signal to keepalived: ", err)
+		return nil, err
 	}
 
 	f, err := os.Open("/tmp/keepalived.data")
