@@ -16,13 +16,11 @@ func main() {
 	metricsPath := flag.String("web.telemetry-path", "/metrics", "A path under which to expose metrics.")
 	keepalivedJSON := flag.Bool("ka.json", false, "Send SIGJSON and decode JSON file instead of parsing text files.")
 	keepalivedPID := flag.String("ka.pid-path", "/var/run/keepalived.pid", "A path for Keepalived PID")
-	keepalivedPing := flag.Bool("ping", false, "Export VIP ping status")
-	keepalivedPingCount := flag.Int("ping.count", 1, "ICMP packet counts to be sent")
-	keepalivedPingTimeout := flag.Int("ping.timeout", 1000, "Ping timeout in miliseconds")
+	keepalivedCheckScript := flag.String("cs", "", "Health Cehck script path to be execute for each VIP")
 
 	flag.Parse()
 
-	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedPing, *keepalivedPID, *keepalivedPingCount, *keepalivedPingTimeout)
+	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedPID, *keepalivedCheckScript)
 	prometheus.MustRegister(keepalivedCollector)
 
 	http.Handle(*metricsPath, promhttp.Handler())
