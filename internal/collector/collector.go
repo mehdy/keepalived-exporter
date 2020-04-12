@@ -185,7 +185,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				pingResult, err := k.pingVIP(ipAddr)
 				if err != nil {
 					logrus.WithField("VIP", ipAddr).Error("Faild to ping: ", err)
-					continue
+					pingResult.PacketLoss = 100
 				}
 
 				k.newConstMetric(ch, "keepalived_ping_packet_loss", prometheus.GaugeValue, pingResult.PacketLoss, vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
