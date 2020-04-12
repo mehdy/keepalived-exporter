@@ -33,13 +33,13 @@ func main() {
 		</body>
 		</html>`))
 		if err != nil {
-			logrus.Warn("Error on returning home page: ", err)
+			logrus.WithError(err).Warn("Error on returning home page")
 		}
 	})
 
 	logrus.Info("Listening on address: ", *listenAddr)
 	if err := http.ListenAndServe(*listenAddr, nil); err != nil {
-		logrus.Error("Error starting HTTP server: ", err)
+		logrus.WithError(err).Error("Error starting HTTP server")
 		os.Exit(1)
 	}
 }

@@ -31,7 +31,7 @@ func (v *VRRPData) setWantState(wantState string) error {
 func (v *VRRPData) setGArpDelay(delay string) error {
 	var err error
 	if v.GArpDelay, err = strconv.Atoi(delay); err != nil {
-		logrus.WithField("delay", delay).Error("Failed to parse GArpDelay to int delay: ", err)
+		logrus.WithField("delay", delay).WithError(err).Error("Failed to parse GArpDelay to int delay")
 		return err
 	}
 
@@ -41,7 +41,7 @@ func (v *VRRPData) setGArpDelay(delay string) error {
 func (v *VRRPData) setVRID(vrid string) error {
 	var err error
 	if v.VRID, err = strconv.Atoi(vrid); err != nil {
-		logrus.WithField("vrid", vrid).Error("Failed to parse vrid to int: ", err)
+		logrus.WithField("vrid", vrid).WithError(err).Error("Failed to parse vrid to int")
 		return err
 	}
 
