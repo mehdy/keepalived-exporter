@@ -1,28 +1,27 @@
 package collector
 
 import (
+	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
-	"github.com/sparrc/go-ping"
 )
 
 // KeepalivedCollector implements prometheus.Collector interface and stores required info to collect data
 type KeepalivedCollector struct {
 	sync.Mutex
-	useJSON     bool
-	ping        bool
-	pingCount   int
-	pingTimeout int
-	pidPath     string
-	SIGDATA     int
-	SIGJSON     int
-	SIGSTATS    int
-	metrics     map[string]*prometheus.Desc
+	runningSignal     bool
+	failedStatsSignal bool
+	useJSON           bool
+	pidPath           string
+	scriptPath        string
+	SIGDATA           int
+	SIGJSON           int
+	SIGSTATS          int
+	metrics           map[string]*prometheus.Desc
 }
 
 // VRRPStats represents Keepalived stats about VRRP
@@ -74,20 +73,20 @@ type KeepalivedStats struct {
 }
 
 // NewKeepalivedCollector is creating new instance of KeepalivedCollector
-func NewKeepalivedCollector(useJSON, ping bool, pidPath string, pingCount, pingTimeout int) *KeepalivedCollector {
+func NewKeepalivedCollector(useJSON bool, pidPath, scriptPath string) *KeepalivedCollector {
 	kc := &KeepalivedCollector{
-		useJSON:     useJSON,
-		ping:        ping,
-		pingCount:   pingCount,
-		pingTimeout: pingTimeout,
-		pidPath:     pidPath,
+		useJSON:           useJSON,
+		pidPath:           pidPath,
+		scriptPath:        scriptPath,
+		runningSignal:     false,
+		failedStatsSignal: false,
 	}
 
 	commonLabels := []string{"iname", "intf", "vrid", "state"}
 	kc.metrics = map[string]*prometheus.Desc{
 		"keepalived_up":                  prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state":          prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
-		"keepalived_ping_packet_loss":    prometheus.NewDesc("keepalived_ping_packet_loss", "Ping packet loss status to each vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
+		"keepalived_check_script_status": prometheus.NewDesc("keepalived_check_script_status", "Check Script status for each VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_garp_delay":          prometheus.NewDesc("keepalived_garp_deplay", "Gratuitous ARP delay", commonLabels, nil),
 		"keepalived_advert_rcvd":         prometheus.NewDesc("keepalived_advert_rcvd", "Advertisements received", commonLabels, nil),
 		"keepalived_advert_sent":         prometheus.NewDesc("keepalived_advert_sent", "Advertisements sent", commonLabels, nil),
@@ -180,14 +179,13 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 
 			k.newConstMetric(ch, "keepalived_vrrp_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 
-			if k.ping {
-				pingResult, err := k.pingVIP(ipAddr)
-				if err != nil {
-					logrus.WithField("VIP", ipAddr).Error("Faild to ping: ", err)
-					pingResult.PacketLoss = 100
+			if k.scriptPath != "" {
+				ok := k.checkScript(ipAddr)
+				checkScript := float64(0)
+				if ok {
+					checkScript = 1
 				}
-
-				k.newConstMetric(ch, "keepalived_ping_packet_loss", prometheus.GaugeValue, pingResult.PacketLoss, vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
+				k.newConstMetric(ch, "keepalived_check_script_status", prometheus.GaugeValue, checkScript, vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 			}
 		}
 	}
@@ -207,16 +205,14 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (k *KeepalivedCollector) pingVIP(ipAddr string) (*ping.Statistics, error) {
-	pinger, err := ping.NewPinger(ipAddr)
+func (k *KeepalivedCollector) checkScript(vip string) bool {
+	script := k.scriptPath + " " + vip
+	_, err := exec.Command("/bin/sh", "-c", script).Output()
 	if err != nil {
-		return nil, err
+		logrus.WithField("VIP", vip).Error("Check script failed: ", err)
+		return false
 	}
-	pinger.SetPrivileged(true)
-	pinger.Count = k.pingCount
-	pinger.Timeout = time.Duration(k.pingTimeout) * time.Millisecond
-	pinger.Run()
-	return pinger.Statistics(), nil
+	return true
 }
 
 // Describe outputs metrics descriptions
