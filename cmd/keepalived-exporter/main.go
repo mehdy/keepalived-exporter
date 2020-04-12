@@ -18,10 +18,11 @@ func main() {
 	keepalivedPID := flag.String("ka.pid-path", "/var/run/keepalived.pid", "A path for Keepalived PID")
 	keepalivedPing := flag.Bool("ping", false, "Export VIP ping status")
 	keepalivedPingCount := flag.Int("ping.count", 1, "ICMP packet counts to be sent")
+	keepalivedPingTimeout := flag.Int("ping.timeout", 1000, "Ping timeout in miliseconds")
 
 	flag.Parse()
 
-	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedPing, *keepalivedPID, *keepalivedPingCount)
+	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedPing, *keepalivedPID, *keepalivedPingCount, *keepalivedPingTimeout)
 	prometheus.MustRegister(keepalivedCollector)
 
 	http.Handle(*metricsPath, promhttp.Handler())

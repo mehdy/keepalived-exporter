@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
@@ -13,16 +14,15 @@ import (
 // KeepalivedCollector implements prometheus.Collector interface and stores required info to collect data
 type KeepalivedCollector struct {
 	sync.Mutex
-	runningSignal     bool
-	failedStatsSignal bool
-	useJSON           bool
-	ping              bool
-	pingCount         int
-	pidPath           string
-	SIGDATA           int
-	SIGJSON           int
-	SIGSTATS          int
-	metrics           map[string]*prometheus.Desc
+	useJSON     bool
+	ping        bool
+	pingCount   int
+	pingTimeout int
+	pidPath     string
+	SIGDATA     int
+	SIGJSON     int
+	SIGSTATS    int
+	metrics     map[string]*prometheus.Desc
 }
 
 // VRRPStats represents Keepalived stats about VRRP
@@ -74,14 +74,13 @@ type KeepalivedStats struct {
 }
 
 // NewKeepalivedCollector is creating new instance of KeepalivedCollector
-func NewKeepalivedCollector(useJSON, ping bool, pidPath string, pingCount int) *KeepalivedCollector {
+func NewKeepalivedCollector(useJSON, ping bool, pidPath string, pingCount, pingTimeout int) *KeepalivedCollector {
 	kc := &KeepalivedCollector{
-		useJSON:           useJSON,
-		ping:              ping,
-		pingCount:         pingCount,
-		pidPath:           pidPath,
-		runningSignal:     false,
-		failedStatsSignal: false,
+		useJSON:     useJSON,
+		ping:        ping,
+		pingCount:   pingCount,
+		pingTimeout: pingTimeout,
+		pidPath:     pidPath,
 	}
 
 	commonLabels := []string{"iname", "intf", "vrid", "state"}
@@ -215,6 +214,7 @@ func (k *KeepalivedCollector) pingVIP(ipAddr string) (*ping.Statistics, error) {
 	}
 	pinger.SetPrivileged(true)
 	pinger.Count = k.pingCount
+	pinger.Timeout = time.Duration(k.pingTimeout) * time.Millisecond
 	pinger.Run()
 	return pinger.Statistics(), nil
 }
