@@ -87,7 +87,7 @@ func NewKeepalivedCollector(useJSON bool, pidPath, scriptPath string) *Keepalive
 		"keepalived_up":                  prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state":          prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_check_script_status": prometheus.NewDesc("keepalived_check_script_status", "Check Script status for each VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
-		"keepalived_garp_delay":          prometheus.NewDesc("keepalived_garp_deplay", "Gratuitous ARP delay", commonLabels, nil),
+		"keepalived_garp_delay":          prometheus.NewDesc("keepalived_garp_delay", "Gratuitous ARP delay", commonLabels, nil),
 		"keepalived_advert_rcvd":         prometheus.NewDesc("keepalived_advert_rcvd", "Advertisements received", commonLabels, nil),
 		"keepalived_advert_sent":         prometheus.NewDesc("keepalived_advert_sent", "Advertisements sent", commonLabels, nil),
 		"keepalived_become_master":       prometheus.NewDesc("keepalived_become_master", "Became master", commonLabels, nil),
