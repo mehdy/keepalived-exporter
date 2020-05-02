@@ -4,6 +4,10 @@ PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 LINTER = golangci-lint
 LINTER_VERSION = v1.24.0
+COMMIT := $(shell git rev-parse HEAD)
+VERSION ?= $(shell git describe --tags ${COMMIT})
+ARCH := $(shell dpkg --print-architecture)
+RELEASE_FILENAME := $(PROJECT_NAME)-$(VERSION).linux-$(ARCH)
 
 .PHONY: all dep lint build clean
 
@@ -23,3 +27,11 @@ build: dep ## Build the binary file
 
 clean: ## Remove previous build
 	@rm -f $(PROJECT_NAME)
+
+release: build
+	@mkdir $(RELEASE_FILENAME)
+	@cp $(PROJECT_NAME) $(RELEASE_FILENAME)/
+	@cp LICENSE $(RELEASE_FILENAME)/
+	@zip -r $(RELEASE_FILENAME).zip $(RELEASE_FILENAME)
+	@tar -czvf $(RELEASE_FILENAME).tar.gz $(RELEASE_FILENAME)
+	@rm -rf $(RELEASE_FILENAME)
