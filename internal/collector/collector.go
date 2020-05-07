@@ -124,7 +124,7 @@ func (k *KeepalivedCollector) newConstMetric(ch chan<- prometheus.Metric, name s
 		lableValues...,
 	)
 	if err != nil {
-		logrus.Errorf("Failed to register %q metric: %s", name, err)
+		logrus.WithError(err).Errorf("Failed to register %q metric", name)
 		return
 	}
 
@@ -140,7 +140,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 
 	keepalivedStats, err := k.stats()
 	if err != nil {
-		logrus.WithField("json", k.useJSON).Error("No data found to be exported: ", err)
+		logrus.WithField("json", k.useJSON).WithError(err).Error("No data found to be exported")
 		keepalivedUp = 0
 	}
 
@@ -209,7 +209,7 @@ func (k *KeepalivedCollector) checkScript(vip string) bool {
 	script := k.scriptPath + " " + vip
 	_, err := exec.Command("/bin/sh", "-c", script).Output()
 	if err != nil {
-		logrus.WithField("VIP", vip).Error("Check script failed: ", err)
+		logrus.WithField("VIP", vip).WithError(err).Error("Check script failed")
 		return false
 	}
 	return true

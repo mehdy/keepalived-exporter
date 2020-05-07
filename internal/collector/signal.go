@@ -17,13 +17,13 @@ func sigNum(sig string) int {
 	sigNumCommand := "keepalived --signum=" + sig
 	out, err := exec.Command("bash", "-c", sigNumCommand).Output()
 	if err != nil {
-		logrus.WithField("signal", sig).Fatal("Error getting signum: ", err)
+		logrus.WithField("signal", sig).WithError(err).Fatal("Error getting signum")
 	}
 
 	var signum int
 	err = json.Unmarshal(out, &signum)
 	if err != nil {
-		logrus.WithField("signal", sig).Fatal("Error unmarshalling signum result: ", err)
+		logrus.WithField("signal", sig).WithError(err).Fatal("Error unmarshalling signum result")
 	}
 
 	return signum
@@ -32,25 +32,25 @@ func sigNum(sig string) int {
 func (k *KeepalivedCollector) signal(signal int) error {
 	data, err := ioutil.ReadFile(k.pidPath)
 	if err != nil {
-		logrus.WithField("path", k.pidPath).Error("Can't find keepalived: ", err)
+		logrus.WithField("path", k.pidPath).WithError(err).Error("Can't find keepalived")
 		return err
 	}
 
 	pid, err := strconv.Atoi(strings.TrimSuffix(string(data), "\n"))
 	if err != nil {
-		logrus.WithField("path", k.pidPath).Error("Unknown pid found for keepalived: ", err)
+		logrus.WithField("path", k.pidPath).WithError(err).Error("Unknown pid found for keepalived")
 		return err
 	}
 
 	proc, err := os.FindProcess(pid)
 	if err != nil {
-		logrus.WithField("pid", pid).Error("Failed to find process: ", err)
+		logrus.WithField("pid", pid).WithError(err).Error("Failed to find process")
 		return err
 	}
 
 	err = proc.Signal(syscall.Signal(signal))
 	if err != nil {
-		logrus.WithField("pid", pid).Error("Failed to send signal: ", err)
+		logrus.WithField("pid", pid).WithError(err).Error("Failed to send signal")
 		return err
 	}
 
