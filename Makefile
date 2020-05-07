@@ -25,8 +25,10 @@ lint: lintdeps ## to lint the files
 build: dep ## Build the binary file
 	@go build -i -v $(PKG)/cmd/$(PROJECT_NAME)
 
-clean: ## Remove previous build
+clean: ## Remove previous build and release files
 	@rm -f $(PROJECT_NAME)
+	@rm -f $(RELEASE_FILENAME).zip
+	@rm -f $(RELEASE_FILENAME).tar.gz
 
 release: build
 	@mkdir $(RELEASE_FILENAME)
