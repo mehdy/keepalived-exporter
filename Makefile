@@ -5,7 +5,7 @@ GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 LINTER = golangci-lint
 LINTER_VERSION = v1.24.0
 COMMIT := $(shell git rev-parse HEAD)
-VERSION ?= $(shell git describe --tags ${COMMIT})
+VERSION := $(shell git describe --tags ${COMMIT} | cut -c2-)
 ARCH := $(shell dpkg --print-architecture)
 RELEASE_FILENAME := $(PROJECT_NAME)-$(VERSION).linux-$(ARCH)
 
@@ -25,8 +25,10 @@ lint: lintdeps ## to lint the files
 build: dep ## Build the binary file
 	@go build -i -v $(PKG)/cmd/$(PROJECT_NAME)
 
-clean: ## Remove previous build
+clean: ## Remove previous build and release files
 	@rm -f $(PROJECT_NAME)
+	@rm -f $(RELEASE_FILENAME).zip
+	@rm -f $(RELEASE_FILENAME).tar.gz
 
 release: build
 	@mkdir $(RELEASE_FILENAME)
