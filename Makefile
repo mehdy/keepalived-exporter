@@ -5,7 +5,7 @@ GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 LINTER = golangci-lint
 LINTER_VERSION = v1.24.0
 COMMIT := $(shell git rev-parse HEAD)
-VERSION ?= $(shell git describe --tags ${COMMIT})
+VERSION := $(shell git describe --tags ${COMMIT} | cut -c2-)
 ARCH := $(shell dpkg --print-architecture)
 RELEASE_FILENAME := $(PROJECT_NAME)-$(VERSION).linux-$(ARCH)
 
