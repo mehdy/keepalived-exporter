@@ -207,9 +207,9 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 
 func (k *KeepalivedCollector) checkScript(vip string) bool {
 	script := k.scriptPath + " " + vip
-	_, err := exec.Command("/bin/sh", "-c", script).Output()
+	out, err := exec.Command("/bin/sh", "-c", script).Output()
 	if err != nil {
-		logrus.WithField("VIP", vip).WithError(err).Error("Check script failed")
+		logrus.WithFields(logrus.Fields{"VIP": vip, "output": string(out)}).WithError(err).Error("Check script failed")
 		return false
 	}
 	return true
