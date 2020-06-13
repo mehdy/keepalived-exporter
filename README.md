@@ -23,28 +23,28 @@ cs                 | Health Cehck script path to be execute for each VIP.
 **Note:** For `ka.json` option requirement is to have Keepalived compiled with `--enable-json` configure option.
 
 ## Metrics
-| Metric                         | Notes
-|--------------------------------|-----------------------------------
-| keepalived_up                  | Status of Keepalived service
-| keepalived_vrrp_state          | State of vrrp
-| keepalived_check_script_status | Check Script status for each VIP
-| keepalived_garp_delay          | Gratuitous ARP delay
-| keepalived_advert_rcvd         | Advertisements received
-| keepalived_advert_sent         | Advertisements sent
-| keepalived_become_master       | Became master
-| keepalived_release_master      | Released master
-| keepalived_packet_len_err      | Packet length errors
-| keepalived_advert_interval_err | Advertisement interval errors
-| keepalived_ip_ttl_err          | TTL errors
-| keepalived_invalid_type_rcvd   | Invalid type errors
-| keepalived_addr_list_err       | Address list errors
-| keepalived_invalid_authtype    | Authentication invalid
-| keepalived_authtype_mismatch   | Authentication mismatch
-| keepalived_auth_failure        | Authentication failure
-| keepalived_pri_zero_rcvd       | Priority zero received
-| keepalived_pri_zero_sent       | Priority zero sent
-| keepalived_script_status       | Tracker Script Status
-| keepalived_script_state        | Tracker Script State
+| Metric                                          | Notes
+|-------------------------------------------------|------------------------------------
+| keepalived_up                                   | Status of Keepalived service
+| keepalived_vrrp_state                           | State of vrrp
+| keepalived_exporter_check_script_status         | Check Script status for each VIP
+| keepalived_gratuitous_arp_delay_total           | Gratuitous ARP delay
+| keepalived_advertisements_received_total        | Advertisements received
+| keepalived_advertisements_sent_total            | Advertisements sent
+| keepalived_become_master_total                  | Became master
+| keepalived_release_master_total                 | Released master
+| keepalived_packet_length_errors_total           | Packet length errors
+| keepalived_advertisements_interval_errors_total | Advertisement interval errors
+| keepalived_ip_ttl_errors_total                  | TTL errors
+| keepalived_invalid_type_received_total          | Invalid type errors
+| keepalived_address_list_errors_total            | Address list errors
+| keepalived_authentication_invalid_total         | Authentication invalid
+| keepalived_authentication_mismatch_total        | Authentication mismatch
+| keepalived_authentication_failure_total         | Authentication failure
+| keepalived_priority_zero_received_total         | Priority zero received
+| keepalived_priority_zero_sent_total             | Priority zero sent
+| keepalived_script_status                        | Tracker Script Status
+| keepalived_script_state                         | Tracker Script State
 
 ## Check Script
 You can specify a check script like Keepalived script check to check if all the things is okay or not.
