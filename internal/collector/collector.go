@@ -167,7 +167,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 		k.newConstMetric(ch, "keepalived_invalid_type_received_total", prometheus.CounterValue, float64(vrrp.Stats.InvalidTypeRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
 		k.newConstMetric(ch, "keepalived_address_list_errors_total", prometheus.CounterValue, float64(vrrp.Stats.AddrListErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
 		k.newConstMetric(ch, "keepalived_authentication_invalid_total", prometheus.CounterValue, float64(vrrp.Stats.InvalidAuthType), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_authentication_mismatch_total", prometheus.CounterValue, float64(vrrp.Stats.AuthFailure), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_authentication_mismatch_total", prometheus.CounterValue, float64(vrrp.Stats.AuthTypeMismatch), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
 		k.newConstMetric(ch, "keepalived_authentication_failure_total", prometheus.CounterValue, float64(vrrp.Stats.AuthFailure), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
 		k.newConstMetric(ch, "keepalived_priority_zero_received_total", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
 		k.newConstMetric(ch, "keepalived_priority_zero_sent_total", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
