@@ -7,12 +7,16 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    steps:
 
-    - name: Set up Go 1.13
+    strategy:
+      matrix:
+        go: [1.13, 1.14]
+
+    steps:
+    - name: Set up Go ${{ matrix.go }}
       uses: actions/setup-go@v1
       with:
-        go-version: 1.13
+        go-version: ${{ matrix.go }}
       id: go
 
     - name: Check out code into the Go module directory
@@ -27,12 +31,16 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    steps:
+    
+    strategy:
+      matrix:
+        go: [1.14]
 
-    - name: Set up Go 1.13
+    steps:
+    - name: Set up Go ${{ matrix.go }}
       uses: actions/setup-go@v1
       with:
-        go-version: 1.13
+        go-version: ${{ matrix.go }}
       id: go
 
     - name: Check out code into the Go module directory
