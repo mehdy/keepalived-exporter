@@ -191,7 +191,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	for _, script := range keepalivedStats.Scripts {
-		if scriptStatus, ok := script.getIntStatus(script.Status); !ok {
+		if scriptStatus, ok := getIntStatus(script.Status); !ok {
 			logrus.WithFields(logrus.Fields{"status": script.Status, "name": script.Name}).Warn("Unknown status")
 		} else {
 			k.newConstMetric(ch, "keepalived_script_status", prometheus.GaugeValue, float64(scriptStatus), script.Name)
