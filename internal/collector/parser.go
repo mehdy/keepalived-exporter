@@ -208,7 +208,10 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 
 			s := strings.Split(strings.TrimSpace(l), prop)
 			d.IName = strings.TrimSpace(s[1])
-		} else if strings.HasPrefix(l, "   ") && strings.Contains(l, prop) && d.IName != "" {
+		} else if strings.HasPrefix(l, "   ") && d.IName != "" {
+			if !strings.Contains(l, prop) {
+				continue
+			}
 			s := strings.Split(strings.TrimSpace(l), prop)
 			key := strings.TrimSpace(s[0])
 			val := strings.TrimSpace(s[1])
