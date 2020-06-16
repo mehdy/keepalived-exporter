@@ -279,7 +279,7 @@
             "pluginVersion":"6.6.2",
             "targets":[
                 {
-                    "expr":"keepalived_check_script_status{node_name=\"$node\"}",
+                    "expr":"keepalived_exporter_check_script_status{node_name=\"$node\"}",
                     "legendFormat":"{{ ip_address }}",
                     "refId":"A"
                 }
@@ -519,7 +519,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_release_master{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_release_master_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -620,7 +620,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_become_master{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_become_master_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -721,7 +721,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_advert_rcvd{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_advertisements_received_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -822,7 +822,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_advert_sent{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_advertisements_sent_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -923,7 +923,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_pri_zero_rcvd{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_priority_zero_received_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1024,7 +1024,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_pri_zero_sent{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_priority_zero_sent_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1125,7 +1125,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_packet_len_err{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_packet_length_errors_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1226,7 +1226,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_advert_interval_err{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_advertisements_interval_errors_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1327,7 +1327,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_ip_ttl_err{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_ip_ttl_errors_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1428,7 +1428,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_addr_list_err{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_address_list_errors_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1529,7 +1529,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_invalid_type_rcvd{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_invalid_type_received_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1630,7 +1630,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_garp_delay{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_gratuitous_arp_delay_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1747,7 +1747,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_invalid_authtype{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_authentication_invalid_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1848,7 +1848,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_authtype_mismatch{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_authentication_mismatch_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
@@ -1949,7 +1949,7 @@
             "steppedLine":false,
             "targets":[
                 {
-                    "expr":"irate(keepalived_auth_failure{node_name=\"$node\"}[1m])",
+                    "expr":"irate(keepalived_authentication_failure_total{node_name=\"$node\"}[1m])",
                     "legendFormat":"{{ iname }}",
                     "refId":"A"
                 }
