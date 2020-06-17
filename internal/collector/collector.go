@@ -153,7 +153,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, vrrp := range keepalivedStats.VRRPs {
 		state := ""
 		ok := false
-		if state, ok = vrrp.Data.getStringState(vrrp.Data.State); !ok {
+		if state, ok = vrrp.Data.getStringState(); !ok {
 			logrus.WithField("state", vrrp.Data.State).Warn("Unknown State found for vrrp: ", vrrp.Data.IName)
 		}
 
@@ -191,13 +191,13 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	for _, script := range keepalivedStats.Scripts {
-		if scriptStatus, ok := getIntStatus(script.Status); !ok {
+		if scriptStatus, ok := script.getIntStatus(); !ok {
 			logrus.WithFields(logrus.Fields{"status": script.Status, "name": script.Name}).Warn("Unknown status")
 		} else {
 			k.newConstMetric(ch, "keepalived_script_status", prometheus.GaugeValue, float64(scriptStatus), script.Name)
 		}
 
-		if scriptState, ok := script.getIntState(script.State); !ok {
+		if scriptState, ok := script.getIntState(); !ok {
 			logrus.WithFields(logrus.Fields{"state": script.State, "name": script.Name}).Warn("Unknown state")
 		} else {
 			k.newConstMetric(ch, "keepalived_script_state", prometheus.GaugeValue, float64(scriptState), script.Name)

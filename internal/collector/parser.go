@@ -21,32 +21,32 @@ var (
 	VRRPStates = []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 )
 
-func getIntStatus(status string) (int, bool) {
+func (v *VRRPScript) getIntStatus() (int, bool) {
 	for i, s := range VRRPScriptStatuses {
-		if s == status {
+		if s == v.Status {
 			return i, true
 		}
 	}
 	return -1, false
 }
 
-func (VRRPScript) getIntState(state string) (int, bool) {
+func (v *VRRPScript) getIntState() (int, bool) {
 	for i, s := range VRRPScriptStates {
-		if s == state {
+		if s == v.State {
 			return i, true
 		}
 	}
 	return -1, false
 }
 
-func (VRRPData) getStringState(state int) (string, bool) {
-	if state < len(VRRPStates) && state >= 0 {
-		return VRRPStates[state], true
+func (v *VRRPData) getStringState() (string, bool) {
+	if v.State < len(VRRPStates) && v.State >= 0 {
+		return VRRPStates[v.State], true
 	}
 	return "", false
 }
 
-func (VRRPData) getIntState(state string) (int, bool) {
+func vrrpDataStringToIntState(state string) (int, bool) {
 	for i, s := range VRRPStates {
 		if s == state {
 			return i, true
