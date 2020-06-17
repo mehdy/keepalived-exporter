@@ -39,3 +39,28 @@ func TestGetIntState(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestGetStringState(t *testing.T) {
+	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
+	data := VRRPData{}
+
+	for state, expected := range acceptableStates {
+		data.State = state
+		result, ok := data.getStringState()
+		if !ok || result != expected {
+			t.Fail()
+		}
+	}
+
+	data.State = -1
+	result, ok := data.getStringState()
+	if ok || result != "" {
+		t.Fail()
+	}
+
+	data.State = len(acceptableStates)
+	result, ok = data.getStringState()
+	if ok || result != "" {
+		t.Fail()
+	}
+}
