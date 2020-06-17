@@ -30,9 +30,9 @@ func (v *VRRPScript) getIntStatus() (int, bool) {
 	return -1, false
 }
 
-func (VRRPScript) getIntState(state string) (int, bool) {
+func (v *VRRPScript) getIntState() (int, bool) {
 	for i, s := range VRRPScriptStates {
-		if s == state {
+		if s == v.State {
 			return i, true
 		}
 	}
