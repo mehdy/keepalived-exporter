@@ -153,7 +153,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, vrrp := range keepalivedStats.VRRPs {
 		state := ""
 		ok := false
-		if state, ok = vrrp.Data.getStringState(vrrp.Data.State); !ok {
+		if state, ok = vrrp.Data.getStringState(); !ok {
 			logrus.WithField("state", vrrp.Data.State).Warn("Unknown State found for vrrp: ", vrrp.Data.IName)
 		}
 

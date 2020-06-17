@@ -39,9 +39,9 @@ func (v *VRRPScript) getIntState() (int, bool) {
 	return -1, false
 }
 
-func (VRRPData) getStringState(state int) (string, bool) {
-	if state < len(VRRPStates) && state >= 0 {
-		return VRRPStates[state], true
+func (v *VRRPData) getStringState() (string, bool) {
+	if v.State < len(VRRPStates) && v.State >= 0 {
+		return VRRPStates[v.State], true
 	}
 	return "", false
 }
