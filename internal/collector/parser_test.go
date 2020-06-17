@@ -4,15 +4,18 @@ import "testing"
 
 func TestGetIntStatus(t *testing.T) {
 	acceptableStatuses := []string{"BAD", "GOOD"}
+	script := VRRPScript{}
 
 	for expected, status := range acceptableStatuses {
-		result, ok := getIntStatus(status)
+		script.Status = status
+		result, ok := script.getIntStatus()
 		if !ok || result != expected {
 			t.Fail()
 		}
 	}
 
-	result, ok := getIntStatus("NOTGOOD")
+	script.Status = "NOTGOOD"
+	result, ok := script.getIntStatus()
 	if ok || result != -1 {
 		t.Fail()
 	}

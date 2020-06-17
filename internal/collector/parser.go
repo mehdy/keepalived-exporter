@@ -21,9 +21,9 @@ var (
 	VRRPStates = []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 )
 
-func getIntStatus(status string) (int, bool) {
+func (v *VRRPScript) getIntStatus() (int, bool) {
 	for i, s := range VRRPScriptStatuses {
-		if s == status {
+		if s == v.Status {
 			return i, true
 		}
 	}
