@@ -10,7 +10,7 @@ import (
 
 func (v *VRRPData) setState(state string) error {
 	var ok bool
-	if v.State, ok = v.getIntState(state); !ok {
+	if v.State, ok = vrrpDataStringToIntState(state); !ok {
 		logrus.WithFields(logrus.Fields{"state": state, "iname": v.IName}).Error("Unknown state found")
 		return errors.New("Unknown state found: " + state + " iname: " + v.IName)
 	}
@@ -20,7 +20,7 @@ func (v *VRRPData) setState(state string) error {
 
 func (v *VRRPData) setWantState(wantState string) error {
 	var ok bool
-	if v.WantState, ok = v.getIntState(wantState); !ok {
+	if v.WantState, ok = vrrpDataStringToIntState(wantState); !ok {
 		logrus.WithField("wantstate", wantState).Error("Unknown wantstate found")
 		return errors.New("Unknown wantstate found: " + wantState)
 	}

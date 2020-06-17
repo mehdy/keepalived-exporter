@@ -46,7 +46,7 @@ func (v *VRRPData) getStringState() (string, bool) {
 	return "", false
 }
 
-func (VRRPData) getIntState(state string) (int, bool) {
+func vrrpDataStringToIntState(state string) (int, bool) {
 	for i, s := range VRRPStates {
 		if s == state {
 			return i, true
