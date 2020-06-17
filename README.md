@@ -1,4 +1,6 @@
 # Keepalived Exporter
+[![Continuous Integration](https://github.com/cafebazaar/keepalived-exporter/workflows/Continuous%20Integration/badge.svg)](https://github.com/cafebazaar/keepalived-exporter/actions)
+
 Prometheus exporter for [Keepalived](https://keepalived.org) metrics.
 
 ## Getting Started
