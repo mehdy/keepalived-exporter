@@ -1,0 +1,5 @@
+# Allow use of Merge commits (eg on github: "Merge branch 'master' into feature/ride-unicorns")
+allowMergeCommits: true
+
+# Allow use of Revert commits (eg on github: "Revert "feat: ride unicorns"")
+allowRevertCommits: true
