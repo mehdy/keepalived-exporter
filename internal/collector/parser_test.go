@@ -64,3 +64,19 @@ func TestGetStringState(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestVRRPDataStringToIntState(t *testing.T) {
+	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
+
+	for expected, state := range acceptableStates {
+		result, ok := vrrpDataStringToIntState(state)
+		if !ok || result != expected {
+			t.Fail()
+		}
+	}
+
+	result, ok := vrrpDataStringToIntState("NOGOOD")
+	if ok || result != -1 {
+		t.Fail()
+	}
+}
