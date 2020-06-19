@@ -18,3 +18,20 @@ func TestSetState(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSetWantState(t *testing.T) {
+	data := VRRPData{}
+	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
+
+	for expected, state := range acceptableStates {
+		err := data.setWantState(state)
+		if err != nil || data.WantState != expected {
+			t.Fail()
+		}
+	}
+
+	err := data.setWantState("NOGOOD")
+	if err == nil || data.WantState != -1 {
+		t.Fail()
+	}
+}
