@@ -35,3 +35,28 @@ func TestSetWantState(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSetGArpDelay(t *testing.T) {
+	data := VRRPData{}
+
+	delay := "1"
+	expected := 1
+	err := data.setGArpDelay(delay)
+	if err != nil || data.GArpDelay != expected {
+		t.Fail()
+	}
+
+	delay = "1.1"
+	expected = 0
+	err = data.setGArpDelay(delay)
+	if err == nil || data.GArpDelay != expected {
+		t.Fail()
+	}
+
+	delay = "NA"
+	expected = 0
+	err = data.setGArpDelay(delay)
+	if err == nil || data.GArpDelay != expected {
+		t.Fail()
+	}
+}
