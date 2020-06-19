@@ -60,3 +60,28 @@ func TestSetGArpDelay(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestSetVRID(t *testing.T) {
+	data := VRRPData{}
+
+	vrid := "10"
+	expected := 10
+	err := data.setVRID(vrid)
+	if err != nil || data.VRID != expected {
+		t.Fail()
+	}
+
+	vrid = "1.1"
+	expected = 0
+	err = data.setVRID(vrid)
+	if err == nil || data.VRID != expected {
+		t.Fail()
+	}
+
+	vrid = "NA"
+	expected = 0
+	err = data.setVRID(vrid)
+	if err == nil || data.VRID != expected {
+		t.Fail()
+	}
+}
