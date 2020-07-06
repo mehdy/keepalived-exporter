@@ -16,7 +16,7 @@ Help on flags
 ## Usage
 Name               | Description
 -------------------|------------
-web.listen-address | Address to listen on for web interface and telemetry, defaults to `:2112`.
+web.listen-address | Address to listen on for web interface and telemetry, defaults to `:9165`.
 web.telemetry-path | A path under which to expose metrics, defaults to `/metrics`.
 ka.json            | Send SIGJSON and decode JSON file instead of parsing text files, defaults to `false`.
 ka.pid-path        | A path for Keepalived PID, defaults to `/var/run/keepalived.pid`.
