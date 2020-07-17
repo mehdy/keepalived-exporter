@@ -1,6 +1,9 @@
 package collector
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestGetIntStatus(t *testing.T) {
 	acceptableStatuses := []string{"BAD", "GOOD"}
@@ -78,5 +81,92 @@ func TestVRRPDataStringToIntState(t *testing.T) {
 	result, ok := vrrpDataStringToIntState("NOGOOD")
 	if ok || result != -1 {
 		t.Fail()
+	}
+}
+
+func TestParseVRRPData(t *testing.T) {
+	f, err := os.Open("../../test_files/keepalived.data")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	k := &KeepalivedCollector{}
+	vrrpData, err := k.parseVRRPData(f)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	if len(vrrpData) != 3 {
+		t.Fail()
+	}
+
+	for _, data := range vrrpData {
+		if data.IName == "VI_EXT_1" {
+			if data.State != 2 {
+				t.Fail()
+			}
+			if data.WantState != 2 {
+				t.Fail()
+			}
+			if data.Intf != "ens192" {
+				t.Fail()
+			}
+			if data.GArpDelay != 5 {
+				t.Fail()
+			}
+			if data.VRID != 10 {
+				t.Fail()
+			}
+			for _, ip := range data.VIPs {
+				if ip != "192.168.2.1" {
+					t.Fail()
+				}
+			}
+		} else if data.IName == "VI_EXT_2" {
+			if data.State != 1 {
+				t.Fail()
+			}
+			if data.WantState != 1 {
+				t.Fail()
+			}
+			if data.Intf != "ens192" {
+				t.Fail()
+			}
+			if data.GArpDelay != 5 {
+				t.Fail()
+			}
+			if data.VRID != 20 {
+				t.Fail()
+			}
+			for _, ip := range data.VIPs {
+				if ip != "192.168.2.2" {
+					t.Fail()
+				}
+			}
+		} else if data.IName == "VI_EXT_2" {
+			if data.State != 1 {
+				t.Fail()
+			}
+			if data.WantState != 1 {
+				t.Fail()
+			}
+			if data.Intf != "ens192" {
+				t.Fail()
+			}
+			if data.GArpDelay != 5 {
+				t.Fail()
+			}
+			if data.VRID != 30 {
+				t.Fail()
+			}
+			for _, ip := range data.VIPs {
+				if ip != "192.168.2.3" {
+					t.Fail()
+				}
+			}
+		}
 	}
 }
