@@ -82,29 +82,7 @@ func NewKeepalivedCollector(useJSON bool, pidPath, scriptPath string) *Keepalive
 		failedStatsSignal: false,
 	}
 
-	commonLabels := []string{"iname", "intf", "vrid", "state"}
-	kc.metrics = map[string]*prometheus.Desc{
-		"keepalived_up":                                   prometheus.NewDesc("keepalived_up", "Status", nil, nil),
-		"keepalived_vrrp_state":                           prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
-		"keepalived_exporter_check_script_status":         prometheus.NewDesc("keepalived_exporter_check_script_status", "Check Script status for each VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
-		"keepalived_gratuitous_arp_delay_total":           prometheus.NewDesc("keepalived_gratuitous_arp_delay_total", "Gratuitous ARP delay", commonLabels, nil),
-		"keepalived_advertisements_received_total":        prometheus.NewDesc("keepalived_advertisements_received_total", "Advertisements received", commonLabels, nil),
-		"keepalived_advertisements_sent_total":            prometheus.NewDesc("keepalived_advertisements_sent_total", "Advertisements sent", commonLabels, nil),
-		"keepalived_become_master_total":                  prometheus.NewDesc("keepalived_become_master_total", "Became master", commonLabels, nil),
-		"keepalived_release_master_total":                 prometheus.NewDesc("keepalived_release_master_total", "Released master", commonLabels, nil),
-		"keepalived_packet_length_errors_total":           prometheus.NewDesc("keepalived_packet_length_errors_total", "Packet length errors", commonLabels, nil),
-		"keepalived_advertisements_interval_errors_total": prometheus.NewDesc("keepalived_advertisements_interval_errors_total", "Advertisement interval errors", commonLabels, nil),
-		"keepalived_ip_ttl_errors_total":                  prometheus.NewDesc("keepalived_ip_ttl_errors_total", "TTL errors", commonLabels, nil),
-		"keepalived_invalid_type_received_total":          prometheus.NewDesc("keepalived_invalid_type_received_total", "Invalid type errors", commonLabels, nil),
-		"keepalived_address_list_errors_total":            prometheus.NewDesc("keepalived_address_list_errors_total", "Address list errors", commonLabels, nil),
-		"keepalived_authentication_invalid_total":         prometheus.NewDesc("keepalived_authentication_invalid_total", "Authentication invalid", commonLabels, nil),
-		"keepalived_authentication_mismatch_total":        prometheus.NewDesc("keepalived_authentication_mismatch_total", "Authentication mismatch", commonLabels, nil),
-		"keepalived_authentication_failure_total":         prometheus.NewDesc("keepalived_authentication_failure_total", "Authentication failure", commonLabels, nil),
-		"keepalived_priority_zero_received_total":         prometheus.NewDesc("keepalived_priority_zero_received_total", "Priority zero received", commonLabels, nil),
-		"keepalived_priority_zero_sent_total":             prometheus.NewDesc("keepalived_priority_zero_sent_total", "Priority zero sent", commonLabels, nil),
-		"keepalived_script_status":                        prometheus.NewDesc("keepalived_script_status", "Tracker Script Status", []string{"name"}, nil),
-		"keepalived_script_state":                         prometheus.NewDesc("keepalived_script_state", "Tracker Script State", []string{"name"}, nil),
-	}
+	kc.fillMetrics()
 
 	if kc.useJSON {
 		kc.SIGJSON = sigNum("JSON")
@@ -116,7 +94,6 @@ func NewKeepalivedCollector(useJSON bool, pidPath, scriptPath string) *Keepalive
 }
 
 func (k *KeepalivedCollector) newConstMetric(ch chan<- prometheus.Metric, name string, valueType prometheus.ValueType, value float64, lableValues ...string) {
-	// TODO: Why constMetric?
 	pm, err := prometheus.NewConstMetric(
 		k.metrics[name],
 		valueType,
@@ -219,5 +196,31 @@ func (k *KeepalivedCollector) checkScript(vip string) bool {
 func (k *KeepalivedCollector) Describe(ch chan<- *prometheus.Desc) {
 	for _, m := range k.metrics {
 		ch <- m
+	}
+}
+
+func (k *KeepalivedCollector) fillMetrics() {
+	commonLabels := []string{"iname", "intf", "vrid", "state"}
+	k.metrics = map[string]*prometheus.Desc{
+		"keepalived_up":                                   prometheus.NewDesc("keepalived_up", "Status", nil, nil),
+		"keepalived_vrrp_state":                           prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
+		"keepalived_exporter_check_script_status":         prometheus.NewDesc("keepalived_exporter_check_script_status", "Check Script status for each VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
+		"keepalived_gratuitous_arp_delay_total":           prometheus.NewDesc("keepalived_gratuitous_arp_delay_total", "Gratuitous ARP delay", commonLabels, nil),
+		"keepalived_advertisements_received_total":        prometheus.NewDesc("keepalived_advertisements_received_total", "Advertisements received", commonLabels, nil),
+		"keepalived_advertisements_sent_total":            prometheus.NewDesc("keepalived_advertisements_sent_total", "Advertisements sent", commonLabels, nil),
+		"keepalived_become_master_total":                  prometheus.NewDesc("keepalived_become_master_total", "Became master", commonLabels, nil),
+		"keepalived_release_master_total":                 prometheus.NewDesc("keepalived_release_master_total", "Released master", commonLabels, nil),
+		"keepalived_packet_length_errors_total":           prometheus.NewDesc("keepalived_packet_length_errors_total", "Packet length errors", commonLabels, nil),
+		"keepalived_advertisements_interval_errors_total": prometheus.NewDesc("keepalived_advertisements_interval_errors_total", "Advertisement interval errors", commonLabels, nil),
+		"keepalived_ip_ttl_errors_total":                  prometheus.NewDesc("keepalived_ip_ttl_errors_total", "TTL errors", commonLabels, nil),
+		"keepalived_invalid_type_received_total":          prometheus.NewDesc("keepalived_invalid_type_received_total", "Invalid type errors", commonLabels, nil),
+		"keepalived_address_list_errors_total":            prometheus.NewDesc("keepalived_address_list_errors_total", "Address list errors", commonLabels, nil),
+		"keepalived_authentication_invalid_total":         prometheus.NewDesc("keepalived_authentication_invalid_total", "Authentication invalid", commonLabels, nil),
+		"keepalived_authentication_mismatch_total":        prometheus.NewDesc("keepalived_authentication_mismatch_total", "Authentication mismatch", commonLabels, nil),
+		"keepalived_authentication_failure_total":         prometheus.NewDesc("keepalived_authentication_failure_total", "Authentication failure", commonLabels, nil),
+		"keepalived_priority_zero_received_total":         prometheus.NewDesc("keepalived_priority_zero_received_total", "Priority zero received", commonLabels, nil),
+		"keepalived_priority_zero_sent_total":             prometheus.NewDesc("keepalived_priority_zero_sent_total", "Priority zero sent", commonLabels, nil),
+		"keepalived_script_status":                        prometheus.NewDesc("keepalived_script_status", "Tracker Script Status", []string{"name"}, nil),
+		"keepalived_script_state":                         prometheus.NewDesc("keepalived_script_state", "Tracker Script State", []string{"name"}, nil),
 	}
 }
