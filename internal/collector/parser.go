@@ -245,7 +245,7 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 					return data, err
 				}
 			case "Virtual IP":
-				d.setVIP(strings.Split(val, " ")[0])
+				d.addVIP(strings.Split(val, " ")[0])
 			}
 		} else {
 			if d.IName != "" {

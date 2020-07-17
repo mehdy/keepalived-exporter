@@ -89,14 +89,14 @@ func TestSetVRID(t *testing.T) {
 	}
 }
 
-func TestSetVIP(t *testing.T) {
+func TestAddVIP(t *testing.T) {
 	data := VRRPData{}
 
 	vips := []string{"   1.1.1.1", "2.2.2.2", "3.3.3.3   "}
 	expectedVIPs := []string{"1.1.1.1", "2.2.2.2", "3.3.3.3"}
 
 	for _, vip := range vips {
-		data.setVIP(vip)
+		data.addVIP(vip)
 	}
 
 	if !reflect.DeepEqual(expectedVIPs, data.VIPs) {
