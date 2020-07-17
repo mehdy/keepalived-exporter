@@ -170,3 +170,31 @@ func TestParseVRRPData(t *testing.T) {
 		}
 	}
 }
+
+func TestParseVRRPScript(t *testing.T) {
+	f, err := os.Open("../../test_files/keepalived.data")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	k := &KeepalivedCollector{}
+	vrrpScripts := k.parseVRRPScript(f)
+
+	if len(vrrpScripts) != 1 {
+		t.Fail()
+	}
+
+	for _, script := range vrrpScripts {
+		if script.Name != "check_script" {
+			t.Fail()
+		}
+		if script.Status != "GOOD" {
+			t.Fail()
+		}
+		if script.State != "idle" {
+			t.Fail()
+		}
+	}
+}
