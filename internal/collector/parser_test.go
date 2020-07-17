@@ -2,6 +2,7 @@ package collector
 
 import (
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -196,5 +197,88 @@ func TestParseVRRPScript(t *testing.T) {
 		if script.State != "idle" {
 			t.Fail()
 		}
+	}
+}
+
+func TestParseStats(t *testing.T) {
+	f, err := os.Open("../../test_files/keepalived.stats")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	k := &KeepalivedCollector{}
+	stats, err := k.parseStats(f)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	if len(stats) != 3 {
+		t.Fail()
+	}
+
+	// check for VI_EXT_1
+	viExt1 := VRRPStats{
+		AdvertRcvd:        11,
+		AdvertSent:        12,
+		BecomeMaster:      2,
+		ReleaseMaster:     1,
+		PacketLenErr:      1,
+		IPTTLErr:          1,
+		InvalidTypeRcvd:   1,
+		AdvertIntervalErr: 1,
+		AddrListErr:       1,
+		InvalidAuthType:   2,
+		AuthTypeMismatch:  2,
+		AuthFailure:       2,
+		PRIZeroRcvd:       1,
+		PRIZeroSent:       1,
+	}
+	if !reflect.DeepEqual(viExt1, stats[0]) {
+		t.Fail()
+	}
+
+	// check for VI_EXT_2
+	viExt2 := VRRPStats{
+		AdvertRcvd:        10,
+		AdvertSent:        158,
+		BecomeMaster:      2,
+		ReleaseMaster:     2,
+		PacketLenErr:      10,
+		IPTTLErr:          10,
+		InvalidTypeRcvd:   10,
+		AdvertIntervalErr: 10,
+		AddrListErr:       10,
+		InvalidAuthType:   20,
+		AuthTypeMismatch:  20,
+		AuthFailure:       20,
+		PRIZeroRcvd:       12,
+		PRIZeroSent:       12,
+	}
+	if !reflect.DeepEqual(viExt2, stats[1]) {
+		t.Fail()
+	}
+
+	// check for VI_EXT_3
+	viExt3 := VRRPStats{
+		AdvertRcvd:        23,
+		AdvertSent:        172,
+		BecomeMaster:      4,
+		ReleaseMaster:     4,
+		PacketLenErr:      30,
+		IPTTLErr:          30,
+		InvalidTypeRcvd:   30,
+		AdvertIntervalErr: 30,
+		AddrListErr:       30,
+		InvalidAuthType:   10,
+		AuthTypeMismatch:  10,
+		AuthFailure:       2,
+		PRIZeroRcvd:       1,
+		PRIZeroSent:       2,
+	}
+	if !reflect.DeepEqual(viExt3, stats[2]) {
+		t.Fail()
 	}
 }
