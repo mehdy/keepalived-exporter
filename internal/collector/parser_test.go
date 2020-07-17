@@ -104,69 +104,46 @@ func TestParseVRRPData(t *testing.T) {
 		t.Fail()
 	}
 
+	viExt1 := VRRPData{
+		IName:     "VI_EXT_1",
+		State:     2,
+		WantState: 2,
+		Intf:      "ens192",
+		GArpDelay: 5,
+		VRID:      10,
+		VIPs:      []string{"192.168.2.1"},
+	}
+	viExt2 := VRRPData{
+		IName:     "VI_EXT_2",
+		State:     1,
+		WantState: 1,
+		Intf:      "ens192",
+		GArpDelay: 5,
+		VRID:      20,
+		VIPs:      []string{"192.168.2.2"},
+	}
+	viExt3 := VRRPData{
+		IName:     "VI_EXT_3",
+		State:     1,
+		WantState: 1,
+		Intf:      "ens192",
+		GArpDelay: 5,
+		VRID:      30,
+		VIPs:      []string{"192.168.2.3"},
+	}
+
 	for _, data := range vrrpData {
 		if data.IName == "VI_EXT_1" {
-			if data.State != 2 {
+			if !reflect.DeepEqual(data, viExt1) {
 				t.Fail()
-			}
-			if data.WantState != 2 {
-				t.Fail()
-			}
-			if data.Intf != "ens192" {
-				t.Fail()
-			}
-			if data.GArpDelay != 5 {
-				t.Fail()
-			}
-			if data.VRID != 10 {
-				t.Fail()
-			}
-			for _, ip := range data.VIPs {
-				if ip != "192.168.2.1" {
-					t.Fail()
-				}
 			}
 		} else if data.IName == "VI_EXT_2" {
-			if data.State != 1 {
+			if !reflect.DeepEqual(data, viExt2) {
 				t.Fail()
 			}
-			if data.WantState != 1 {
+		} else if data.IName == "VI_EXT_3" {
+			if !reflect.DeepEqual(data, viExt3) {
 				t.Fail()
-			}
-			if data.Intf != "ens192" {
-				t.Fail()
-			}
-			if data.GArpDelay != 5 {
-				t.Fail()
-			}
-			if data.VRID != 20 {
-				t.Fail()
-			}
-			for _, ip := range data.VIPs {
-				if ip != "192.168.2.2" {
-					t.Fail()
-				}
-			}
-		} else if data.IName == "VI_EXT_2" {
-			if data.State != 1 {
-				t.Fail()
-			}
-			if data.WantState != 1 {
-				t.Fail()
-			}
-			if data.Intf != "ens192" {
-				t.Fail()
-			}
-			if data.GArpDelay != 5 {
-				t.Fail()
-			}
-			if data.VRID != 30 {
-				t.Fail()
-			}
-			for _, ip := range data.VIPs {
-				if ip != "192.168.2.3" {
-					t.Fail()
-				}
 			}
 		}
 	}

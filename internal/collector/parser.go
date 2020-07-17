@@ -194,10 +194,13 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 
 	sep := "VRRP Instance"
 	prop := "="
+	arrayProp := ":"
 
 	d := VRRPData{}
 	scanner := bufio.NewScanner(bufio.NewReader(i))
 
+	key := ""
+	val := ""
 	for scanner.Scan() {
 		l := scanner.Text()
 		if strings.HasPrefix(l, " "+sep) && strings.Contains(l, prop) {
@@ -208,13 +211,20 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 
 			s := strings.Split(strings.TrimSpace(l), prop)
 			d.IName = strings.TrimSpace(s[1])
-		} else if strings.HasPrefix(l, "   ") && d.IName != "" {
-			if !strings.Contains(l, prop) {
-				continue
+		} else if (strings.HasPrefix(l, "   ") || strings.HasPrefix(l, "     ")) && d.IName != "" {
+			if strings.HasPrefix(l, "     ") {
+				val = strings.TrimSpace(l)
+			} else {
+				if strings.Contains(l, prop) {
+					s := strings.Split(strings.TrimSpace(l), prop)
+					key = strings.TrimSpace(s[0])
+					val = strings.TrimSpace(s[1])
+				} else if strings.Contains(l, arrayProp) {
+					s := strings.Split(strings.TrimSpace(l), arrayProp)
+					key = strings.TrimSpace(s[0])
+					continue
+				}
 			}
-			s := strings.Split(strings.TrimSpace(l), prop)
-			key := strings.TrimSpace(s[0])
-			val := strings.TrimSpace(s[1])
 			switch key {
 			case "State":
 				if err := d.setState(val); err != nil {
@@ -235,19 +245,7 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 					return data, err
 				}
 			case "Virtual IP":
-				vipNums, err := strconv.Atoi(val)
-				if err != nil {
-					logrus.WithField("VIPNums", val).WithError(err).Error("Failed to convert string to int in parseVIPS")
-					return data, err
-				}
-				for i := 0; i < vipNums; i++ {
-					if scanner.Scan() {
-						vip := scanner.Text()
-						d.setVIP(vip)
-					} else {
-						return data, scanner.Err()
-					}
-				}
+				d.setVIP(strings.Split(val, " ")[0])
 			}
 		} else {
 			if d.IName != "" {
