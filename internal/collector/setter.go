@@ -48,7 +48,7 @@ func (v *VRRPData) setVRID(vrid string) error {
 	return nil
 }
 
-func (v *VRRPData) setVIP(vip string) {
+func (v *VRRPData) addVIP(vip string) {
 	vip = strings.TrimSpace(vip)
 	v.VIPs = append(v.VIPs, vip)
 }
