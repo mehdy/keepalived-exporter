@@ -1,19 +1,43 @@
 # Keepalived Exporter
+
 [![Continuous Integration](https://github.com/cafebazaar/keepalived-exporter/workflows/Continuous%20Integration/badge.svg)](https://github.com/cafebazaar/keepalived-exporter/actions)
 
 Prometheus exporter for [Keepalived](https://keepalived.org) metrics.
 
-## Getting Started
-To run it:
+## Installation
+
+### Binary releases (Recommended)
+
+```bash
+export VERSION=1.0.0
+wget https://github.com/cafebazaar/keepalived-exporter/releases/download/v${VERSION}/keepalived-exporter-${VERSION}.linux-amd64.tar.gz
+tar xvzf keepalived-exporter-${VERSION}.linux-amd64.tar.gz keepalived-exporter-${VERSION}.linux-amd64/keepalived-exporter
+sudo mv keepalived-exporter-${VERSION}.linux-amd64/keepalived-exporter /usr/local/bin/
 ```
-sudo ./keepalived-exporter [flags]
-```
-Help on flags
-```
-./keepalived-exporter --help
+
+### From source
+
+```bash
+git clone --depth 1 https://github.com/cafebazaar/keepalived-exporter.git
+cd keepalived-exporter
+make build
+sudo mv keepalived-exporter /usr/local/bin/
 ```
 
 ## Usage
+
+Run keepalived-exporter
+
+```bash
+sudo keepalived-exporter [flags]
+```
+
+Help on flags
+
+```bash
+./keepalived-exporter --help
+```
+
 Name               | Description
 -------------------|------------
 web.listen-address | Address to listen on for web interface and telemetry, defaults to `:9165`.
@@ -25,6 +49,7 @@ cs                 | Health Cehck script path to be execute for each VIP.
 **Note:** For `ka.json` option requirement is to have Keepalived compiled with `--enable-json` configure option.
 
 ## Metrics
+
 | Metric                                          | Notes
 |-------------------------------------------------|------------------------------------
 | keepalived_up                                   | Status of Keepalived service
@@ -49,16 +74,19 @@ cs                 | Health Cehck script path to be execute for each VIP.
 | keepalived_script_state                         | Tracker Script State
 
 ## Check Script
+
 You can specify a check script like Keepalived script check to check if all the things is okay or not.
 The script will run for each VIP and gives an arg `$1` that contains VIP.
 
 **Note:** The script should be executable.
-```
+
+```bash
 chmod +x check_script.sh
 ```
 
 ### Sample Check Script
-```
+
+```bash
 #!/usr/bin/env bash
 
 ping $1 -c 1 -W 1
