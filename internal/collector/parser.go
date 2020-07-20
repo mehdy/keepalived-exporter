@@ -245,7 +245,7 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 					return data, err
 				}
 			case "Virtual IP":
-				d.addVIP(strings.Split(val, " ")[0])
+				d.addVIP(val)
 			}
 		} else {
 			if d.IName != "" {
@@ -409,4 +409,14 @@ func (k *KeepalivedCollector) parseStats(i io.Reader) ([]VRRPStats, error) {
 	}
 
 	return stats, nil
+}
+
+func parseVIP(vip string) (string, string, bool) {
+	args := strings.Split(vip, " ")
+	if len(args) != 5 {
+		logrus.WithField("VIP", vip).Error("Failed to parse VIP from keepalived data")
+		return "", "", false
+	}
+
+	return args[0], args[2], true
 }

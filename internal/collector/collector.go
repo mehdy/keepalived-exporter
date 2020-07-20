@@ -3,7 +3,6 @@ package collector
 import (
 	"os/exec"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -147,8 +146,10 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 		k.newConstMetric(ch, "keepalived_gratuitous_arp_delay_total", prometheus.CounterValue, float64(vrrp.Data.GArpDelay), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
 
 		for _, ip := range vrrp.Data.VIPs {
-			ipAddr := strings.Split(ip, " ")[0]
-			intf := strings.Split(ip, " ")[2]
+			ipAddr, intf, ok := parseVIP(ip)
+			if !ok {
+				continue
+			}
 
 			k.newConstMetric(ch, "keepalived_vrrp_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 
