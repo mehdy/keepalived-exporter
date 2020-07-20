@@ -111,7 +111,7 @@ func TestParseVRRPData(t *testing.T) {
 		Intf:      "ens192",
 		GArpDelay: 5,
 		VRID:      10,
-		VIPs:      []string{"192.168.2.1"},
+		VIPs:      []string{"192.168.2.1 dev ens192 scope global set"},
 	}
 	viExt2 := VRRPData{
 		IName:     "VI_EXT_2",
@@ -120,7 +120,7 @@ func TestParseVRRPData(t *testing.T) {
 		Intf:      "ens192",
 		GArpDelay: 5,
 		VRID:      20,
-		VIPs:      []string{"192.168.2.2"},
+		VIPs:      []string{"192.168.2.2 dev ens192 scope global"},
 	}
 	viExt3 := VRRPData{
 		IName:     "VI_EXT_3",
@@ -129,7 +129,7 @@ func TestParseVRRPData(t *testing.T) {
 		Intf:      "ens192",
 		GArpDelay: 5,
 		VRID:      30,
-		VIPs:      []string{"192.168.2.3"},
+		VIPs:      []string{"192.168.2.3 dev ens192 scope global"},
 	}
 
 	for _, data := range vrrpData {
@@ -256,6 +256,21 @@ func TestParseStats(t *testing.T) {
 		PRIZeroSent:       2,
 	}
 	if !reflect.DeepEqual(viExt3, stats[2]) {
+		t.Fail()
+	}
+}
+
+func TestParseVIP(t *testing.T) {
+	vip := "192.168.2.2 dev ens192 scope global"
+	excpectedIP := "192.168.2.2"
+	excpectedIntf := "ens192"
+
+	ip, intf, ok := parseVIP(vip)
+	if !ok {
+		t.Fail()
+	}
+
+	if ip != excpectedIP || intf != excpectedIntf {
 		t.Fail()
 	}
 }
