@@ -227,20 +227,20 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 			if strings.HasPrefix(l, "     ") {
 				val = strings.TrimSpace(l)
 			} else {
-				var s []string
+				var args []string
 				if strings.Contains(l, prop) {
-					s = strings.Split(strings.TrimSpace(l), prop)
+					args = strings.Split(strings.TrimSpace(l), prop)
 				} else if strings.Contains(l, arrayProp) {
-					s = strings.Split(strings.TrimSpace(l), arrayProp)
+					args = strings.Split(strings.TrimSpace(l), arrayProp)
 				} else {
 					continue
 				}
 
-				key = strings.TrimSpace(s[0])
+				key = strings.TrimSpace(args[0])
 				if isKeyArray(key) {
 					continue
 				}
-				val = strings.TrimSpace(s[1])
+				val = strings.TrimSpace(args[1])
 			}
 			switch key {
 			case "State":
