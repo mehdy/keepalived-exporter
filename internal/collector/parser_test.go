@@ -274,3 +274,18 @@ func TestParseVIP(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestIsKeyArray(t *testing.T) {
+	supportedKeys := []string{"Virtual IP"}
+
+	for _, key := range supportedKeys {
+		if !isKeyArray(key) {
+			t.Fail()
+		}
+	}
+
+	notArrayKey := "NoArray"
+	if isKeyArray(notArrayKey) {
+		t.Fail()
+	}
+}

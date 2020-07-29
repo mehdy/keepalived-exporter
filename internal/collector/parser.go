@@ -189,6 +189,18 @@ func (k *KeepalivedCollector) parseJSON(i io.Reader) ([]VRRP, error) {
 	return stats, nil
 }
 
+// isKeyArray checks if key is array in keepalived.data file
+func isKeyArray(key string) bool {
+	supportedKeys := []string{"Virtual IP"}
+	for _, supportedKey := range supportedKeys {
+		if supportedKey == key {
+			return true
+		}
+	}
+	logrus.WithField("Key", key).Debug("Unsupported array key")
+	return false
+}
+
 func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 	data := make([]VRRPData, 0)
 
@@ -215,15 +227,20 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 			if strings.HasPrefix(l, "     ") {
 				val = strings.TrimSpace(l)
 			} else {
+				var s []string
 				if strings.Contains(l, prop) {
-					s := strings.Split(strings.TrimSpace(l), prop)
-					key = strings.TrimSpace(s[0])
-					val = strings.TrimSpace(s[1])
+					s = strings.Split(strings.TrimSpace(l), prop)
 				} else if strings.Contains(l, arrayProp) {
-					s := strings.Split(strings.TrimSpace(l), arrayProp)
-					key = strings.TrimSpace(s[0])
+					s = strings.Split(strings.TrimSpace(l), arrayProp)
+				} else {
 					continue
 				}
+
+				key = strings.TrimSpace(s[0])
+				if isKeyArray(key) {
+					continue
+				}
+				val = strings.TrimSpace(s[1])
 			}
 			switch key {
 			case "State":
