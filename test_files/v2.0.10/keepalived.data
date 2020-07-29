@@ -1,0 +1,49 @@
+------< VRRP Topology >------
+ VRRP Instance = VI_1
+   VRRP Version = 2
+   State = MASTER
+   Wantstate = MASTER
+   Number of interface and track script faults = 0
+   Number of track scripts init = 0
+   Last transition = 1595875667 (Mon Jul 27 18:47:47 2020)
+   Read timeout = 1596022954.764907 (Wed Jul 29 11:42:34.764907)
+   Master down timer = 804687 usecs
+   Interface = ens192
+   Using src_ip = 1.1.1.1
+   Gratuitous ARP delay = 5
+   Gratuitous ARP repeat = 5
+   Gratuitous ARP refresh = 0
+   Gratuitous ARP refresh repeat = 1
+   Gratuitous ARP lower priority delay = 5
+   Gratuitous ARP lower priority repeat = 5
+   Send advert after receive lower priority advert = true
+   Send advert after receive higher priority advert = false
+   Virtual Router ID = 52
+   Priority = 50
+   Effective priority = 50
+   Total priority = 50
+   Advert interval = 1 sec
+   Accept = enabled
+   Preempt = enabled
+   Promote_secondaries = disabled
+   Authentication type = none
+   Virtual IP = 1
+     2.2.2.2/32 dev ens192 scope global
+   fd_in 12, fd_out 13
+   Tracked scripts = 1
+     chk_service weight 0
+   Using smtp notification = no
+------< VRRP Scripts >------
+ VRRP Script = chk_service
+   Command = '/usr/bin/killall' '-0' 'haproxy'
+   Interval = 2 sec
+   Timeout = 0 sec
+   Weight = 0
+   Rise = 1
+   Fall = 1
+   Insecure = no
+   Status = GOOD
+   Script uid:gid = 0:0
+   VRRP instances = 1
+     VI_1, weight 0
+   State = idle

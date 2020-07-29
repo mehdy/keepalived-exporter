@@ -85,8 +85,8 @@ func TestVRRPDataStringToIntState(t *testing.T) {
 	}
 }
 
-func TestParseVRRPData(t *testing.T) {
-	f, err := os.Open("../../test_files/keepalived.data")
+func TestV215ParseVRRPData(t *testing.T) {
+	f, err := os.Open("../../test_files/v2.1.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -149,8 +149,76 @@ func TestParseVRRPData(t *testing.T) {
 	}
 }
 
-func TestParseVRRPScript(t *testing.T) {
-	f, err := os.Open("../../test_files/keepalived.data")
+func TestV2010ParseVRRPData(t *testing.T) {
+	f, err := os.Open("../../test_files/v2.0.10/keepalived.data")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	k := &KeepalivedCollector{}
+	vrrpData, err := k.parseVRRPData(f)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	if len(vrrpData) != 1 {
+		t.Fail()
+	}
+
+	vi1 := VRRPData{
+		IName:     "VI_1",
+		State:     2,
+		WantState: 2,
+		Intf:      "ens192",
+		GArpDelay: 5,
+		VRID:      52,
+		VIPs:      []string{"2.2.2.2/32 dev ens192 scope global"},
+	}
+
+	for _, data := range vrrpData {
+		if data.IName == "VI_1" {
+			if !reflect.DeepEqual(data, vi1) {
+				t.Fail()
+			}
+		} else {
+			t.Fail()
+		}
+	}
+}
+
+func TestV215ParseVRRPScript(t *testing.T) {
+	f, err := os.Open("../../test_files/v2.0.10/keepalived.data")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	k := &KeepalivedCollector{}
+	vrrpScripts := k.parseVRRPScript(f)
+
+	if len(vrrpScripts) != 1 {
+		t.Fail()
+	}
+
+	for _, script := range vrrpScripts {
+		if script.Name != "chk_service" {
+			t.Fail()
+		}
+		if script.Status != "GOOD" {
+			t.Fail()
+		}
+		if script.State != "idle" {
+			t.Fail()
+		}
+	}
+}
+
+func TestV2010ParseVRRPScript(t *testing.T) {
+	f, err := os.Open("../../test_files/v2.1.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -177,8 +245,8 @@ func TestParseVRRPScript(t *testing.T) {
 	}
 }
 
-func TestParseStats(t *testing.T) {
-	f, err := os.Open("../../test_files/keepalived.stats")
+func TestV215ParseStats(t *testing.T) {
+	f, err := os.Open("../../test_files/v2.1.5/keepalived.stats")
 	if err != nil {
 		t.Log(err)
 		t.Fail()
