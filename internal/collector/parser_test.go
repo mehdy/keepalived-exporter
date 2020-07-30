@@ -329,16 +329,24 @@ func TestV215ParseStats(t *testing.T) {
 }
 
 func TestParseVIP(t *testing.T) {
-	vip := "192.168.2.2 dev ens192 scope global"
+	vips := []string{"192.168.2.2 dev ens192 scope global", "192.168.2.2 dev ens192 scope global set"}
 	excpectedIP := "192.168.2.2"
 	excpectedIntf := "ens192"
 
-	ip, intf, ok := parseVIP(vip)
-	if !ok {
-		t.Fail()
+	for _, vip := range vips {
+		ip, intf, ok := parseVIP(vip)
+		if !ok {
+			t.Fail()
+		}
+
+		if ip != excpectedIP || intf != excpectedIntf {
+			t.Fail()
+		}
 	}
 
-	if ip != excpectedIP || intf != excpectedIntf {
+	badVIP := "192.168.2.2 dev"
+	ip, intf, ok := parseVIP(badVIP)
+	if ok || ip != "" || intf != "" {
 		t.Fail()
 	}
 }
