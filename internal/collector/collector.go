@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"bytes"
 	"os/exec"
 	"strconv"
 	"sync"
@@ -181,9 +182,13 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 
 func (k *KeepalivedCollector) checkScript(vip string) bool {
 	script := k.scriptPath + " " + vip
-	out, err := exec.Command("/bin/sh", "-c", script).Output()
+	cmd := exec.Command("/bin/sh", "-c", script)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"VIP": vip, "output": string(out)}).WithError(err).Error("Check script failed")
+		logrus.WithFields(logrus.Fields{"VIP": vip, "stdout": stdout.String(), "stderr": stderr.String()}).WithError(err).Error("Check script failed")
 		return false
 	}
 	return true
