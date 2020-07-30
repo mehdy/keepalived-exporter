@@ -189,6 +189,18 @@ func (k *KeepalivedCollector) parseJSON(i io.Reader) ([]VRRP, error) {
 	return stats, nil
 }
 
+// isKeyArray checks if key is array in keepalived.data file
+func isKeyArray(key string) bool {
+	supportedKeys := []string{"Virtual IP"}
+	for _, supportedKey := range supportedKeys {
+		if supportedKey == key {
+			return true
+		}
+	}
+	logrus.WithField("Key", key).Debug("Unsupported array key")
+	return false
+}
+
 func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 	data := make([]VRRPData, 0)
 
@@ -211,19 +223,24 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 
 			s := strings.Split(strings.TrimSpace(l), prop)
 			d.IName = strings.TrimSpace(s[1])
-		} else if (strings.HasPrefix(l, "   ") || strings.HasPrefix(l, "     ")) && d.IName != "" {
+		} else if strings.HasPrefix(l, "   ") && d.IName != "" {
 			if strings.HasPrefix(l, "     ") {
 				val = strings.TrimSpace(l)
 			} else {
+				var args []string
 				if strings.Contains(l, prop) {
-					s := strings.Split(strings.TrimSpace(l), prop)
-					key = strings.TrimSpace(s[0])
-					val = strings.TrimSpace(s[1])
+					args = strings.Split(strings.TrimSpace(l), prop)
 				} else if strings.Contains(l, arrayProp) {
-					s := strings.Split(strings.TrimSpace(l), arrayProp)
-					key = strings.TrimSpace(s[0])
+					args = strings.Split(strings.TrimSpace(l), arrayProp)
+				} else {
 					continue
 				}
+
+				key = strings.TrimSpace(args[0])
+				if isKeyArray(key) {
+					continue
+				}
+				val = strings.TrimSpace(args[1])
 			}
 			switch key {
 			case "State":
