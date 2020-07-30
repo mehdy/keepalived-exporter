@@ -430,7 +430,7 @@ func (k *KeepalivedCollector) parseStats(i io.Reader) ([]VRRPStats, error) {
 
 func parseVIP(vip string) (string, string, bool) {
 	args := strings.Split(vip, " ")
-	if len(args) != 5 {
+	if len(args) < 3 {
 		logrus.WithField("VIP", vip).Error("Failed to parse VIP from keepalived data")
 		return "", "", false
 	}
