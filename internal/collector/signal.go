@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -15,15 +16,19 @@ import (
 
 func sigNum(sig string) int {
 	sigNumCommand := "keepalived --signum=" + sig
-	out, err := exec.Command("bash", "-c", sigNumCommand).Output()
+	cmd := exec.Command("bash", "-c", sigNumCommand)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
 	if err != nil {
-		logrus.WithField("signal", sig).WithError(err).Fatal("Error getting signum")
+		logrus.WithFields(logrus.Fields{"signal": sig, "stderr": stderr.String()}).WithError(err).Fatal("Error getting signum")
 	}
 
 	var signum int
-	err = json.Unmarshal(out, &signum)
+	err = json.Unmarshal(stdout.Bytes(), &signum)
 	if err != nil {
-		logrus.WithField("signal", sig).WithError(err).Fatal("Error unmarshalling signum result")
+		logrus.WithFields(logrus.Fields{"signal": sig, "signum": stdout.String()}).WithError(err).Fatal("Error unmarshalling signum result")
 	}
 
 	return signum
