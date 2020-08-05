@@ -16,7 +16,7 @@ func main() {
 	metricsPath := flag.String("web.telemetry-path", "/metrics", "A path under which to expose metrics.")
 	keepalivedJSON := flag.Bool("ka.json", false, "Send SIGJSON and decode JSON file instead of parsing text files.")
 	keepalivedPID := flag.String("ka.pid-path", "/var/run/keepalived.pid", "A path for Keepalived PID")
-	keepalivedCheckScript := flag.String("cs", "", "Health Cehck script path to be execute for each VIP")
+	keepalivedCheckScript := flag.String("cs", "", "Health Check script path to be execute for each VIP")
 
 	flag.Parse()
 
