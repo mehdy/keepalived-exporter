@@ -44,7 +44,7 @@ web.listen-address | Address to listen on for web interface and telemetry, defau
 web.telemetry-path | A path under which to expose metrics, defaults to `/metrics`.
 ka.json            | Send SIGJSON and decode JSON file instead of parsing text files, defaults to `false`.
 ka.pid-path        | A path for Keepalived PID, defaults to `/var/run/keepalived.pid`.
-cs                 | Health Cehck script path to be execute for each VIP.
+cs                 | Health Check script path to be execute for each VIP.
 
 **Note:** For `ka.json` option requirement is to have Keepalived compiled with `--enable-json` configure option.
 
