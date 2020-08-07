@@ -251,7 +251,7 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 				if err := d.setWantState(val); err != nil {
 					return data, err
 				}
-			case "Interface":
+			case "Interface", "Listening device":
 				d.Intf = val
 			case "Gratuitous ARP delay":
 				if err := d.setGArpDelay(val); err != nil {
@@ -264,6 +264,9 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 			case "Virtual IP":
 				d.addVIP(val)
 			}
+		} else if strings.HasPrefix(l, " VRRP Version") || strings.HasPrefix(l, " VRRP Script") {
+			// Seen in version <= 1.3.5
+			continue
 		} else {
 			if d.IName != "" {
 				data = append(data, d)

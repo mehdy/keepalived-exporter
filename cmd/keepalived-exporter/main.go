@@ -13,9 +13,9 @@ import (
 
 // nolint: gochecknoglobals // since these are build time variables
 var (
-	commit    string
-	version   string
-	buildTime string
+	Commit    string
+	Version   string
+	BuildTime string
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 
 	if *versionFlag {
 		logrus.WithFields(logrus.Fields{
-			"commit": commit, "version": version, "build_time": buildTime,
+			"commit": Commit, "version": Version, "build_time": BuildTime,
 		}).Info("Keepalived Exporter")
 
 		return
