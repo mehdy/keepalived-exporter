@@ -4,10 +4,15 @@ PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 LINTER = golangci-lint
 LINTER_VERSION = v1.28.3
-COMMIT := $(shell git rev-parse HEAD)
-VERSION := $(shell git describe --tags ${COMMIT} | cut -c2-)
+COMMIT := $(shell git rev-parse --short HEAD)
+VERSION ?= $(shell git describe --tags ${COMMIT} 2> /dev/null || echo "$(COMMIT)")
 ARCH := $(shell dpkg --print-architecture)
 RELEASE_FILENAME := $(PROJECT_NAME)-$(VERSION).linux-$(ARCH)
+BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
+LD_FLAGS ?=
+LD_FLAGS += -X main.version=$(VERSION)
+LD_FLAGS += -X main.commit=$(COMMIT)
+LD_FLAGS += -X main.buildTime=$(BUILD_TIME)
 
 .PHONY: all dep lint build clean
 
@@ -23,7 +28,7 @@ lint: lintdeps ## to lint the files
 	$(LINTER) run --config=.golangci-lint.yml ./...
 
 build: dep ## Build the binary file
-	@go build -i -v $(PKG)/cmd/$(PROJECT_NAME)
+	@go build -i -v -ldflags="$(LD_FLAGS)" $(PKG)/cmd/$(PROJECT_NAME)
 
 test:
 	@go test -v -cover -race ./...
