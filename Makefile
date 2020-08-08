@@ -10,9 +10,9 @@ ARCH := $(shell dpkg --print-architecture)
 RELEASE_FILENAME := $(PROJECT_NAME)-$(VERSION).linux-$(ARCH)
 BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
 LD_FLAGS ?=
-LD_FLAGS += -X main.Version=$(VERSION)
-LD_FLAGS += -X main.Commit=$(COMMIT)
-LD_FLAGS += -X main.BuildTime=$(BUILD_TIME)
+LD_FLAGS += -X main.version=$(VERSION)
+LD_FLAGS += -X main.commit=$(COMMIT)
+LD_FLAGS += -X main.buildTime=$(BUILD_TIME)
 
 .PHONY: all dep lint build clean
 

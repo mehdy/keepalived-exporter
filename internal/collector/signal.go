@@ -15,14 +15,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func isSigNumSupport() bool {
-	v := keepalivedVersion()
-	sigNumSupportedVersion, err := version.NewVersion("1.3.8")
-	if err != nil {
-		logrus.WithError(err).Fatal("Unexcpected error")
-	}
+var sigNumSupportedVersion = version.Must(version.NewVersion("1.3.8"))
 
-	return v.GreaterThanOrEqual(sigNumSupportedVersion)
+func isSigNumSupport() bool {
+	keepalivedVersion, err := getKeepalivedVersion()
+	if err != nil {
+		// keep backward compatibility and assuming it's the latest one on version detection failure
+		return true
+	}
+	return keepalivedVersion.GreaterThanOrEqual(sigNumSupportedVersion)
 }
 
 func sigNum(sig string) os.Signal {
