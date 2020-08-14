@@ -1,0 +1,35 @@
+------< VRRP Topology >------
+ VRRP Instance = VI_1
+ VRRP Version = 2
+   State = MASTER
+   Last transition = 1596892296 (Sat Aug  8 13:11:36 2020)
+   Listening device = eth0
+   Using src_ip = 192.168.2.2
+   Gratuitous ARP delay = 5
+   Gratuitous ARP repeat = 5
+   Gratuitous ARP refresh = 0
+   Gratuitous ARP refresh repeat = 1
+   Gratuitous ARP lower priority delay = 5
+   Gratuitous ARP lower priority repeat = 5
+   Send advert after receive lower priority advert = true
+   Send advert after receive higher priority advert = false
+   Virtual Router ID = 51
+   Priority = 150
+   Advert interval = 1 sec
+   Accept = enabled
+   Preempt = enabled
+   Promote_secondaries = disabled
+   Authentication type = SIMPLE_PASSWORD
+   Password = test
+   Tracked scripts = 1
+ VRRP Script = check_haproxy
+   Command = /etc/keepalived/check.sh
+   Interval = 2 sec
+   Weight = 0
+   Rise = 1
+   Full = 1
+   Insecure = no
+   Status = BAD
+   Interface weight 0
+   Virtual IP = 1
+     10.32.75.200/32 dev eth0 scope global

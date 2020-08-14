@@ -328,6 +328,114 @@ func TestV215ParseStats(t *testing.T) {
 	}
 }
 
+func TestV135ParseVRRPData(t *testing.T) {
+	f, err := os.Open("../../test_files/v1.3.5/keepalived.data")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	k := &KeepalivedCollector{}
+	vrrpData, err := k.parseVRRPData(f)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	if len(vrrpData) != 1 {
+		t.Fail()
+	}
+
+	vi1 := VRRPData{
+		IName:     "VI_1",
+		State:     2,
+		WantState: 0,
+		Intf:      "eth0",
+		GArpDelay: 5,
+		VRID:      51,
+		VIPs:      []string{"10.32.75.200/32 dev eth0 scope global"},
+	}
+
+	for _, data := range vrrpData {
+		if data.IName == "VI_1" {
+			if !reflect.DeepEqual(data, vi1) {
+				t.Fail()
+			}
+		} else {
+			t.Fail()
+		}
+	}
+}
+
+func TestV135ParseVRRPScript(t *testing.T) {
+	f, err := os.Open("../../test_files/v1.3.5/keepalived.data")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	k := &KeepalivedCollector{}
+	vrrpScripts := k.parseVRRPScript(f)
+
+	if len(vrrpScripts) != 1 {
+		t.Fail()
+	}
+
+	for _, script := range vrrpScripts {
+		if script.Name != "check_haproxy" {
+			t.Fail()
+		}
+		if script.Status != "BAD" {
+			t.Fail()
+		}
+		if script.State != "" {
+			t.Fail()
+		}
+	}
+}
+
+func TestV135ParseStats(t *testing.T) {
+	f, err := os.Open("../../test_files/v1.3.5/keepalived.stats")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	k := &KeepalivedCollector{}
+	stats, err := k.parseStats(f)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	if len(stats) != 1 {
+		t.Fail()
+	}
+
+	vi1 := VRRPStats{
+		AdvertRcvd:        1,
+		AdvertSent:        17,
+		BecomeMaster:      1,
+		ReleaseMaster:     1,
+		PacketLenErr:      10,
+		IPTTLErr:          1,
+		InvalidTypeRcvd:   5,
+		AdvertIntervalErr: 4,
+		AddrListErr:       3,
+		InvalidAuthType:   3,
+		AuthTypeMismatch:  6,
+		AuthFailure:       7,
+		PRIZeroRcvd:       9,
+		PRIZeroSent:       2,
+	}
+	if !reflect.DeepEqual(vi1, stats[0]) {
+		t.Fail()
+	}
+}
+
 func TestParseVIP(t *testing.T) {
 	vips := []string{"192.168.2.2 dev ens192 scope global", "192.168.2.2 dev ens192 scope global set"}
 	excpectedIP := "192.168.2.2"

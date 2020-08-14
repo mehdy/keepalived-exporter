@@ -11,10 +11,33 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/hashicorp/go-version"
 	"github.com/sirupsen/logrus"
 )
 
-func sigNum(sig string) int {
+var sigNumSupportedVersion = version.Must(version.NewVersion("1.3.8"))
+
+func isSigNumSupport() bool {
+	keepalivedVersion, err := getKeepalivedVersion()
+	if err != nil {
+		// keep backward compatibility and assuming it's the latest one on version detection failure
+		return true
+	}
+	return keepalivedVersion.GreaterThanOrEqual(sigNumSupportedVersion)
+}
+
+func sigNum(sig string) os.Signal {
+	if !isSigNumSupport() {
+		switch sig {
+		case "DATA":
+			return syscall.SIGUSR1
+		case "STATS":
+			return syscall.SIGUSR2
+		default:
+			logrus.WithField("signal", sig).Fatal("Unsupported signal for your keepalived")
+		}
+	}
+
 	sigNumCommand := "keepalived --signum=" + sig
 	cmd := exec.Command("bash", "-c", sigNumCommand)
 	var stdout, stderr bytes.Buffer
@@ -31,10 +54,10 @@ func sigNum(sig string) int {
 		logrus.WithFields(logrus.Fields{"signal": sig, "signum": stdout.String()}).WithError(err).Fatal("Error unmarshalling signum result")
 	}
 
-	return signum
+	return syscall.Signal(signum)
 }
 
-func (k *KeepalivedCollector) signal(signal int) error {
+func (k *KeepalivedCollector) signal(signal os.Signal) error {
 	data, err := ioutil.ReadFile(k.pidPath)
 	if err != nil {
 		logrus.WithField("path", k.pidPath).WithError(err).Error("Can't find keepalived")
@@ -53,7 +76,7 @@ func (k *KeepalivedCollector) signal(signal int) error {
 		return err
 	}
 
-	err = proc.Signal(syscall.Signal(signal))
+	err = proc.Signal(signal)
 	if err != nil {
 		logrus.WithField("pid", pid).WithError(err).Error("Failed to send signal")
 		return err

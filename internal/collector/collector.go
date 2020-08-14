@@ -2,6 +2,7 @@ package collector
 
 import (
 	"bytes"
+	"os"
 	"os/exec"
 	"strconv"
 	"sync"
@@ -16,9 +17,9 @@ type KeepalivedCollector struct {
 	useJSON    bool
 	pidPath    string
 	scriptPath string
-	SIGDATA    int
-	SIGJSON    int
-	SIGSTATS   int
+	SIGDATA    os.Signal
+	SIGJSON    os.Signal
+	SIGSTATS   os.Signal
 	metrics    map[string]*prometheus.Desc
 }
 
