@@ -45,8 +45,11 @@ web.telemetry-path | A path under which to expose metrics, defaults to `/metrics
 ka.json            | Send SIGJSON and decode JSON file instead of parsing text files, defaults to `false`.
 ka.pid-path        | A path for Keepalived PID, defaults to `/var/run/keepalived.pid`.
 cs                 | Health Check script path to be execute for each VIP.
+container-name     | Keepalived container name to export metrics from Keepalived container
 
 **Note:** For `ka.json` option requirement is to have Keepalived compiled with `--enable-json` configure option.
+
+**Note:** For `container-name` option requirement is to volume `/tmp/keepalived.data` and `/tmp/keepalived.stats` and `/tmp/keepalived.json` (if using `ka.json`) to your host.
 
 ## Metrics
 
