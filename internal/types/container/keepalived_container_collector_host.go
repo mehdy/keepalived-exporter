@@ -1,8 +1,12 @@
 package container
 
 import (
+	"bytes"
 	"context"
+	"errors"
+	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -21,6 +25,7 @@ type KeepalivedContainerCollectorHost struct {
 	version       *version.Version
 	useJSON       bool
 	containerName string
+	endpoint      *url.URL
 	dataPath      string
 	jsonPath      string
 	statsPath     string
@@ -32,10 +37,22 @@ type KeepalivedContainerCollectorHost struct {
 }
 
 // NewKeepalivedContainerCollectorHost is creating new instance of KeepalivedContainerCollectorHost
-func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerTmpDir string) *KeepalivedContainerCollectorHost {
+func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerTmpDir, endpoint string) *KeepalivedContainerCollectorHost {
 	k := &KeepalivedContainerCollectorHost{
 		useJSON:       useJSON,
 		containerName: containerName,
+	}
+
+	if endpoint != "" && containerName != "" {
+		logrus.WithFields(logrus.Fields{"endpoint": endpoint, "containerName": containerName}).Fatal("Both container-name and endpoint can't be set")
+	}
+
+	if endpoint != "" {
+		var err error
+		k.endpoint, err = url.Parse(endpoint)
+		if err != nil {
+			logrus.WithError(err).WithField("endpoint", endpoint).Fatal("Invalid endpoint")
+		}
 	}
 
 	var err error
@@ -64,10 +81,33 @@ func (k *KeepalivedContainerCollectorHost) initPaths(containerTmpDir string) {
 
 // GetKeepalivedVersion returns Keepalived version
 func (k *KeepalivedContainerCollectorHost) getKeepalivedVersion() (*version.Version, error) {
-	getVersionCmd := []string{"keepalived", "-v"}
-	stdout, err := k.dockerExecCmd(getVersionCmd)
-	if err != nil {
-		return nil, err
+	getVersionCmdArgs := []string{"-v"}
+	var stdout *bytes.Buffer
+	var err error
+
+	if k.containerName != "" {
+		stdout, err = k.dockerExecCmd(append([]string{"keepalived"}, getVersionCmdArgs...))
+		if err != nil {
+			return nil, err
+		}
+	} else if k.endpoint != nil {
+		u := *k.endpoint
+		u.Path = filepath.Join(k.endpoint.Path, "version")
+		stdout, err = EndpointExec(&u)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		cmd := exec.Command("keepalived", getVersionCmdArgs...)
+		var stderr *bytes.Buffer
+		cmd.Stdout = stdout
+		cmd.Stderr = stderr
+		err := cmd.Run()
+		if err != nil {
+			logrus.WithFields(logrus.Fields{"stderr": stderr.String(), "stdout": stdout.String()}).WithError(err).Error("Error getting keepalived version")
+			return nil, errors.New("Error getting keepalived version")
+		}
+		stdout = stderr
 	}
 
 	return utils.ParseVersion(stdout.String())
@@ -87,10 +127,34 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 		return utils.GetDefaultSignal(sigString)
 	}
 
-	sigNumCommand := []string{"keepalived", "--signum", sigString}
-	stdout, err := k.dockerExecCmd(sigNumCommand)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{"signal": sigString, "container": k.containerName}).WithError(err).Fatal("Error getting signum")
+	sigNumCmdArgs := []string{"--signum", sigString}
+	var stdout *bytes.Buffer
+	var err error
+
+	if k.containerName != "" {
+		stdout, err = k.dockerExecCmd(append([]string{"keepalived"}, sigNumCmdArgs...))
+		if err != nil {
+			logrus.WithFields(logrus.Fields{"signal": sigString, "container": k.containerName}).WithError(err).Fatal("Error getting signum")
+		}
+	} else if k.endpoint != nil {
+		u := *k.endpoint
+		u.Path = filepath.Join(u.Path, "signal/num")
+		queryString := u.Query()
+		queryString.Set("signal", sigString)
+		u.RawQuery = queryString.Encode()
+		stdout, err = EndpointExec(&u)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{"endpoint": k.endpoint, "container": k.containerName}).WithError(err).Fatal("Error getting signum")
+		}
+	} else {
+		cmd := exec.Command("keepalived", sigNumCmdArgs...)
+		var stderr bytes.Buffer
+		cmd.Stdout = stdout
+		cmd.Stderr = &stderr
+		err := cmd.Run()
+		if err != nil {
+			logrus.WithFields(logrus.Fields{"signal": sigString, "stderr": stderr.String()}).WithError(err).Fatal("Error getting signum")
+		}
 	}
 
 	reg := regexp.MustCompile("[^0-9]+")
@@ -105,9 +169,19 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 // Signal sends signal to Keepalived process
 func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
-	err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
-	if err != nil {
-		logrus.WithError(err).WithField("signal", int(signal)).Error("Failed to send signal")
+	if k.containerName != "" {
+		err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
+		if err != nil {
+			logrus.WithError(err).WithField("signal", int(signal)).Error("Failed to send signal")
+			return err
+		}
+	} else if k.endpoint != nil {
+		u := *k.endpoint
+		u.Path = filepath.Join(u.Path, "signal")
+		queryString := u.Query()
+		queryString.Set("signal", strconv.Itoa(int(signal)))
+		u.RawQuery = queryString.Encode()
+		_, err := EndpointExec(&u)
 		return err
 	}
 
