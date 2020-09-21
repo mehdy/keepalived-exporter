@@ -47,6 +47,7 @@ ka.pid-path        | A path for Keepalived PID, defaults to `/var/run/keepalived
 cs                 | Health Check script path to be execute for each VIP.
 container-name     | Keepalived container name to export metrics from Keepalived container.
 container-tmp-dir  | Keepalived container tmp volume path, defaults to `/tmp`.
+endpoint           | shell2http instance url to send signals
 
 **Note:** For `ka.json` option requirement is to have Keepalived compiled with `--enable-json` configure option.
 
@@ -67,6 +68,25 @@ docker pull ghcr.io/cafebazaar/keepalived-exporter
 docker run -v keepalived-data:/tmp/ ... $KEEPALIVED_IMAGE
 docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -p 9165:9165 ghcr.io/cafebazaar/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
 ```
+
+**Note:** Should use one of `endpoint` or `container-name` at a same time.
+
+## Dockerized
+
+### Keepalived on docker
+If Keepalived is dockerized and Keepalived Exporter is running on docker host you should pass `--container-name` to Keepalived Exporter.
+```bash
+./keepalived-exporter --container-name keepalived
+```
+Also you should volume `/tmp/keepalived.data` and `/tmp/keepalived.stats` (`/tmp/keepalived.json` if using `ka.json`) to `/tmp/` of your host.
+
+### Keepalived and Keepalived Exporter on docker
+If both Keepalived and Keepalived Exporter are containerized you should containerized your Keepalived like [here](./keepalived-container/) and pass `--endpoint` to Keepalived Exporter for running shell2http instance on keepalived container.
+```bash
+docker run keepalived-exporter --endpoint "http://localhost:8080"
+```
+Also you should volume `/tmp/keepalived.data` and `/tmp/keepalived.stats` (`/tmp/keepalived.json` if using `ka.json`) to `/tmp/` of Keepalived Exporter container.
+
 
 ## Metrics
 
