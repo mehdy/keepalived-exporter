@@ -28,7 +28,7 @@ func main() {
 	keepalivedCheckScript := flag.String("cs", "", "Health Check script path to be execute for each VIP")
 	keepalivedContainerName := flag.String("container-name", "", "Keepalived container name")
 	keepalivedContainerTmpDir := flag.String("container-tmp-dir", "/tmp", "Keepalived container tmp volume path")
-	keepalivedEndpoint := flag.String("endpoint", "http://localhost:8080", "Keepalived HTTP endpoint for sending signals")
+	keepalivedEndpoint := flag.String("endpoint", "", "Keepalived HTTP endpoint for sending signals")
 	versionFlag := flag.Bool("version", false, "Show the current keepalived exporter version")
 
 	flag.Parse()
