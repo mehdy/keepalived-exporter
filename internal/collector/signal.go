@@ -17,8 +17,8 @@ import (
 
 var sigNumSupportedVersion = version.Must(version.NewVersion("1.3.8"))
 
-func isSigNumSupport() bool {
-	keepalivedVersion, err := getKeepalivedVersion()
+func (k *KeepalivedCollector) isSigNumSupport() bool {
+	keepalivedVersion, err := k.getKeepalivedVersion()
 	if err != nil {
 		// keep backward compatibility and assuming it's the latest one on version detection failure
 		return true
@@ -26,8 +26,8 @@ func isSigNumSupport() bool {
 	return keepalivedVersion.GreaterThanOrEqual(sigNumSupportedVersion)
 }
 
-func sigNum(sig string) os.Signal {
-	if !isSigNumSupport() {
+func (k *KeepalivedCollector) sigNum(sig string) os.Signal {
+	if !k.isSigNumSupport() {
 		switch sig {
 		case "DATA":
 			return syscall.SIGUSR1

@@ -82,10 +82,10 @@ func NewKeepalivedCollector(useJSON bool, pidPath, scriptPath string) *Keepalive
 	kc.fillMetrics()
 
 	if kc.useJSON {
-		kc.SIGJSON = sigNum("JSON")
+		kc.SIGJSON = kc.sigNum("JSON")
 	}
-	kc.SIGDATA = sigNum("DATA")
-	kc.SIGSTATS = sigNum("STATS")
+	kc.SIGDATA = kc.sigNum("DATA")
+	kc.SIGSTATS = kc.sigNum("STATS")
 
 	return kc
 }

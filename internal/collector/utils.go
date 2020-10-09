@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func getKeepalivedVersion() (*version.Version, error) {
+func (k *KeepalivedCollector) getKeepalivedVersion() (*version.Version, error) {
 	cmd := exec.Command("bash", "-c", "keepalived -v")
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
