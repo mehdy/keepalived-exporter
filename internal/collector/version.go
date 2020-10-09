@@ -1,9 +1,7 @@
 package collector
 
 import (
-	"bytes"
 	"errors"
-	"os/exec"
 	"strings"
 
 	"github.com/hashicorp/go-version"
@@ -11,20 +9,15 @@ import (
 )
 
 func (k *KeepalivedCollector) getKeepalivedVersion() (*version.Version, error) {
-	cmd := exec.Command("bash", "-c", "keepalived -v")
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
+	output, err := k.collector.GetKeepalivedVersion()
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"stderr": stderr.String(), "stdout": stdout.String()}).WithError(err).Error("Error getting keepalived version")
-		return nil, errors.New("Error getting keepalived version")
+		return nil, err
 	}
 
 	// version is always at first line
-	firstLine, err := stderr.ReadString('\n')
+	firstLine, err := output.ReadString('\n')
 	if err != nil {
-		logrus.WithField("output", stderr.String()).WithError(err).Error("Failed to parse keepalived version output")
+		logrus.WithField("output", output.String()).WithError(err).Error("Failed to parse keepalived version output")
 		return nil, errors.New("Failed to parse keepalived version output")
 	}
 

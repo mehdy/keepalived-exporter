@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/cafebazaar/keepalived-exporter/internal/types"
+	"github.com/cafebazaar/keepalived-exporter/internal/types/host"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
@@ -15,12 +17,12 @@ import (
 type KeepalivedCollector struct {
 	sync.Mutex
 	useJSON    bool
-	pidPath    string
 	scriptPath string
+	metrics    map[string]*prometheus.Desc
 	SIGDATA    os.Signal
 	SIGJSON    os.Signal
 	SIGSTATS   os.Signal
-	metrics    map[string]*prometheus.Desc
+	collector  types.KeepalivedCollector
 }
 
 // VRRPStats represents Keepalived stats about VRRP
@@ -75,9 +77,10 @@ type KeepalivedStats struct {
 func NewKeepalivedCollector(useJSON bool, pidPath, scriptPath string) *KeepalivedCollector {
 	kc := &KeepalivedCollector{
 		useJSON:    useJSON,
-		pidPath:    pidPath,
 		scriptPath: scriptPath,
 	}
+
+	kc.collector = host.NewKeepalivedHostCollectorHost(pidPath)
 
 	kc.fillMetrics()
 
