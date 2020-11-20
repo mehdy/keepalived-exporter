@@ -2,16 +2,21 @@ package collector
 
 import (
 	"bytes"
-	"os"
+	"errors"
 	"os/exec"
 	"strconv"
 	"sync"
 
-	"github.com/cafebazaar/keepalived-exporter/internal/types"
-	"github.com/cafebazaar/keepalived-exporter/internal/types/host"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
+
+type Collector interface {
+	ScriptVrrps() ([]VRRPScript, error)
+	DataVrrps() (map[string]*VRRPData, error)
+	StatsVrrps() (map[string]*VRRPStats, error)
+	JSONVrrps() ([]VRRP, error)
+}
 
 // KeepalivedCollector implements prometheus.Collector interface and stores required info to collect data
 type KeepalivedCollector struct {
@@ -19,10 +24,7 @@ type KeepalivedCollector struct {
 	useJSON    bool
 	scriptPath string
 	metrics    map[string]*prometheus.Desc
-	SIGDATA    os.Signal
-	SIGJSON    os.Signal
-	SIGSTATS   os.Signal
-	collector  types.KeepalivedCollector
+	collector  Collector
 }
 
 // VRRPStats represents Keepalived stats about VRRP
@@ -74,21 +76,14 @@ type KeepalivedStats struct {
 }
 
 // NewKeepalivedCollector is creating new instance of KeepalivedCollector
-func NewKeepalivedCollector(useJSON bool, pidPath, scriptPath string) *KeepalivedCollector {
+func NewKeepalivedCollector(useJSON bool, scriptPath string, collector Collector) *KeepalivedCollector {
 	kc := &KeepalivedCollector{
 		useJSON:    useJSON,
 		scriptPath: scriptPath,
+		collector:  collector,
 	}
-
-	kc.collector = host.NewKeepalivedHostCollectorHost(pidPath)
 
 	kc.fillMetrics()
-
-	if kc.useJSON {
-		kc.SIGJSON = kc.sigNum("JSON")
-	}
-	kc.SIGDATA = kc.sigNum("DATA")
-	kc.SIGSTATS = kc.sigNum("STATS")
 
 	return kc
 }
@@ -115,9 +110,9 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 
 	keepalivedUp := float64(1)
 
-	keepalivedStats, err := k.stats()
+	keepalivedStats, err := k.getKeepalivedStats()
 	if err != nil {
-		logrus.WithField("json", k.useJSON).WithError(err).Error("No data found to be exported")
+		logrus.WithError(err).Error("No data found to be exported")
 		keepalivedUp = 0
 	}
 
@@ -151,7 +146,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 		k.newConstMetric(ch, "keepalived_gratuitous_arp_delay_total", prometheus.CounterValue, float64(vrrp.Data.GArpDelay), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
 
 		for _, ip := range vrrp.Data.VIPs {
-			ipAddr, intf, ok := parseVIP(ip)
+			ipAddr, intf, ok := ParseVIP(ip)
 			if !ok {
 				continue
 			}
@@ -182,6 +177,55 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			k.newConstMetric(ch, "keepalived_script_state", prometheus.GaugeValue, float64(scriptState), script.Name)
 		}
 	}
+}
+
+func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
+	stats := &KeepalivedStats{
+		VRRPs:   make([]VRRP, 0),
+		Scripts: make([]VRRPScript, 0),
+	}
+	var err error
+
+	if k.useJSON {
+		stats.VRRPs, err = k.collector.JSONVrrps()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		vrrpStats, err := k.collector.StatsVrrps()
+		if err != nil {
+			return nil, err
+		}
+
+		vrrpData, err := k.collector.DataVrrps()
+		if err != nil {
+			return nil, err
+		}
+
+		if len(vrrpData) != len(vrrpStats) {
+			logrus.Error("keepalived.data and keepalived.stats datas are not synced")
+			return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
+		}
+
+		for instance, vData := range vrrpData {
+			if vStat, ok := vrrpStats[instance]; ok {
+				stats.VRRPs = append(stats.VRRPs, VRRP{
+					Data:  *vData,
+					Stats: *vStat,
+				})
+			} else {
+				logrus.WithField("instance", instance).Error("There is no stats found for instance")
+				return nil, errors.New("There is no stats found for instance")
+			}
+		}
+
+		stats.Scripts, err = k.collector.ScriptVrrps()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return stats, nil
 }
 
 func (k *KeepalivedCollector) checkScript(vip string) bool {

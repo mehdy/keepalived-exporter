@@ -93,8 +93,7 @@ func TestV215ParseVRRPData(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpData, err := k.parseVRRPData(f)
+	vrrpData, err := ParseVRRPData(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -157,8 +156,7 @@ func TestV2010ParseVRRPData(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpData, err := k.parseVRRPData(f)
+	vrrpData, err := ParseVRRPData(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -197,8 +195,7 @@ func TestV215ParseVRRPScript(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpScripts := k.parseVRRPScript(f)
+	vrrpScripts := ParseVRRPScript(f)
 
 	if len(vrrpScripts) != 1 {
 		t.Fail()
@@ -225,8 +222,7 @@ func TestV2010ParseVRRPScript(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpScripts := k.parseVRRPScript(f)
+	vrrpScripts := ParseVRRPScript(f)
 
 	if len(vrrpScripts) != 1 {
 		t.Fail()
@@ -253,8 +249,7 @@ func TestV215ParseStats(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	stats, err := k.parseStats(f)
+	stats, err := ParseStats(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -336,8 +331,7 @@ func TestV135ParseVRRPData(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpData, err := k.parseVRRPData(f)
+	vrrpData, err := ParseVRRPData(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -376,8 +370,7 @@ func TestV135ParseVRRPScript(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpScripts := k.parseVRRPScript(f)
+	vrrpScripts := ParseVRRPScript(f)
 
 	if len(vrrpScripts) != 1 {
 		t.Fail()
@@ -404,8 +397,7 @@ func TestV135ParseStats(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	stats, err := k.parseStats(f)
+	stats, err := ParseStats(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -442,7 +434,7 @@ func TestParseVIP(t *testing.T) {
 	excpectedIntf := "ens192"
 
 	for _, vip := range vips {
-		ip, intf, ok := parseVIP(vip)
+		ip, intf, ok := ParseVIP(vip)
 		if !ok {
 			t.Error("Error parsing")
 			t.Fail()
@@ -455,7 +447,7 @@ func TestParseVIP(t *testing.T) {
 	}
 
 	badVIP := "192.168.2.2 dev"
-	ip, intf, ok := parseVIP(badVIP)
+	ip, intf, ok := ParseVIP(badVIP)
 	if ok || ip != "" || intf != "" {
 		t.Fail()
 	}

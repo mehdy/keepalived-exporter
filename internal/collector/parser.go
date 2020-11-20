@@ -3,9 +3,7 @@ package collector
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 
@@ -55,134 +53,7 @@ func vrrpDataStringToIntState(state string) (int, bool) {
 	return -1, false
 }
 
-func (k *KeepalivedCollector) jsonVrrps() ([]VRRP, error) {
-	err := k.collector.Signal(k.SIGJSON)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
-		return nil, err
-	}
-
-	f, err := os.Open("/tmp/keepalived.json")
-	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.json")
-		return nil, err
-	}
-	defer f.Close()
-
-	VRRPs, err := k.parseJSON(f)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to decode keepalived.json to VRRPStats array structure")
-		return nil, err
-	}
-
-	return VRRPs, nil
-}
-
-func (k *KeepalivedCollector) statsVrrps() (map[string]*VRRPStats, error) {
-	err := k.collector.Signal(k.SIGSTATS)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
-		return nil, err
-	}
-
-	f, err := os.Open("/tmp/keepalived.stats")
-	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.stats")
-		return nil, err
-	}
-	defer f.Close()
-
-	vrrpStats, err := k.parseStats(f)
-	if err != nil {
-		return nil, err
-	}
-
-	return vrrpStats, nil
-}
-
-func (k *KeepalivedCollector) dataVrrps() (map[string]*VRRPData, error) {
-	err := k.collector.Signal(k.SIGDATA)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
-		return nil, err
-	}
-
-	f, err := os.Open("/tmp/keepalived.data")
-	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
-		return nil, err
-	}
-	defer f.Close()
-
-	vrrpData, err := k.parseVRRPData(f)
-	if err != nil {
-		return nil, err
-	}
-
-	return vrrpData, nil
-}
-
-func (k *KeepalivedCollector) scriptVrrps() ([]VRRPScript, error) {
-	f, err := os.Open("/tmp/keepalived.data")
-	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
-		return nil, err
-	}
-	defer f.Close()
-
-	return k.parseVRRPScript(f), nil
-}
-
-func (k *KeepalivedCollector) stats() (*KeepalivedStats, error) {
-	stats := &KeepalivedStats{
-		VRRPs:   make([]VRRP, 0),
-		Scripts: make([]VRRPScript, 0),
-	}
-	var err error
-
-	if k.useJSON {
-		stats.VRRPs, err = k.jsonVrrps()
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		vrrpStats, err := k.statsVrrps()
-		if err != nil {
-			return nil, err
-		}
-
-		vrrpData, err := k.dataVrrps()
-		if err != nil {
-			return nil, err
-		}
-
-		if len(vrrpData) != len(vrrpStats) {
-			logrus.Error("keepalived.data and keepalived.stats datas are not synced")
-			return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
-		}
-
-		for instance, vData := range vrrpData {
-			if vStat, ok := vrrpStats[instance]; ok {
-				stats.VRRPs = append(stats.VRRPs, VRRP{
-					Data:  *vData,
-					Stats: *vStat,
-				})
-			} else {
-				logrus.WithField("instance", instance).Error("There is no stats found for instance")
-				return nil, errors.New("There is no stats found for instance")
-			}
-		}
-
-		stats.Scripts, err = k.scriptVrrps()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return stats, nil
-}
-
-func (k *KeepalivedCollector) parseJSON(i io.Reader) ([]VRRP, error) {
+func ParseJSON(i io.Reader) ([]VRRP, error) {
 	stats := make([]VRRP, 0)
 
 	err := json.NewDecoder(i).Decode(&stats)
@@ -205,7 +76,7 @@ func isKeyArray(key string) bool {
 	return false
 }
 
-func (k *KeepalivedCollector) parseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
+func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 	data := make(map[string]*VRRPData)
 
 	sep := "VRRP Instance"
@@ -275,7 +146,7 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) (map[string]*VRRPData, 
 	return data, nil
 }
 
-func (k *KeepalivedCollector) parseVRRPScript(i io.Reader) []VRRPScript {
+func ParseVRRPScript(i io.Reader) []VRRPScript {
 	scripts := make([]VRRPScript, 0)
 
 	sep := "VRRP Script"
@@ -322,7 +193,7 @@ func (k *KeepalivedCollector) parseVRRPScript(i io.Reader) []VRRPScript {
 	return scripts
 }
 
-func (k *KeepalivedCollector) parseStats(i io.Reader) (map[string]*VRRPStats, error) {
+func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 	stats := make(map[string]*VRRPStats)
 
 	sep := "VRRP Instance"
@@ -414,7 +285,7 @@ func (k *KeepalivedCollector) parseStats(i io.Reader) (map[string]*VRRPStats, er
 	return stats, nil
 }
 
-func parseVIP(vip string) (string, string, bool) {
+func ParseVIP(vip string) (string, string, bool) {
 	args := strings.Split(vip, " ")
 	if len(args) < 3 {
 		logrus.WithField("VIP", vip).Error("Failed to parse VIP from keepalived data")
