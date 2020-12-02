@@ -93,8 +93,7 @@ func TestV215ParseVRRPData(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpData, err := k.parseVRRPData(f)
+	vrrpData, err := ParseVRRPData(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -134,15 +133,15 @@ func TestV215ParseVRRPData(t *testing.T) {
 
 	for _, data := range vrrpData {
 		if data.IName == "VI_EXT_1" {
-			if !reflect.DeepEqual(data, viExt1) {
+			if !reflect.DeepEqual(*data, viExt1) {
 				t.Fail()
 			}
 		} else if data.IName == "VI_EXT_2" {
-			if !reflect.DeepEqual(data, viExt2) {
+			if !reflect.DeepEqual(*data, viExt2) {
 				t.Fail()
 			}
 		} else if data.IName == "VI_EXT_3" {
-			if !reflect.DeepEqual(data, viExt3) {
+			if !reflect.DeepEqual(*data, viExt3) {
 				t.Fail()
 			}
 		}
@@ -157,8 +156,7 @@ func TestV2010ParseVRRPData(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpData, err := k.parseVRRPData(f)
+	vrrpData, err := ParseVRRPData(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -180,7 +178,7 @@ func TestV2010ParseVRRPData(t *testing.T) {
 
 	for _, data := range vrrpData {
 		if data.IName == "VI_1" {
-			if !reflect.DeepEqual(data, vi1) {
+			if !reflect.DeepEqual(*data, vi1) {
 				t.Fail()
 			}
 		} else {
@@ -197,8 +195,7 @@ func TestV215ParseVRRPScript(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpScripts := k.parseVRRPScript(f)
+	vrrpScripts := ParseVRRPScript(f)
 
 	if len(vrrpScripts) != 1 {
 		t.Fail()
@@ -225,8 +222,7 @@ func TestV2010ParseVRRPScript(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpScripts := k.parseVRRPScript(f)
+	vrrpScripts := ParseVRRPScript(f)
 
 	if len(vrrpScripts) != 1 {
 		t.Fail()
@@ -253,8 +249,7 @@ func TestV215ParseStats(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	stats, err := k.parseStats(f)
+	stats, err := ParseStats(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -281,7 +276,7 @@ func TestV215ParseStats(t *testing.T) {
 		PRIZeroRcvd:       1,
 		PRIZeroSent:       1,
 	}
-	if !reflect.DeepEqual(viExt1, stats[0]) {
+	if !reflect.DeepEqual(viExt1, *stats["VI_EXT_1"]) {
 		t.Fail()
 	}
 
@@ -302,7 +297,7 @@ func TestV215ParseStats(t *testing.T) {
 		PRIZeroRcvd:       12,
 		PRIZeroSent:       12,
 	}
-	if !reflect.DeepEqual(viExt2, stats[1]) {
+	if !reflect.DeepEqual(viExt2, *stats["VI_EXT_2"]) {
 		t.Fail()
 	}
 
@@ -323,7 +318,7 @@ func TestV215ParseStats(t *testing.T) {
 		PRIZeroRcvd:       1,
 		PRIZeroSent:       2,
 	}
-	if !reflect.DeepEqual(viExt3, stats[2]) {
+	if !reflect.DeepEqual(viExt3, *stats["VI_EXT_3"]) {
 		t.Fail()
 	}
 }
@@ -336,8 +331,7 @@ func TestV135ParseVRRPData(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpData, err := k.parseVRRPData(f)
+	vrrpData, err := ParseVRRPData(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -359,7 +353,7 @@ func TestV135ParseVRRPData(t *testing.T) {
 
 	for _, data := range vrrpData {
 		if data.IName == "VI_1" {
-			if !reflect.DeepEqual(data, vi1) {
+			if !reflect.DeepEqual(*data, vi1) {
 				t.Fail()
 			}
 		} else {
@@ -376,8 +370,7 @@ func TestV135ParseVRRPScript(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	vrrpScripts := k.parseVRRPScript(f)
+	vrrpScripts := ParseVRRPScript(f)
 
 	if len(vrrpScripts) != 1 {
 		t.Fail()
@@ -404,8 +397,7 @@ func TestV135ParseStats(t *testing.T) {
 	}
 	defer f.Close()
 
-	k := &KeepalivedCollector{}
-	stats, err := k.parseStats(f)
+	stats, err := ParseStats(f)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -431,7 +423,7 @@ func TestV135ParseStats(t *testing.T) {
 		PRIZeroRcvd:       9,
 		PRIZeroSent:       2,
 	}
-	if !reflect.DeepEqual(vi1, stats[0]) {
+	if !reflect.DeepEqual(vi1, *stats["VI_1"]) {
 		t.Fail()
 	}
 }
@@ -442,18 +434,20 @@ func TestParseVIP(t *testing.T) {
 	excpectedIntf := "ens192"
 
 	for _, vip := range vips {
-		ip, intf, ok := parseVIP(vip)
+		ip, intf, ok := ParseVIP(vip)
 		if !ok {
+			t.Error("Error parsing")
 			t.Fail()
 		}
 
 		if ip != excpectedIP || intf != excpectedIntf {
+			t.Error("ip or interface not equals")
 			t.Fail()
 		}
 	}
 
 	badVIP := "192.168.2.2 dev"
-	ip, intf, ok := parseVIP(badVIP)
+	ip, intf, ok := ParseVIP(badVIP)
 	if ok || ip != "" || intf != "" {
 		t.Fail()
 	}

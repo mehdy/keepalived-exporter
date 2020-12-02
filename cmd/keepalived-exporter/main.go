@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/cafebazaar/keepalived-exporter/internal/collector"
+	"github.com/cafebazaar/keepalived-exporter/internal/types/host"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
@@ -36,7 +37,9 @@ func main() {
 		return
 	}
 
-	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedPID, *keepalivedCheckScript)
+	keepalivedHostCollectorHost := host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
+
+	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedCheckScript, keepalivedHostCollectorHost)
 	prometheus.MustRegister(keepalivedCollector)
 
 	http.Handle(*metricsPath, promhttp.Handler())

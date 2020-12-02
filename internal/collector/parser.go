@@ -3,9 +3,7 @@ package collector
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 
@@ -55,130 +53,7 @@ func vrrpDataStringToIntState(state string) (int, bool) {
 	return -1, false
 }
 
-func (k *KeepalivedCollector) jsonVrrps() ([]VRRP, error) {
-	err := k.signal(k.SIGJSON)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
-		return nil, err
-	}
-
-	f, err := os.Open("/tmp/keepalived.json")
-	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.json")
-		return nil, err
-	}
-	defer f.Close()
-
-	VRRPs, err := k.parseJSON(f)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to decode keepalived.json to VRRPStats array structure")
-		return nil, err
-	}
-
-	return VRRPs, nil
-}
-
-func (k *KeepalivedCollector) statsVrrps() ([]VRRPStats, error) {
-	err := k.signal(k.SIGSTATS)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
-		return nil, err
-	}
-
-	f, err := os.Open("/tmp/keepalived.stats")
-	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.stats")
-		return nil, err
-	}
-	defer f.Close()
-
-	vrrpStats, err := k.parseStats(f)
-	if err != nil {
-		return nil, err
-	}
-
-	return vrrpStats, nil
-}
-
-func (k *KeepalivedCollector) dataVrrps() ([]VRRPData, error) {
-	err := k.signal(k.SIGDATA)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
-		return nil, err
-	}
-
-	f, err := os.Open("/tmp/keepalived.data")
-	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
-		return nil, err
-	}
-	defer f.Close()
-
-	vrrpData, err := k.parseVRRPData(f)
-	if err != nil {
-		return nil, err
-	}
-
-	return vrrpData, nil
-}
-
-func (k *KeepalivedCollector) scriptVrrps() ([]VRRPScript, error) {
-	f, err := os.Open("/tmp/keepalived.data")
-	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
-		return nil, err
-	}
-	defer f.Close()
-
-	return k.parseVRRPScript(f), nil
-}
-
-func (k *KeepalivedCollector) stats() (*KeepalivedStats, error) {
-	stats := &KeepalivedStats{
-		VRRPs:   make([]VRRP, 0),
-		Scripts: make([]VRRPScript, 0),
-	}
-	var err error
-
-	if k.useJSON {
-		stats.VRRPs, err = k.jsonVrrps()
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		vrrpStats, err := k.statsVrrps()
-		if err != nil {
-			return nil, err
-		}
-
-		vrrpData, err := k.dataVrrps()
-		if err != nil {
-			return nil, err
-		}
-
-		if len(vrrpData) != len(vrrpStats) {
-			logrus.Error("keepalived.data and keepalived.stats datas are not synced")
-			return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
-		}
-
-		for i := 0; i < len(vrrpData); i++ {
-			s := VRRP{
-				Data:  vrrpData[i],
-				Stats: vrrpStats[i],
-			}
-			stats.VRRPs = append(stats.VRRPs, s)
-		}
-
-		stats.Scripts, err = k.scriptVrrps()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return stats, nil
-}
-
-func (k *KeepalivedCollector) parseJSON(i io.Reader) ([]VRRP, error) {
+func ParseJSON(i io.Reader) ([]VRRP, error) {
 	stats := make([]VRRP, 0)
 
 	err := json.NewDecoder(i).Decode(&stats)
@@ -201,29 +76,25 @@ func isKeyArray(key string) bool {
 	return false
 }
 
-func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
-	data := make([]VRRPData, 0)
+func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
+	data := make(map[string]*VRRPData)
 
 	sep := "VRRP Instance"
 	prop := "="
 	arrayProp := ":"
 
-	d := VRRPData{}
 	scanner := bufio.NewScanner(bufio.NewReader(i))
+	var instance string
 
 	key := ""
 	val := ""
 	for scanner.Scan() {
 		l := scanner.Text()
 		if strings.HasPrefix(l, " "+sep) && strings.Contains(l, prop) {
-			if d.IName != "" {
-				data = append(data, d)
-				d = VRRPData{}
-			}
-
 			s := strings.Split(strings.TrimSpace(l), prop)
-			d.IName = strings.TrimSpace(s[1])
-		} else if strings.HasPrefix(l, "   ") && d.IName != "" {
+			instance = strings.TrimSpace(s[1])
+			data[instance] = &VRRPData{IName: instance}
+		} else if strings.HasPrefix(l, "   ") && instance != "" {
 			if strings.HasPrefix(l, "     ") {
 				val = strings.TrimSpace(l)
 			} else {
@@ -244,46 +115,38 @@ func (k *KeepalivedCollector) parseVRRPData(i io.Reader) ([]VRRPData, error) {
 			}
 			switch key {
 			case "State":
-				if err := d.setState(val); err != nil {
+				if err := data[instance].setState(val); err != nil {
 					return data, err
 				}
 			case "Wantstate":
-				if err := d.setWantState(val); err != nil {
+				if err := data[instance].setWantState(val); err != nil {
 					return data, err
 				}
 			case "Interface", "Listening device":
-				d.Intf = val
+				data[instance].Intf = val
 			case "Gratuitous ARP delay":
-				if err := d.setGArpDelay(val); err != nil {
+				if err := data[instance].setGArpDelay(val); err != nil {
 					return data, err
 				}
 			case "Virtual Router ID":
-				if err := d.setVRID(val); err != nil {
+				if err := data[instance].setVRID(val); err != nil {
 					return data, err
 				}
 			case "Virtual IP":
-				d.addVIP(val)
+				data[instance].addVIP(val)
 			}
 		} else if strings.HasPrefix(l, " VRRP Version") || strings.HasPrefix(l, " VRRP Script") {
 			// Seen in version <= 1.3.5
 			continue
 		} else {
-			if d.IName != "" {
-				data = append(data, d)
-				d = VRRPData{}
-			}
+			instance = ""
 		}
-	}
-
-	if d.IName != "" {
-		data = append(data, d)
-		d = VRRPData{}
 	}
 
 	return data, nil
 }
 
-func (k *KeepalivedCollector) parseVRRPScript(i io.Reader) []VRRPScript {
+func ParseVRRPScript(i io.Reader) []VRRPScript {
 	scripts := make([]VRRPScript, 0)
 
 	sep := "VRRP Script"
@@ -330,13 +193,12 @@ func (k *KeepalivedCollector) parseVRRPScript(i io.Reader) []VRRPScript {
 	return scripts
 }
 
-func (k *KeepalivedCollector) parseStats(i io.Reader) ([]VRRPStats, error) {
-	stats := make([]VRRPStats, 0)
+func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
+	stats := make(map[string]*VRRPStats)
 
 	sep := "VRRP Instance"
 	prop := ":"
 
-	s := VRRPStats{}
 	scanner := bufio.NewScanner(bufio.NewReader(i))
 
 	var instance, section string
@@ -344,13 +206,9 @@ func (k *KeepalivedCollector) parseStats(i io.Reader) ([]VRRPStats, error) {
 	for scanner.Scan() {
 		l := scanner.Text()
 		if strings.HasPrefix(l, sep) && strings.Contains(l, prop) {
-			if instance != "" {
-				stats = append(stats, s)
-				s = VRRPStats{}
-			}
-
 			sp := strings.Split(strings.TrimSpace(l), prop)
 			instance = strings.TrimSpace(sp[1])
+			stats[instance] = &VRRPStats{}
 		} else if strings.HasPrefix(l, "  ") && strings.HasSuffix(l, prop) {
 			sp := strings.Split(strings.TrimSpace(l), prop)
 			section = strings.TrimSpace(sp[0])
@@ -369,38 +227,38 @@ func (k *KeepalivedCollector) parseStats(i io.Reader) ([]VRRPStats, error) {
 			case "Advertisements":
 				switch key {
 				case "Received":
-					s.AdvertRcvd = value
+					stats[instance].AdvertRcvd = value
 				case "Sent":
-					s.AdvertSent = value
+					stats[instance].AdvertSent = value
 				}
 			case "Packet Errors":
 				switch key {
 				case "Length":
-					s.PacketLenErr = value
+					stats[instance].PacketLenErr = value
 				case "TTL":
-					s.IPTTLErr = value
+					stats[instance].IPTTLErr = value
 				case "Invalid Type":
-					s.InvalidTypeRcvd = value
+					stats[instance].InvalidTypeRcvd = value
 				case "Advertisement Interval":
-					s.AdvertIntervalErr = value
+					stats[instance].AdvertIntervalErr = value
 				case "Address List":
-					s.AddrListErr = value
+					stats[instance].AddrListErr = value
 				}
 			case "Authentication Errors":
 				switch key {
 				case "Invalid Type":
-					s.InvalidAuthType = value
+					stats[instance].InvalidAuthType = value
 				case "Type Mismatch":
-					s.AuthTypeMismatch = value
+					stats[instance].AuthTypeMismatch = value
 				case "Failure":
-					s.AuthFailure = value
+					stats[instance].AuthFailure = value
 				}
 			case "Priority Zero":
 				switch key {
 				case "Received":
-					s.PRIZeroRcvd = value
+					stats[instance].PRIZeroRcvd = value
 				case "Sent":
-					s.PRIZeroSent = value
+					stats[instance].PRIZeroSent = value
 				}
 			}
 		} else if strings.HasPrefix(l, "  ") && !strings.HasSuffix(l, prop) && !strings.HasPrefix(l, "    ") {
@@ -417,21 +275,17 @@ func (k *KeepalivedCollector) parseStats(i io.Reader) ([]VRRPStats, error) {
 
 			switch key {
 			case "Became master":
-				s.BecomeMaster = value
+				stats[instance].BecomeMaster = value
 			case "Released master":
-				s.ReleaseMaster = value
+				stats[instance].ReleaseMaster = value
 			}
 		}
-	}
-
-	if instance != "" {
-		stats = append(stats, s)
 	}
 
 	return stats, nil
 }
 
-func parseVIP(vip string) (string, string, bool) {
+func ParseVIP(vip string) (string, string, bool) {
 	args := strings.Split(vip, " ")
 	if len(args) < 3 {
 		logrus.WithField("VIP", vip).Error("Failed to parse VIP from keepalived data")
