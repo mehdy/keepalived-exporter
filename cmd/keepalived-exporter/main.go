@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/cafebazaar/keepalived-exporter/internal/collector"
+	"github.com/cafebazaar/keepalived-exporter/internal/types/container"
 	"github.com/cafebazaar/keepalived-exporter/internal/types/host"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -25,6 +26,7 @@ func main() {
 	keepalivedJSON := flag.Bool("ka.json", false, "Send SIGJSON and decode JSON file instead of parsing text files.")
 	keepalivedPID := flag.String("ka.pid-path", "/var/run/keepalived.pid", "A path for Keepalived PID")
 	keepalivedCheckScript := flag.String("cs", "", "Health Check script path to be execute for each VIP")
+	keepalivedContainerName := flag.String("container-name", "", "Keepalived container name")
 	versionFlag := flag.Bool("version", false, "Show the current keepalived exporter version")
 
 	flag.Parse()
@@ -37,9 +39,14 @@ func main() {
 		return
 	}
 
-	keepalivedHostCollectorHost := host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
+	var c collector.Collector
+	if *keepalivedContainerName != "" {
+		c = container.NewKeepalivedContainerCollectorHost(*keepalivedJSON, *keepalivedContainerName)
+	} else {
+		c = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
+	}
 
-	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedCheckScript, keepalivedHostCollectorHost)
+	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedCheckScript, c)
 	prometheus.MustRegister(keepalivedCollector)
 
 	http.Handle(*metricsPath, promhttp.Handler())
