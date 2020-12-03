@@ -3,6 +3,7 @@ package container
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"syscall"
@@ -20,6 +21,9 @@ type KeepalivedContainerCollectorHost struct {
 	version       *version.Version
 	useJSON       bool
 	containerName string
+	dataPath      string
+	jsonPath      string
+	statsPath     string
 	dockerCli     *client.Client
 
 	SIGJSON  syscall.Signal
@@ -28,7 +32,7 @@ type KeepalivedContainerCollectorHost struct {
 }
 
 // NewKeepalivedContainerCollectorHost is creating new instance of KeepalivedContainerCollectorHost
-func NewKeepalivedContainerCollectorHost(useJSON bool, containerName string) *KeepalivedContainerCollectorHost {
+func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerTmpDir string) *KeepalivedContainerCollectorHost {
 	k := &KeepalivedContainerCollectorHost{
 		useJSON:       useJSON,
 		containerName: containerName,
@@ -47,7 +51,15 @@ func NewKeepalivedContainerCollectorHost(useJSON bool, containerName string) *Ke
 
 	k.initSignals()
 
+	k.initPaths(containerTmpDir)
+
 	return k
+}
+
+func (k *KeepalivedContainerCollectorHost) initPaths(containerTmpDir string) {
+	k.jsonPath = filepath.Join(containerTmpDir, "keepalived.json")
+	k.statsPath = filepath.Join(containerTmpDir, "keepalived.stats")
+	k.dataPath = filepath.Join(containerTmpDir, "keepalived.data")
 }
 
 // GetKeepalivedVersion returns Keepalived version
@@ -112,9 +124,9 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 		return nil, err
 	}
 
-	f, err := os.Open("/tmp/keepalived.json")
+	f, err := os.Open(k.jsonPath)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.json")
+		logrus.WithError(err).WithField("path", k.jsonPath).Error("Failed to open keepalived.json")
 		return nil, err
 	}
 	defer f.Close()
@@ -130,9 +142,9 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 		return nil, err
 	}
 
-	f, err := os.Open("/tmp/keepalived.stats")
+	f, err := os.Open(k.statsPath)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.stats")
+		logrus.WithError(err).WithField("path", k.statsPath).Error("Failed to open keepalived.stats")
 		return nil, err
 	}
 	defer f.Close()
@@ -148,9 +160,9 @@ func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VR
 		return nil, err
 	}
 
-	f, err := os.Open("/tmp/keepalived.data")
+	f, err := os.Open(k.dataPath)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
+		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
 		return nil, err
 	}
 	defer f.Close()
@@ -160,9 +172,9 @@ func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VR
 
 // ScriptVrrps parse the script data from keepalived.data
 func (k *KeepalivedContainerCollectorHost) ScriptVrrps() ([]collector.VRRPScript, error) {
-	f, err := os.Open("/tmp/keepalived.data")
+	f, err := os.Open(k.dataPath)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
+		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
 		return nil, err
 	}
 	defer f.Close()
