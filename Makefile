@@ -28,7 +28,7 @@ lint: lintdeps ## to lint the files
 	$(LINTER) run --config=.golangci-lint.yml ./...
 
 build: dep ## Build the binary file
-	@go build -i -v -ldflags="$(LD_FLAGS)" $(PKG)/cmd/$(PROJECT_NAME)
+	@CGO_ENABLED=0 go build -i -v -ldflags="$(LD_FLAGS)" $(PKG)/cmd/$(PROJECT_NAME)
 
 test:
 	@go test -v -cover -race ./...
