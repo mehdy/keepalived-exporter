@@ -6,7 +6,7 @@ RUN apk add --no-cache git
 
 RUN CGO_ENABLED=0 go get -u github.com/msoap/shell2http
 
-FROM alpine:latest
+FROM alpine:3.12
 
 RUN apk --update -t add --no-cache keepalived
 
