@@ -1,4 +1,6 @@
-FROM golang:alpine AS builder
+ARG GOVERSION=1.14
+
+FROM golang:${GOVERSION}-alpine as builder
 
 WORKDIR /build
 

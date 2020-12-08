@@ -1,4 +1,6 @@
-FROM golang:alpine as builder
+ARG GOVERSION=1.14
+
+FROM golang:${GOVERSION}-alpine as builder
 
 RUN apk add --no-cache git
 
