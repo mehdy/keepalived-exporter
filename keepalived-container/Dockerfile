@@ -1,10 +1,16 @@
-FROM golang:alpine
+FROM golang:alpine as builder
 
-RUN apk --update -t add keepalived git
+RUN apk add --no-cache git
 
-RUN go get -u github.com/msoap/shell2http
+RUN CGO_ENABLED=0 go get -u github.com/msoap/shell2http
 
-COPY entrypoint.sh entrypoint.sh
+FROM alpine:latest
+
+RUN apk --update -t add --no-cache keepalived
+
+COPY --from=builder /go/bin/shell2http /usr/local/bin/shell2http
+
+COPY entrypoint.sh .
 
 EXPOSE 8080
 
