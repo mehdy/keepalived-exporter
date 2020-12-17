@@ -22,7 +22,6 @@ func GetDefaultSignal(sigString string) syscall.Signal {
 	sig, ok := defaultSignals[sigString]
 	if !ok {
 		logrus.WithField("signal", sigString).Fatal("Unsupported signal for your keepalived")
-		return syscall.Signal(0) // Nothing is sent
 	}
 	return sig
 }
