@@ -66,7 +66,7 @@ func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, 
 		return nil, errors.New("Error getting keepalived version")
 	}
 
-	return utils.ParseVersion(stdout.String())
+	return utils.ParseVersion(stderr.String())
 }
 
 // Signal sends signal to Keepalived process
