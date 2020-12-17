@@ -115,12 +115,7 @@ func (k *KeepalivedHostCollectorHost) sigNum(sigString string) syscall.Signal {
 		logrus.WithFields(logrus.Fields{"signal": sigString, "stderr": stderr.String()}).WithError(err).Fatal("Error getting signum")
 	}
 
-	signum, err := strconv.ParseInt(stdout.String(), 10, 32)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{"signal": sigString, "signum": stdout.String()}).WithError(err).Fatal("Error parsing signum result")
-	}
-
-	return syscall.Signal(signum)
+	return syscall.Signal(parseSigNum(stdout, sigString))
 }
 
 func (k *KeepalivedHostCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
