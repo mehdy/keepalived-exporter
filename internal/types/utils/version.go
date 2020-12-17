@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// ParseVersion returns keepalived version from keepalived -v command output
 func ParseVersion(versionOutput string) (*version.Version, error) {
 	// version is always at first line
 	lines := strings.SplitN(versionOutput, "\n", 2)
