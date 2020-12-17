@@ -179,3 +179,8 @@ func (k *KeepalivedHostCollectorHost) ScriptVrrps() ([]collector.VRRPScript, err
 
 	return collector.ParseVRRPScript(f), nil
 }
+
+// HasVRRPScriptStateSupport check if Keepalived version supports VRRP Script State in output
+func (k *KeepalivedHostCollectorHost) HasVRRPScriptStateSupport() bool {
+	return utils.HasVRRPScriptStateSupport(k.version)
+}
