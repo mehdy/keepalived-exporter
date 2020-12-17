@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        go: [1.13, 1.14]
+        go: [1.14, 1.15]
 
     steps:
     - name: Set up Go ${{ matrix.go }}
@@ -34,7 +34,7 @@ jobs:
 
     strategy:
       matrix:
-        go: [1.13, 1.14]
+        go: [1.14, 1.15]
 
     steps:
     - name: Set up Go ${{ matrix.go }}
@@ -59,7 +59,7 @@ jobs:
     
     strategy:
       matrix:
-        go: [1.14]
+        go: [1.15]
 
     steps:
     - name: Set up Go ${{ matrix.go }}
