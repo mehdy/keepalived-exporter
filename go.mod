@@ -1,6 +1,6 @@
 module github.com/cafebazaar/keepalived-exporter
 
-go 1.14
+go 1.15
 
 require (
 	github.com/Microsoft/go-winio v0.4.15 // indirect
