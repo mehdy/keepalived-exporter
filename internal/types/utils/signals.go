@@ -12,15 +12,16 @@ var (
 	defaultSignals         = map[string]syscall.Signal{"DATA": syscall.SIGUSR1, "STATS": syscall.SIGUSR2}
 )
 
+// HasSigNumSupport checks if Keepalived supports --signum command
 func HasSigNumSupport(version *version.Version) bool {
 	return version == nil || version.GreaterThanOrEqual(sigNumSupportedVersion)
 }
 
+// GetDefaultSignal returns default signals for Keepalived
 func GetDefaultSignal(sigString string) syscall.Signal {
 	sig, ok := defaultSignals[sigString]
 	if !ok {
 		logrus.WithField("signal", sigString).Fatal("Unsupported signal for your keepalived")
-		return syscall.Signal(0) // Nothing is sent
 	}
 	return sig
 }
