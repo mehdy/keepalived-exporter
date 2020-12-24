@@ -50,7 +50,24 @@ container-tmp-dir  | Keepalived container tmp volume path, defaults to `/tmp`.
 
 **Note:** For `ka.json` option requirement is to have Keepalived compiled with `--enable-json` configure option.
 
-**Note:** For `container-name` option requirement is to volume `/tmp` of Keepalived container to your host and specify it with `--container-tmp-dir`.
+### Keepalived on Docker and Keepalived Exporter on host
+
+Set the `--container-name` to the Keepalived container name and set `--container-tmp-dir` to the Keepalived `/tmp` dir path that is volumed to the host
+
+```bash
+./keepalived-exporter --container-name keepalived --container-tmp-dir /tmp
+```
+
+### Keepalived and Keepalived Exporter on docker
+
+Volume docker socket (`/var/run/docker.sock`) to Keepalived Exporter cotnainer in the same path and pass the args like as using Keepalived on container
+
+```bash
+docker pull docker.pkg.github.com/cafebazaar/keepalived-exporter/keepalived-exporter
+docker run -v keepalived-data:/tmp/ ... $KEEPALIVED_IMAGE
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -p 9165:9165 docker.pkg.github.com/cafebazaar/keepalived-exporter/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
+```
+
 
 ## Metrics
 
