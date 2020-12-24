@@ -16,6 +16,7 @@ type Collector interface {
 	DataVrrps() (map[string]*VRRPData, error)
 	StatsVrrps() (map[string]*VRRPStats, error)
 	JSONVrrps() ([]VRRP, error)
+	HasVRRPScriptStateSupport() bool
 }
 
 // KeepalivedCollector implements prometheus.Collector interface and stores required info to collect data
@@ -171,10 +172,12 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			k.newConstMetric(ch, "keepalived_script_status", prometheus.GaugeValue, float64(scriptStatus), script.Name)
 		}
 
-		if scriptState, ok := script.getIntState(); !ok {
-			logrus.WithFields(logrus.Fields{"state": script.State, "name": script.Name}).Warn("Unknown state")
-		} else {
-			k.newConstMetric(ch, "keepalived_script_state", prometheus.GaugeValue, float64(scriptState), script.Name)
+		if k.collector.HasVRRPScriptStateSupport() {
+			if scriptState, ok := script.getIntState(); !ok {
+				logrus.WithFields(logrus.Fields{"state": script.State, "name": script.Name}).Warn("Unknown state")
+			} else {
+				k.newConstMetric(ch, "keepalived_script_state", prometheus.GaugeValue, float64(scriptState), script.Name)
+			}
 		}
 	}
 }
