@@ -63,11 +63,10 @@ Set the `--container-name` to the Keepalived container name and set `--container
 Volume docker socket (`/var/run/docker.sock`) to Keepalived Exporter cotnainer in the same path and pass the args like as using Keepalived on container
 
 ```bash
-docker pull docker.pkg.github.com/cafebazaar/keepalived-exporter/keepalived-exporter
+docker pull ghcr.io/cafebazaar/keepalived-exporter
 docker run -v keepalived-data:/tmp/ ... $KEEPALIVED_IMAGE
-docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -p 9165:9165 docker.pkg.github.com/cafebazaar/keepalived-exporter/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -p 9165:9165 ghcr.io/cafebazaar/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
 ```
-
 
 ## Metrics
 
