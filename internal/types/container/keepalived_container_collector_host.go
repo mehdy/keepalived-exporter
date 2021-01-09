@@ -47,18 +47,17 @@ func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerT
 		logrus.WithFields(logrus.Fields{"endpoint": endpoint, "containerName": containerName}).Fatal("Both container-name and endpoint can't be set")
 	}
 
+	var err error
 	if endpoint != "" {
-		var err error
 		k.endpoint, err = url.Parse(endpoint)
 		if err != nil {
 			logrus.WithError(err).WithField("endpoint", endpoint).Fatal("Invalid endpoint")
 		}
-	}
-
-	var err error
-	k.dockerCli, err = client.NewEnvClient()
-	if err != nil {
-		logrus.WithError(err).Fatal("Error creating docker env client")
+	} else {
+		k.dockerCli, err = client.NewEnvClient()
+		if err != nil {
+			logrus.WithError(err).Fatal("Error creating docker env client")
+		}
 	}
 
 	k.version, err = k.getKeepalivedVersion()
