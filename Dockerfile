@@ -10,7 +10,7 @@ ADD . .
 
 RUN make build
 
-FROM scratch 
+FROM alpine:3.12
 
 COPY --from=builder /build/keepalived-exporter . 
 

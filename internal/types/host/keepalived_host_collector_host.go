@@ -57,7 +57,7 @@ func (k *KeepalivedHostCollectorHost) initSignals() {
 
 // GetKeepalivedVersion returns Keepalived version
 func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, error) {
-	cmd := exec.Command("bash", "-c", "keepalived -v")
+	cmd := exec.Command("sh", "-c", "keepalived -v")
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -107,7 +107,7 @@ func (k *KeepalivedHostCollectorHost) sigNum(sigString string) syscall.Signal {
 	}
 
 	sigNumCommand := "keepalived --signum=" + sigString
-	cmd := exec.Command("bash", "-c", sigNumCommand)
+	cmd := exec.Command("sh", "-c", sigNumCommand)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
