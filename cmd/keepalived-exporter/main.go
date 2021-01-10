@@ -42,7 +42,7 @@ func main() {
 	}
 
 	var c collector.Collector
-	if *keepalivedContainerName != "" {
+	if *keepalivedContainerName != "" || *keepalivedEndpoint != "" {
 		c = container.NewKeepalivedContainerCollectorHost(*keepalivedJSON, *keepalivedContainerName, *keepalivedContainerTmpDir, *keepalivedEndpoint)
 	} else {
 		c = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)

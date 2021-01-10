@@ -39,8 +39,7 @@ type KeepalivedContainerCollectorHost struct {
 // NewKeepalivedContainerCollectorHost is creating new instance of KeepalivedContainerCollectorHost
 func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerTmpDir, endpoint string) *KeepalivedContainerCollectorHost {
 	k := &KeepalivedContainerCollectorHost{
-		useJSON:       useJSON,
-		containerName: containerName,
+		useJSON: useJSON,
 	}
 
 	if endpoint != "" && containerName != "" {
