@@ -1,4 +1,4 @@
-ARG GOVERSION=1.14
+ARG GOVERSION=1.15
 
 FROM golang:${GOVERSION}-alpine as builder
 
