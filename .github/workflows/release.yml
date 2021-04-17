@@ -1,0 +1,32 @@
+name: Build Release
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [ linux ]
+        goarch: [ "386", arm, amd64 ]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set APP_VERSION env
+        run: echo "APP_VERSION=$(git describe --tags ${COMMIT} | cut -c2- 2> /dev/null || echo $(COMMIT))" >> $GITHUB_ENV
+
+      - name: Set BUILD_TIME env
+        run: echo "BUILD_TIME=$(LANG=en_US date +"%F_%T_%z")" >> $GITHUB_ENV
+
+      - uses: wangyoucao577/go-release-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          goversion: "https://dl.google.com/go/go1.15.2.linux-amd64.tar.gz"
+          project_path: "./cmd/keepalived-exporter"
+          binary_name: "keepalived-exporter"
+          extra_files: "LICENSE README.md"
+          ldflags: -X "main.version=${{ env.APP_VERSION }}" -X "main.buildTime=${{ env.BUILD_TIME }}" -X main.commit=${{ github.sha }} -s -w
