@@ -60,7 +60,7 @@ Set the `--container-name` to the Keepalived container name and set `--container
 
 ### Keepalived and Keepalived Exporter on docker
 
-Volume docker socket (`/var/run/docker.sock`) to Keepalived Exporter cotnainer in the same path and pass the args like as using Keepalived on container
+Volume docker socket (`/var/run/docker.sock`) to Keepalived Exporter container in the same path and pass the args like as using Keepalived on container
 
 ```bash
 docker pull ghcr.io/cafebazaar/keepalived-exporter
