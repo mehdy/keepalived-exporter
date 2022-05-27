@@ -85,6 +85,69 @@ func TestVRRPDataStringToIntState(t *testing.T) {
 	}
 }
 
+func TestV227ParseVRRPData(t *testing.T) {
+	f, err := os.Open("../../test_files/v2.2.7/keepalived.data")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	vrrpData, err := ParseVRRPData(f)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	if len(vrrpData) != 3 {
+		t.Fail()
+	}
+
+	viExt1 := VRRPData{
+		IName:     "VI_EXT_1",
+		State:     2,
+		WantState: 2,
+		Intf:      "ens192",
+		GArpDelay: 5,
+		VRID:      10,
+		VIPs:      []string{"192.168.2.1 dev ens192 scope global set"},
+	}
+	viExt2 := VRRPData{
+		IName:     "VI_EXT_2",
+		State:     1,
+		WantState: 1,
+		Intf:      "ens192",
+		GArpDelay: 5,
+		VRID:      20,
+		VIPs:      []string{"192.168.2.2 dev ens192 scope global"},
+	}
+	viExt3 := VRRPData{
+		IName:     "VI_EXT_3",
+		State:     1,
+		WantState: 1,
+		Intf:      "ens192",
+		GArpDelay: 5,
+		VRID:      30,
+		VIPs:      []string{"192.168.2.3 dev ens192 scope global"},
+	}
+
+	for _, data := range vrrpData {
+		if data.IName == "VI_EXT_1" {
+			if !reflect.DeepEqual(*data, viExt1) {
+				t.Fail()
+			}
+		} else if data.IName == "VI_EXT_2" {
+			if !reflect.DeepEqual(*data, viExt2) {
+				t.Fail()
+			}
+		} else if data.IName == "VI_EXT_3" {
+			if !reflect.DeepEqual(*data, viExt3) {
+				t.Fail()
+			}
+		}
+	}
+}
+
 func TestV215ParseVRRPData(t *testing.T) {
 	f, err := os.Open("../../test_files/v2.1.5/keepalived.data")
 	if err != nil {

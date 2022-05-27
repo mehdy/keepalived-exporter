@@ -1,0 +1,151 @@
+------< VRRP Topology >------
+ VRRP Instance = VI_EXT_1
+   VRRP Version = 2
+   State = MASTER
+   Wantstate = MASTER
+   Number of interface and track script faults = 0
+   Number of track scripts init = 0
+   Last transition = 1594831166.420598 (Wed Jul 15 21:09:26 2020.420598)
+   Read timeout = 1594995529.942882 (Fri Jul 17 18:48:49.942882)
+   Master down timer = 608848 usecs
+   Interface = ens192
+   Using src_ip = 192.168.1.1 (from configuration)
+   Gratuitous ARP delay = 5
+   Gratuitous ARP repeat = 5
+   Gratuitous ARP refresh = 0
+   Gratuitous ARP refresh repeat = 1
+   Gratuitous ARP lower priority delay = 5
+   Gratuitous ARP lower priority repeat = 5
+   Send advert after receive lower priority advert = true
+   Send advert after receive higher priority advert = false
+   Virtual Router ID = 10
+   Priority = 100
+   Effective priority = 100
+   Total priority = 100
+   Advert interval = 1 sec
+   Accept = enabled
+   Preempt = enabled
+   Promote_secondaries = disabled
+   Authentication type = SIMPLE_PASSWORD
+   Password = bacbefe5
+   Virtual IP (1):
+     192.168.2.1 dev ens192 scope global set
+   Unicast TTL = 255
+   Check unicast src : no
+   Unicast Peer :
+     192.168.1.2 min_ttl 0 max_ttl 255
+     192.168.1.3 min_ttl 0 max_ttl 255
+   Unicast checksum compatibility = no
+   fd_in 12, fd_out 13
+   Tracked scripts :
+     check_script weight -60
+   Using smtp notification = no
+   Notify deleted = Fault
+   Notify priority changes = false
+ VRRP Instance = VI_EXT_2
+   VRRP Version = 2
+   State = BACKUP
+   Master router = 192.168.1.2
+   Master priority = 100
+   Wantstate = BACKUP
+   Number of interface and track script faults = 0
+   Number of track scripts init = 0
+   Last transition = 1594974363.398961 (Fri Jul 17 12:56:03 2020.398961)
+   Read timeout = 1594995532.225480 (Fri Jul 17 18:48:52.225480)
+   Master down timer = 3687500 usecs
+   Interface = ens192
+   Using src_ip = 192.168.1.1 (from configuration)
+   Gratuitous ARP delay = 5
+   Gratuitous ARP repeat = 5
+   Gratuitous ARP refresh = 0
+   Gratuitous ARP refresh repeat = 1
+   Gratuitous ARP lower priority delay = 5
+   Gratuitous ARP lower priority repeat = 5
+   Send advert after receive lower priority advert = true
+   Send advert after receive higher priority advert = false
+   Virtual Router ID = 20
+   Priority = 80
+   Effective priority = 80
+   Total priority = 80
+   Advert interval = 1 sec
+   Accept = enabled
+   Preempt = enabled
+   Promote_secondaries = disabled
+   Authentication type = SIMPLE_PASSWORD
+   Password = password
+   Virtual IP (1):
+     192.168.2.2 dev ens192 scope global
+   Unicast TTL = 255
+   Check unicast src : no
+   Unicast Peer :
+     192.168.1.2 min_ttl 0 max_ttl 255
+     192.168.1.3 min_ttl 0 max_ttl 255
+   Unicast checksum compatibility = no
+   fd_in 12, fd_out 13
+   Tracked scripts :
+     check_script weight -60
+   Using smtp notification = no
+   Notify deleted = Fault
+   Notify priority changes = false
+ VRRP Instance = VI_EXT_3
+   VRRP Version = 2
+   State = BACKUP
+   Master router = 192.168.1.3
+   Master priority = 100
+   Wantstate = BACKUP
+   Number of interface and track script faults = 0
+   Number of track scripts init = 0
+   Last transition = 1594974363.374509 (Fri Jul 17 12:56:03 2020.374509)
+   Read timeout = 1594995532.381775 (Fri Jul 17 18:48:52.381775)
+   Master down timer = 3648437 usecs
+   Interface = ens192
+   Using src_ip = 192.168.1.1 (from configuration)
+   Gratuitous ARP delay = 5
+   Gratuitous ARP repeat = 5
+   Gratuitous ARP refresh = 0
+   Gratuitous ARP refresh repeat = 1
+   Gratuitous ARP lower priority delay = 5
+   Gratuitous ARP lower priority repeat = 5
+   Send advert after receive lower priority advert = true
+   Send advert after receive higher priority advert = false
+   Virtual Router ID = 30
+   Priority = 90
+   Effective priority = 90
+   Total priority = 90
+   Advert interval = 1 sec
+   Accept = enabled
+   Preempt = enabled
+   Promote_secondaries = disabled
+   Authentication type = SIMPLE_PASSWORD
+   Password = password
+   Virtual IP (1):
+     192.168.2.3 dev ens192 scope global
+   Unicast TTL = 255
+   Check unicast src : no
+   Unicast Peer :
+     192.168.1.2 min_ttl 0 max_ttl 255
+     192.168.1.3 min_ttl 0 max_ttl 255
+   Unicast checksum compatibility = no
+   fd_in 12, fd_out 13
+   Tracked scripts :
+     check_script weight -60
+   Using smtp notification = no
+   Notify deleted = Fault
+   Notify priority changes = false
+------< VRRP Scripts >------
+ VRRP Script = check_script
+   Command = '/etc/keepalived/script.sh'
+   Interval = 2 sec
+   Timeout = 0 sec
+   Weight = -60
+   Rise = 5
+   Fall = 1
+   Insecure = no
+   Status = GOOD
+   Script uid:gid = 0:0
+   VRRP instances :
+   Tracking instances :
+     VI_EXT_1, weight -60
+     VI_EXT_2, weight -60
+     VI_EXT_3, weight -60
+   State = idle
