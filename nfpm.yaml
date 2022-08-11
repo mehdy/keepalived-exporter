@@ -11,7 +11,7 @@ description: |
   Keepalived Prometheus exporter
 vendor: "https://github.com/cafebazaar"
 homepage: "https://cafebazaar.ir/"
-license: "GNU V3"
+license: "GPL-3.0"
 contents:
 - src: ./keepalived-exporter
   dst: /usr/local/bin/keepalived-exporter
