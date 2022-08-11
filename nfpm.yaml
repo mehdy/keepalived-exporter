@@ -1,0 +1,29 @@
+name: "keepalived-exporter"
+arch: "amd64"
+platform: "linux"
+version: "v1.2.0"
+section: "default"
+priority: "extra"
+provides:
+- keepalived-exporter
+maintainer: "Cafe Bazaar <info@cafebazaar.ir>"
+description: |
+  Keepalived Prometheus exporter
+vendor: "https://github.com/cafebazaar"
+homepage: "https://cafebazaar.ir/"
+license: "GNU V3"
+contents:
+- src: ./keepalived-exporter
+  dst: /usr/local/bin/keepalived-exporter
+- src: /usr/local/bin/keepalived-exporter
+  dst: /sbin/keepalived-exporter
+  type: symlink
+- src: ./service/keepalived-exporter.service
+  dst: /etc/systemd/system/keepalived-exporter.service
+- src: ./service/keepalived-exporter
+  dst: /etc/init.d/keepalived-exporter
+  file_info:
+    mode: 0751
+
+scripts:
+  postinstall: ./scripts/postinstall.sh

@@ -1,0 +1,19 @@
+[Unit]
+Description=Keepalived Prometheus Exporter
+ConditionPathExists=/usr/local/bin/keepalived-exporter
+After=network.target
+
+[Service]
+Type=simple
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+ExecStart=/usr/local/bin/keepalived-exporter
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=keepalived-exporter
+
+[Install]
+WantedBy=multi-user.target
