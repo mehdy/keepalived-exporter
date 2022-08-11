@@ -45,3 +45,5 @@ release: build
 	@zip -r $(RELEASE_FILENAME).zip $(RELEASE_FILENAME)
 	@tar -czvf $(RELEASE_FILENAME).tar.gz $(RELEASE_FILENAME)
 	@rm -rf $(RELEASE_FILENAME)
+	@nfpm pkg --packager rpm
+	@nfpm pkg --packager deb
