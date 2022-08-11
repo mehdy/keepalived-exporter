@@ -1,7 +1,6 @@
 name: "keepalived-exporter"
-arch: "amd64"
 platform: "linux"
-version: "v1.2.0"
+version: ${VERSION}
 section: "default"
 priority: "extra"
 provides:

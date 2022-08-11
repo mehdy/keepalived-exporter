@@ -14,6 +14,8 @@ LD_FLAGS += -X main.version=$(VERSION)
 LD_FLAGS += -X main.commit=$(COMMIT)
 LD_FLAGS += -X main.buildTime=$(BUILD_TIME)
 
+export VERSION
+
 .PHONY: all dep lint build clean
 
 all: build
@@ -37,6 +39,8 @@ clean: ## Remove previous build and release files
 	@rm -f $(PROJECT_NAME)
 	@rm -f $(RELEASE_FILENAME).zip
 	@rm -f $(RELEASE_FILENAME).tar.gz
+	@rm -f $(PROJECT_NAME)*.deb
+	@rm -f $(PROJECT_NAME)*.rpm
 
 release: build
 	@mkdir $(RELEASE_FILENAME)
@@ -45,5 +49,7 @@ release: build
 	@zip -r $(RELEASE_FILENAME).zip $(RELEASE_FILENAME)
 	@tar -czvf $(RELEASE_FILENAME).tar.gz $(RELEASE_FILENAME)
 	@rm -rf $(RELEASE_FILENAME)
+
+package: build
 	@nfpm pkg --packager rpm
 	@nfpm pkg --packager deb
