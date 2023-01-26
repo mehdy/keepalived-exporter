@@ -4,6 +4,7 @@ import (
 	"flag"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/cafebazaar/keepalived-exporter/internal/collector"
 	"github.com/cafebazaar/keepalived-exporter/internal/types/container"
@@ -65,7 +66,11 @@ func main() {
 	})
 
 	logrus.Info("Listening on address: ", *listenAddr)
-	if err := http.ListenAndServe(*listenAddr, nil); err != nil {
+	server := &http.Server{
+		Addr:              *listenAddr,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+	if err := server.ListenAndServe(); err != nil {
 		logrus.WithError(err).Error("Error starting HTTP server")
 		os.Exit(1)
 	}
