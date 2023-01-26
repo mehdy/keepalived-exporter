@@ -3,7 +3,6 @@ package host
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -12,13 +11,12 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-version"
-	"github.com/sirupsen/logrus"
-
 	"github.com/mehdy/keepalived-exporter/internal/collector"
 	"github.com/mehdy/keepalived-exporter/internal/types/utils"
+	"github.com/sirupsen/logrus"
 )
 
-// KeepalivedHostCollectorHost implements Collector for when Keepalived and Keepalived Exporter are both on a same host
+// KeepalivedHostCollectorHost implements Collector for when Keepalived and Keepalived Exporter are both on a same host.
 type KeepalivedHostCollectorHost struct {
 	pidPath string
 	version *version.Version
@@ -29,7 +27,7 @@ type KeepalivedHostCollectorHost struct {
 	SIGSTATS syscall.Signal
 }
 
-// NewKeepalivedHostCollectorHost is creating new instance of KeepalivedHostCollectorHost
+// NewKeepalivedHostCollectorHost is creating new instance of KeepalivedHostCollectorHost.
 func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHostCollectorHost {
 	k := &KeepalivedHostCollectorHost{
 		useJSON: useJSON,
@@ -55,7 +53,7 @@ func (k *KeepalivedHostCollectorHost) initSignals() {
 	k.SIGSTATS = k.sigNum("STATS")
 }
 
-// GetKeepalivedVersion returns Keepalived version
+// GetKeepalivedVersion returns Keepalived version.
 func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, error) {
 	cmd := exec.Command("bash", "-c", "keepalived -v")
 	var stdout, stderr bytes.Buffer
@@ -63,15 +61,15 @@ func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, 
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		logrus.WithFields(logrus.Fields{"stderr": stderr.String(), "stdout": stdout.String()}).WithError(err).Error("Error getting keepalived version")
-		return nil, errors.New("Error getting keepalived version")
+		return nil, errors.New("error getting keepalived version")
 	}
 
 	return utils.ParseVersion(stderr.String())
 }
 
-// Signal sends signal to Keepalived process
+// Signal sends signal to Keepalived process.
 func (k *KeepalivedHostCollectorHost) signal(signal os.Signal) error {
-	data, err := ioutil.ReadFile(k.pidPath)
+	data, err := os.ReadFile(k.pidPath)
 	if err != nil {
 		logrus.WithField("path", k.pidPath).WithError(err).Error("Can't find keepalived")
 		return err
@@ -100,7 +98,7 @@ func (k *KeepalivedHostCollectorHost) signal(signal os.Signal) error {
 	return nil
 }
 
-// SigNum returns signal number for given signal name
+// SigNum returns signal number for given signal name.
 func (k *KeepalivedHostCollectorHost) sigNum(sigString string) syscall.Signal {
 	if !utils.HasSigNumSupport(k.version) {
 		return utils.GetDefaultSignal(sigString)
@@ -180,7 +178,7 @@ func (k *KeepalivedHostCollectorHost) ScriptVrrps() ([]collector.VRRPScript, err
 	return collector.ParseVRRPScript(f), nil
 }
 
-// HasVRRPScriptStateSupport check if Keepalived version supports VRRP Script State in output
+// HasVRRPScriptStateSupport check if Keepalived version supports VRRP Script State in output.
 func (k *KeepalivedHostCollectorHost) HasVRRPScriptStateSupport() bool {
 	return utils.HasVRRPScriptStateSupport(k.version)
 }

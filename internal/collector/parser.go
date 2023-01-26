@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	// VRRPScriptStatuses contains VRRP Script statuses
+	// VRRPScriptStatuses contains VRRP Script statuses.
 	VRRPScriptStatuses = []string{"BAD", "GOOD"}
-	// VRRPScriptStates contains VRRP Script states
+	// VRRPScriptStates contains VRRP Script states.
 	VRRPScriptStates = []string{"idle", "running", "requested termination", "forcing termination"}
-	// VRRPStates contains VRRP states
+	// VRRPStates contains VRRP states.
 	VRRPStates = []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 )
 
@@ -64,7 +64,7 @@ func ParseJSON(i io.Reader) ([]VRRP, error) {
 	return stats, nil
 }
 
-// isKeyArray checks if key is array in keepalived.data file
+// isKeyArray checks if key is array in keepalived.data file.
 func isKeyArray(key string) bool {
 	supportedKeys := []string{"Virtual IP"}
 	for _, supportedKey := range supportedKeys {
