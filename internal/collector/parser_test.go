@@ -467,3 +467,40 @@ func TestIsKeyArray(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestV227ParseVRRPData(t *testing.T) {
+	f, err := os.Open("../../test_files/v2.2.7/keepalived.data")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	vrrpData, err := ParseVRRPData(f)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	if len(vrrpData) != 1 {
+		t.Fail()
+	}
+
+	viExt1 := VRRPData{
+		IName:     "VI_1",
+		State:     2,
+		WantState: 2,
+		Intf:      "ens3",
+		GArpDelay: 5,
+		VRID:      52,
+		VIPs:      []string{"10.1.0.1/24 dev ens3 scope global set"},
+	}
+
+	for _, data := range vrrpData {
+		if data.IName == "VI_1" {
+			if !reflect.DeepEqual(*data, viExt1) {
+				t.Fail()
+			}
+		}
+	}
+}

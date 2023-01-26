@@ -1,0 +1,58 @@
+------< VRRP Topology >------
+ VRRP Instance = VI_1
+   VRRP Version = 3
+   State = MASTER
+   Flags: none
+   Wantstate = MASTER
+   Number of config faults = 0
+   Number of interface and track script faults = 0
+   Number of track scripts init = 0
+   Last transition = 1673674892.348360 (Sat Jan 14 06:41:32.348360 2023)
+   Read timeout = 1674563074.242128 (Tue Jan 24 13:24:34.242128 2023)
+   Master down timer = 1656250 usecs
+   Interface = ens3
+   Using src_ip = 10.1.0.166
+   Multicast address 224.0.0.18
+   Gratuitous ARP delay = 5
+   Gratuitous ARP repeat = 5
+   Gratuitous ARP refresh = 0
+   Gratuitous ARP refresh repeat = 1
+   Gratuitous ARP lower priority delay = 5
+   Gratuitous ARP lower priority repeat = 5
+   Down timer adverts = 3
+   Send advert after receive lower priority advert = true
+   Send advert after receive higher priority advert = false
+   Virtual Router ID = 52
+   Priority = 50
+   Effective priority = 150
+   Total priority = 150
+   Advert interval = 4000 milli-sec
+   Accept = enabled
+   Preempt = enabled
+   Promote_secondaries = disabled
+   Virtual IP (1):
+     10.1.0.1/24 dev ens3 scope global set
+   fd_in 14, fd_out 15
+   Tracked scripts :
+     chk_script weight 100
+   Using smtp notification = no
+   Notify deleted = Fault
+   Generic state transition script = '/etc/keepalived/script.sh', uid:gid 0:0
+   Notify priority changes = false
+------< VRRP Scripts >------
+ VRRP Script = check_script
+   Command = '/etc/keepalived/script.sh'
+   Interval = 2 sec
+   Timeout = 0 sec
+   Weight = 100
+   Rise = 1
+   Fall = 1
+   Result = 1
+   Insecure = no
+   Init state = unknown
+   Status = GOOD
+   Script uid:gid = 0:0
+   VRRP instances :
+   Tracking instances :
+     VI_1, weight 100
+   State = idle

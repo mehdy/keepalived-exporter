@@ -113,6 +113,9 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 				}
 				val = strings.TrimSpace(args[1])
 			}
+			if (strings.HasPrefix(key, "Virtual IP (") || key == "Virtual IP") && val != "" {
+				data[instance].addVIP(val)
+			}
 			switch key {
 			case "State":
 				if err := data[instance].setState(val); err != nil {
@@ -132,8 +135,6 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 				if err := data[instance].setVRID(val); err != nil {
 					return data, err
 				}
-			case "Virtual IP":
-				data[instance].addVIP(val)
 			}
 		} else if strings.HasPrefix(l, " VRRP Version") || strings.HasPrefix(l, " VRRP Script") {
 			// Seen in version <= 1.3.5
