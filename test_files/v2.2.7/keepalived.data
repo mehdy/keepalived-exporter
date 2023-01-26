@@ -1,5 +1,5 @@
 ------< VRRP Topology >------
- VRRP Instance = VI_1
+ VRRP Instance = VI_227_1
    VRRP Version = 3
    State = MASTER
    Flags: none
@@ -54,5 +54,5 @@
    Script uid:gid = 0:0
    VRRP instances :
    Tracking instances :
-     VI_1, weight 100
+     VI_227_1, weight 100
    State = idle
