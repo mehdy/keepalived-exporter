@@ -39,7 +39,7 @@ func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerT
 	}
 
 	var err error
-	k.dockerCli, err = client.NewEnvClient()
+	k.dockerCli, err = client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		logrus.WithError(err).Fatal("Error creating docker env client")
 	}
