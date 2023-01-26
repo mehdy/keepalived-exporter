@@ -1,4 +1,4 @@
-ARG GOVERSION=1.15
+ARG GOVERSION=1.19
 
 FROM golang:${GOVERSION}-alpine as builder
 
@@ -10,7 +10,7 @@ ADD . .
 
 RUN make build
 
-FROM alpine:3.12
+FROM alpine:3.17
 
 COPY --from=builder /build/keepalived-exporter . 
 
