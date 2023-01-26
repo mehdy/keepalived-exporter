@@ -487,7 +487,7 @@ func TestV227ParseVRRPData(t *testing.T) {
 	}
 
 	viExt1 := VRRPData{
-		IName:     "VI_1",
+		IName:     "VI_227_1",
 		State:     2,
 		WantState: 2,
 		Intf:      "ens3",
@@ -497,7 +497,7 @@ func TestV227ParseVRRPData(t *testing.T) {
 	}
 
 	for _, data := range vrrpData {
-		if data.IName == "VI_1" {
+		if data.IName == "VI_227_1" {
 			if !reflect.DeepEqual(*data, viExt1) {
 				t.Fail()
 			}
