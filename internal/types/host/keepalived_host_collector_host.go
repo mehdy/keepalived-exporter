@@ -14,8 +14,8 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/sirupsen/logrus"
 
-	"github.com/cafebazaar/keepalived-exporter/internal/collector"
-	"github.com/cafebazaar/keepalived-exporter/internal/types/utils"
+	"github.com/mehdy/keepalived-exporter/internal/collector"
+	"github.com/mehdy/keepalived-exporter/internal/types/utils"
 )
 
 // KeepalivedHostCollectorHost implements Collector for when Keepalived and Keepalived Exporter are both on a same host

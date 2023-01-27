@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/cafebazaar/keepalived-exporter/internal/collector"
-	"github.com/cafebazaar/keepalived-exporter/internal/types/container"
-	"github.com/cafebazaar/keepalived-exporter/internal/types/host"
+	"github.com/mehdy/keepalived-exporter/internal/collector"
+	"github.com/mehdy/keepalived-exporter/internal/types/container"
+	"github.com/mehdy/keepalived-exporter/internal/types/host"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
