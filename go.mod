@@ -1,4 +1,4 @@
-module github.com/cafebazaar/keepalived-exporter
+module github.com/mehdy/keepalived-exporter
 
 go 1.15
 

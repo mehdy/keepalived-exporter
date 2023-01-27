@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cafebazaar/keepalived-exporter/internal/collector"
-	"github.com/cafebazaar/keepalived-exporter/internal/types/utils"
 	"github.com/docker/docker/client"
 	"github.com/hashicorp/go-version"
+	"github.com/mehdy/keepalived-exporter/internal/collector"
+	"github.com/mehdy/keepalived-exporter/internal/types/utils"
 	"github.com/sirupsen/logrus"
 )
 
