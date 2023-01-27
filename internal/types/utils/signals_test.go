@@ -24,13 +24,11 @@ func TestHasSigNumSupport(t *testing.T) {
 }
 
 func TestGetDefaultSignal(t *testing.T) {
-	dataSignal := syscall.SIGUSR1
-	if GetDefaultSignal("DATA") != dataSignal {
+	if dataSignal := syscall.SIGUSR1; GetDefaultSignal("DATA") != dataSignal {
 		t.Fail()
 	}
 
-	statsSignal := syscall.SIGUSR2
-	if GetDefaultSignal("STATS") != statsSignal {
+	if statsSignal := syscall.SIGUSR2; GetDefaultSignal("STATS") != statsSignal {
 		t.Fail()
 	}
 }

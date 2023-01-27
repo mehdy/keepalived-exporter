@@ -463,8 +463,7 @@ func TestIsKeyArray(t *testing.T) {
 		}
 	}
 
-	notArrayKey := "NoArray"
-	if isKeyArray(notArrayKey) {
+	if notArrayKey := "NoArray"; isKeyArray(notArrayKey) {
 		t.Fail()
 	}
 }

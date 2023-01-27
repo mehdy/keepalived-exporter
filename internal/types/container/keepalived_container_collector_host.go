@@ -120,8 +120,7 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 
 // JSONVrrps send SIGJSON and parse the data to the list of collector.VRRP struct.
 func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
-	err := k.signal(k.SIGJSON)
-	if err != nil {
+	if err := k.signal(k.SIGJSON); err != nil {
 		logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
 
 		return nil, err
@@ -140,8 +139,7 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 
 // StatsVrrps send SIGSTATS and parse the stats.
 func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.VRRPStats, error) {
-	err := k.signal(k.SIGSTATS)
-	if err != nil {
+	if err := k.signal(k.SIGSTATS); err != nil {
 		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
 
 		return nil, err
@@ -160,8 +158,7 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 
 // DataVrrps send SIGDATA ans parse the data.
 func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VRRPData, error) {
-	err := k.signal(k.SIGDATA)
-	if err != nil {
+	if err := k.signal(k.SIGDATA); err != nil {
 		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
 
 		return nil, err
