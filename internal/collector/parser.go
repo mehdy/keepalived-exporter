@@ -25,6 +25,7 @@ func (v *VRRPScript) getIntStatus() (int, bool) {
 			return i, true
 		}
 	}
+
 	return -1, false
 }
 
@@ -34,6 +35,7 @@ func (v *VRRPScript) getIntState() (int, bool) {
 			return i, true
 		}
 	}
+
 	return -1, false
 }
 
@@ -41,6 +43,7 @@ func (v *VRRPData) getStringState() (string, bool) {
 	if v.State < len(VRRPStates) && v.State >= 0 {
 		return VRRPStates[v.State], true
 	}
+
 	return "", false
 }
 
@@ -50,6 +53,7 @@ func vrrpDataStringToIntState(state string) (int, bool) {
 			return i, true
 		}
 	}
+
 	return -1, false
 }
 
@@ -73,6 +77,7 @@ func isKeyArray(key string) bool {
 		}
 	}
 	logrus.WithField("Key", key).Debug("Unsupported array key")
+
 	return false
 }
 
@@ -225,6 +230,7 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 			value, err := strconv.Atoi(val)
 			if err != nil {
 				logrus.WithFields(logrus.Fields{"key": key, "val": val}).WithError(err).Error("Unknown metric value from keepalived.stats")
+
 				return stats, err
 			}
 
@@ -275,6 +281,7 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 			value, err := strconv.Atoi(val)
 			if err != nil {
 				logrus.WithFields(logrus.Fields{"key": key, "val": val}).WithError(err).Error("Unknown metric value from keepalived.stats")
+
 				return stats, err
 			}
 
@@ -294,6 +301,7 @@ func ParseVIP(vip string) (string, string, bool) {
 	args := strings.Split(vip, " ")
 	if len(args) < 3 {
 		logrus.WithField("VIP", vip).Error("Failed to parse VIP from keepalived data")
+
 		return "", "", false
 	}
 

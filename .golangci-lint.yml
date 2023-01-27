@@ -16,7 +16,6 @@ linters:
     - wsl  # FIXME
     - testpackage  # FIXME
     - paralleltest  # FIXME
-    - nlreturn  # FIXME
     - ifshort  # FIXME
     - gomnd  # FIXME
 

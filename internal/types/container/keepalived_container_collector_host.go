@@ -108,11 +108,13 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
 	if err != nil {
 		logrus.WithError(err).WithField("signal", int(signal)).Error("Failed to send signal")
+
 		return err
 	}
 
 	// Wait 10ms for Keepalived to create its files
 	time.Sleep(10 * time.Millisecond)
+
 	return nil
 }
 
@@ -121,12 +123,14 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 	err := k.signal(k.SIGJSON)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
+
 		return nil, err
 	}
 
 	f, err := os.Open(k.jsonPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.jsonPath).Error("Failed to open keepalived.json")
+
 		return nil, err
 	}
 	defer f.Close()
@@ -139,12 +143,14 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 	err := k.signal(k.SIGSTATS)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
+
 		return nil, err
 	}
 
 	f, err := os.Open(k.statsPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.statsPath).Error("Failed to open keepalived.stats")
+
 		return nil, err
 	}
 	defer f.Close()
@@ -157,12 +163,14 @@ func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VR
 	err := k.signal(k.SIGDATA)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
+
 		return nil, err
 	}
 
 	f, err := os.Open(k.dataPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
+
 		return nil, err
 	}
 	defer f.Close()
@@ -175,6 +183,7 @@ func (k *KeepalivedContainerCollectorHost) ScriptVrrps() ([]collector.VRRPScript
 	f, err := os.Open(k.dataPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
+
 		return nil, err
 	}
 	defer f.Close()

@@ -98,6 +98,7 @@ func (k *KeepalivedCollector) newConstMetric(ch chan<- prometheus.Metric, name s
 	)
 	if err != nil {
 		logrus.WithError(err).Errorf("Failed to register %q metric", name)
+
 		return
 	}
 
@@ -207,6 +208,7 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 
 		if len(vrrpData) != len(vrrpStats) {
 			logrus.Error("keepalived.data and keepalived.stats datas are not synced")
+
 			return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
 		}
 
@@ -218,6 +220,7 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 				})
 			} else {
 				logrus.WithField("instance", instance).Error("There is no stats found for instance")
+
 				return nil, errors.New("there is no stats found for instance")
 			}
 		}
@@ -240,8 +243,10 @@ func (k *KeepalivedCollector) checkScript(vip string) bool {
 	err := cmd.Run()
 	if err != nil {
 		logrus.WithFields(logrus.Fields{"VIP": vip, "stdout": stdout.String(), "stderr": stderr.String()}).WithError(err).Error("Check script failed")
+
 		return false
 	}
+
 	return true
 }
 
