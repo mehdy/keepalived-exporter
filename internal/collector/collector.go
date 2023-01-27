@@ -19,7 +19,7 @@ type Collector interface {
 	HasVRRPScriptStateSupport() bool
 }
 
-// KeepalivedCollector implements prometheus.Collector interface and stores required info to collect data
+// KeepalivedCollector implements prometheus.Collector interface and stores required info to collect data.
 type KeepalivedCollector struct {
 	sync.Mutex
 	useJSON    bool
@@ -28,7 +28,7 @@ type KeepalivedCollector struct {
 	collector  Collector
 }
 
-// VRRPStats represents Keepalived stats about VRRP
+// VRRPStats represents Keepalived stats about VRRP.
 type VRRPStats struct {
 	AdvertRcvd        int `json:"advert_rcvd"`
 	AdvertSent        int `json:"advert_sent"`
@@ -46,7 +46,7 @@ type VRRPStats struct {
 	PRIZeroSent       int `json:"pri_zero_sent"`
 }
 
-// VRRPData represents Keepalived data about VRRP
+// VRRPData represents Keepalived data about VRRP.
 type VRRPData struct {
 	IName     string   `json:"iname"`
 	State     int      `json:"state"`
@@ -57,26 +57,26 @@ type VRRPData struct {
 	VIPs      []string `json:"vips"`
 }
 
-// VRRPScript represents Keepalived script about VRRP
+// VRRPScript represents Keepalived script about VRRP.
 type VRRPScript struct {
 	Name   string
 	Status string
 	State  string
 }
 
-// VRRP ties together VRRPData and VRRPStats
+// VRRP ties together VRRPData and VRRPStats.
 type VRRP struct {
 	Data  VRRPData  `json:"data"`
 	Stats VRRPStats `json:"stats"`
 }
 
-// KeepalivedStats ties together VRRP and VRRPScript
+// KeepalivedStats ties together VRRP and VRRPScript.
 type KeepalivedStats struct {
 	VRRPs   []VRRP
 	Scripts []VRRPScript
 }
 
-// NewKeepalivedCollector is creating new instance of KeepalivedCollector
+// NewKeepalivedCollector is creating new instance of KeepalivedCollector.
 func NewKeepalivedCollector(useJSON bool, scriptPath string, collector Collector) *KeepalivedCollector {
 	kc := &KeepalivedCollector{
 		useJSON:    useJSON,
@@ -104,7 +104,7 @@ func (k *KeepalivedCollector) newConstMetric(ch chan<- prometheus.Metric, name s
 	ch <- pm
 }
 
-// Collect get metrics and add to prometheus metric channel
+// Collect get metrics and add to prometheus metric channel.
 func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	k.Lock()
 	defer k.Unlock()
@@ -218,7 +218,7 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 				})
 			} else {
 				logrus.WithField("instance", instance).Error("There is no stats found for instance")
-				return nil, errors.New("There is no stats found for instance")
+				return nil, errors.New("there is no stats found for instance")
 			}
 		}
 
@@ -245,7 +245,7 @@ func (k *KeepalivedCollector) checkScript(vip string) bool {
 	return true
 }
 
-// Describe outputs metrics descriptions
+// Describe outputs metrics descriptions.
 func (k *KeepalivedCollector) Describe(ch chan<- *prometheus.Desc) {
 	for _, m := range k.metrics {
 		ch <- m

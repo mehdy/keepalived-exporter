@@ -14,7 +14,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// nolint: gochecknoglobals // since these are build time variables
 var (
 	commit    string
 	version   string

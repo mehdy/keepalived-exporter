@@ -3,7 +3,7 @@ package container
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 
 	"github.com/docker/docker/api/types"
 	"github.com/sirupsen/logrus"
@@ -20,14 +20,14 @@ func (k *KeepalivedContainerCollectorHost) dockerExecCmd(cmd []string) (*bytes.B
 		return nil, err
 	}
 
-	response, err := k.dockerCli.ContainerExecAttach(context.Background(), rst.ID, types.ExecConfig{})
+	response, err := k.dockerCli.ContainerExecAttach(context.Background(), rst.ID, types.ExecStartCheck{})
 	if err != nil {
 		logrus.WithError(err).WithField("CMD", cmd).Error("Error attaching a connection to an exec process")
 		return nil, err
 	}
 	defer response.Close()
 
-	data, err := ioutil.ReadAll(response.Reader)
+	data, err := io.ReadAll(response.Reader)
 	if err != nil {
 		logrus.WithError(err).WithField("CMD", cmd).Error("Error reading response from docker command")
 		return nil, err

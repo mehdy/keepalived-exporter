@@ -16,7 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// KeepalivedContainerCollectorHost implements Collector for when Keepalived is on container and Keepalived Exporter is on a host
+// KeepalivedContainerCollectorHost implements Collector for when Keepalived is on container and Keepalived Exporter is on a host.
 type KeepalivedContainerCollectorHost struct {
 	version       *version.Version
 	useJSON       bool
@@ -31,7 +31,7 @@ type KeepalivedContainerCollectorHost struct {
 	SIGSTATS syscall.Signal
 }
 
-// NewKeepalivedContainerCollectorHost is creating new instance of KeepalivedContainerCollectorHost
+// NewKeepalivedContainerCollectorHost is creating new instance of KeepalivedContainerCollectorHost.
 func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerTmpDir string) *KeepalivedContainerCollectorHost {
 	k := &KeepalivedContainerCollectorHost{
 		useJSON:       useJSON,
@@ -39,7 +39,7 @@ func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerT
 	}
 
 	var err error
-	k.dockerCli, err = client.NewEnvClient()
+	k.dockerCli, err = client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		logrus.WithError(err).Fatal("Error creating docker env client")
 	}
@@ -62,7 +62,7 @@ func (k *KeepalivedContainerCollectorHost) initPaths(containerTmpDir string) {
 	k.dataPath = filepath.Join(containerTmpDir, "keepalived.data")
 }
 
-// GetKeepalivedVersion returns Keepalived version
+// GetKeepalivedVersion returns Keepalived version.
 func (k *KeepalivedContainerCollectorHost) getKeepalivedVersion() (*version.Version, error) {
 	getVersionCmd := []string{"keepalived", "-v"}
 	stdout, err := k.dockerExecCmd(getVersionCmd)
@@ -81,7 +81,7 @@ func (k *KeepalivedContainerCollectorHost) initSignals() {
 	k.SIGSTATS = k.sigNum("STATS")
 }
 
-// SigNum returns signal number for given signal name
+// SigNum returns signal number for given signal name.
 func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Signal {
 	if !utils.HasSigNumSupport(k.version) {
 		return utils.GetDefaultSignal(sigString)
@@ -103,7 +103,7 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 	return syscall.Signal(signum)
 }
 
-// Signal sends signal to Keepalived process
+// Signal sends signal to Keepalived process.
 func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
 	if err != nil {
@@ -116,7 +116,7 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	return nil
 }
 
-// JSONVrrps send SIGJSON and parse the data to the list of collector.VRRP struct
+// JSONVrrps send SIGJSON and parse the data to the list of collector.VRRP struct.
 func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
 	err := k.signal(k.SIGJSON)
 	if err != nil {
@@ -134,7 +134,7 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 	return collector.ParseJSON(f)
 }
 
-// StatsVrrps send SIGSTATS and parse the stats
+// StatsVrrps send SIGSTATS and parse the stats.
 func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.VRRPStats, error) {
 	err := k.signal(k.SIGSTATS)
 	if err != nil {
@@ -152,7 +152,7 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 	return collector.ParseStats(f)
 }
 
-// DataVrrps send SIGDATA ans parse the data
+// DataVrrps send SIGDATA ans parse the data.
 func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VRRPData, error) {
 	err := k.signal(k.SIGDATA)
 	if err != nil {
@@ -170,7 +170,7 @@ func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VR
 	return collector.ParseVRRPData(f)
 }
 
-// ScriptVrrps parse the script data from keepalived.data
+// ScriptVrrps parse the script data from keepalived.data.
 func (k *KeepalivedContainerCollectorHost) ScriptVrrps() ([]collector.VRRPScript, error) {
 	f, err := os.Open(k.dataPath)
 	if err != nil {
@@ -182,7 +182,7 @@ func (k *KeepalivedContainerCollectorHost) ScriptVrrps() ([]collector.VRRPScript
 	return collector.ParseVRRPScript(f), nil
 }
 
-// HasVRRPScriptStateSupport check if Keepalived version supports VRRP Script State in output
+// HasVRRPScriptStateSupport check if Keepalived version supports VRRP Script State in output.
 func (k *KeepalivedContainerCollectorHost) HasVRRPScriptStateSupport() bool {
 	return utils.HasVRRPScriptStateSupport(k.version)
 }
