@@ -12,7 +12,6 @@ linters:
     - funlen
     - gocognit
     - gocyclo
-    - gocritic  # FIXME
     - nestif  # FIXME
     - wsl  # FIXME
     - testpackage  # FIXME

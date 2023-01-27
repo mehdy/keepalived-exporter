@@ -132,15 +132,16 @@ func TestV215ParseVRRPData(t *testing.T) {
 	}
 
 	for _, data := range vrrpData {
-		if data.IName == "VI_EXT_1" {
+		switch data.IName {
+		case "VI_EXT_1":
 			if !reflect.DeepEqual(*data, viExt1) {
 				t.Fail()
 			}
-		} else if data.IName == "VI_EXT_2" {
+		case "VI_EXT_2":
 			if !reflect.DeepEqual(*data, viExt2) {
 				t.Fail()
 			}
-		} else if data.IName == "VI_EXT_3" {
+		case "VI_EXT_3":
 			if !reflect.DeepEqual(*data, viExt3) {
 				t.Fail()
 			}
