@@ -7,6 +7,8 @@ import (
 )
 
 func TestNewConstMetric(t *testing.T) {
+	t.Parallel()
+
 	k := &KeepalivedCollector{}
 	k.fillMetrics()
 
@@ -50,6 +52,8 @@ func TestNewConstMetric(t *testing.T) {
 }
 
 func TestFillMetrics(t *testing.T) {
+	t.Parallel()
+
 	k := &KeepalivedCollector{}
 	k.fillMetrics()
 

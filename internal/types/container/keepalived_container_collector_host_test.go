@@ -7,6 +7,8 @@ import (
 )
 
 func TestInitPaths(t *testing.T) {
+	t.Parallel()
+
 	k := KeepalivedContainerCollectorHost{}
 	k.initPaths("/custom-tmp")
 
@@ -24,6 +26,8 @@ func TestInitPaths(t *testing.T) {
 }
 
 func TestHasVRRPScriptStateSupport(t *testing.T) {
+	t.Parallel()
+
 	notSupportingVersion := version.Must(version.NewVersion("1.3.5"))
 	supportingVersion := version.Must(version.NewVersion("1.4.0"))
 

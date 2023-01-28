@@ -8,6 +8,8 @@ import (
 )
 
 func TestSetState(t *testing.T) {
+	t.Parallel()
+
 	data := VRRPData{}
 	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 
@@ -25,6 +27,8 @@ func TestSetState(t *testing.T) {
 }
 
 func TestSetWantState(t *testing.T) {
+	t.Parallel()
+
 	data := VRRPData{}
 	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 
@@ -96,6 +100,8 @@ func TestSetVRID(t *testing.T) {
 }
 
 func TestAddVIP(t *testing.T) {
+	t.Parallel()
+
 	data := VRRPData{}
 
 	vips := []string{"   1.1.1.1", "2.2.2.2", "3.3.3.3   "}

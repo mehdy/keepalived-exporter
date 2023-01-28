@@ -7,6 +7,8 @@ import (
 )
 
 func TestHasVRRPScriptStateSupport(t *testing.T) {
+	t.Parallel()
+
 	notSupportingVersion := version.Must(version.NewVersion("1.3.5"))
 	if HasSigNumSupport(notSupportingVersion) {
 		t.Fail()

@@ -7,6 +7,8 @@ import (
 )
 
 func TestGetIntStatus(t *testing.T) {
+	t.Parallel()
+
 	acceptableStatuses := []string{"BAD", "GOOD"}
 	script := VRRPScript{}
 
@@ -24,6 +26,8 @@ func TestGetIntStatus(t *testing.T) {
 }
 
 func TestGetIntState(t *testing.T) {
+	t.Parallel()
+
 	acceptableStates := []string{"idle", "running", "requested termination", "forcing termination"}
 	script := VRRPScript{}
 
@@ -41,6 +45,8 @@ func TestGetIntState(t *testing.T) {
 }
 
 func TestGetStringState(t *testing.T) {
+	t.Parallel()
+
 	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 	data := VRRPData{}
 
@@ -63,6 +69,8 @@ func TestGetStringState(t *testing.T) {
 }
 
 func TestVRRPDataStringToIntState(t *testing.T) {
+	t.Parallel()
+
 	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 
 	for expected, state := range acceptableStates {
@@ -79,6 +87,8 @@ func TestVRRPDataStringToIntState(t *testing.T) {
 }
 
 func TestV215ParseVRRPData(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.1.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -143,6 +153,8 @@ func TestV215ParseVRRPData(t *testing.T) {
 }
 
 func TestV2010ParseVRRPData(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.0.10/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -182,6 +194,8 @@ func TestV2010ParseVRRPData(t *testing.T) {
 }
 
 func TestV215ParseVRRPScript(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.0.10/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -211,6 +225,8 @@ func TestV215ParseVRRPScript(t *testing.T) {
 }
 
 func TestV2010ParseVRRPScript(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.1.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -240,6 +256,8 @@ func TestV2010ParseVRRPScript(t *testing.T) {
 }
 
 func TestV215ParseStats(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.1.5/keepalived.stats")
 	if err != nil {
 		t.Log(err)
@@ -322,6 +340,8 @@ func TestV215ParseStats(t *testing.T) {
 }
 
 func TestV135ParseVRRPData(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v1.3.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -361,6 +381,8 @@ func TestV135ParseVRRPData(t *testing.T) {
 }
 
 func TestV135ParseVRRPScript(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v1.3.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -390,6 +412,8 @@ func TestV135ParseVRRPScript(t *testing.T) {
 }
 
 func TestV135ParseStats(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v1.3.5/keepalived.stats")
 	if err != nil {
 		t.Log(err)
@@ -429,6 +453,8 @@ func TestV135ParseStats(t *testing.T) {
 }
 
 func TestParseVIP(t *testing.T) {
+	t.Parallel()
+
 	vips := []string{"192.168.2.2 dev ens192 scope global", "192.168.2.2 dev ens192 scope global set"}
 	excpectedIP := "192.168.2.2"
 	excpectedIntf := "ens192"
@@ -453,6 +479,8 @@ func TestParseVIP(t *testing.T) {
 }
 
 func TestIsKeyArray(t *testing.T) {
+	t.Parallel()
+
 	supportedKeys := []string{"Virtual IP"}
 
 	for _, key := range supportedKeys {
@@ -467,6 +495,8 @@ func TestIsKeyArray(t *testing.T) {
 }
 
 func TestV227ParseVRRPData(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.2.7/keepalived.data")
 	if err != nil {
 		t.Log(err)

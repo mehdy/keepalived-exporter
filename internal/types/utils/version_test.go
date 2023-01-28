@@ -7,6 +7,8 @@ import (
 )
 
 func TestParseVersion(t *testing.T) {
+	t.Parallel()
+
 	versionOutput := `Keepalived v2.0.20 (05/04,2020), git commit v20200428-362-g114364588e
 
 	Copyright(C) 2001-2020 Alexandre Cassen, <acassen@gmail.com>
