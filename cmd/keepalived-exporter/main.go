@@ -65,6 +65,7 @@ func main() {
 	})
 
 	logrus.Info("Listening on address: ", *listenAddr)
+
 	server := &http.Server{
 		Addr:              *listenAddr,
 		ReadHeaderTimeout: 5 * time.Second,

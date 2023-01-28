@@ -17,6 +17,7 @@ func ParseVersion(versionOutput string) (*version.Version, error) {
 
 		return nil, errors.New("failed to parse keepalived version output")
 	}
+
 	versionString := lines[0]
 
 	args := strings.Split(versionString, " ")

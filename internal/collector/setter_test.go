@@ -1,7 +1,9 @@
 package collector
 
 import (
+	"errors"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -40,52 +42,56 @@ func TestSetWantState(t *testing.T) {
 }
 
 func TestSetGArpDelay(t *testing.T) {
-	data := VRRPData{}
+	t.Parallel()
 
-	delay := "1"
-	expected := 1
-	err := data.setGArpDelay(delay)
-	if err != nil || data.GArpDelay != expected {
-		t.Fail()
+	testCases := []struct {
+		delay    string
+		expected int
+		err      error
+	}{
+		{delay: "1", expected: 1, err: nil},
+		{delay: "1.1", expected: 0, err: strconv.ErrSyntax},
+		{delay: "NA", expected: 0, err: strconv.ErrSyntax},
 	}
 
-	delay = "1.1"
-	expected = 0
-	err = data.setGArpDelay(delay)
-	if err == nil || data.GArpDelay != expected {
-		t.Fail()
-	}
+	for _, tc := range testCases {
+		tc := tc
 
-	delay = "NA"
-	expected = 0
-	err = data.setGArpDelay(delay)
-	if err == nil || data.GArpDelay != expected {
-		t.Fail()
+		t.Run(tc.delay, func(t *testing.T) {
+			t.Parallel()
+
+			data := VRRPData{}
+			if err := data.setGArpDelay(tc.delay); !errors.Is(err, tc.err) || data.GArpDelay != tc.expected {
+				t.Fail()
+			}
+		})
 	}
 }
 
 func TestSetVRID(t *testing.T) {
-	data := VRRPData{}
+	t.Parallel()
 
-	vrid := "10"
-	expected := 10
-	err := data.setVRID(vrid)
-	if err != nil || data.VRID != expected {
-		t.Fail()
+	testCases := []struct {
+		vrid     string
+		expected int
+		err      error
+	}{
+		{vrid: "10", expected: 10, err: nil},
+		{vrid: "1.1", expected: 0, err: strconv.ErrSyntax},
+		{vrid: "NA", expected: 0, err: strconv.ErrSyntax},
 	}
 
-	vrid = "1.1"
-	expected = 0
-	err = data.setVRID(vrid)
-	if err == nil || data.VRID != expected {
-		t.Fail()
-	}
+	for _, tc := range testCases {
+		tc := tc
 
-	vrid = "NA"
-	expected = 0
-	err = data.setVRID(vrid)
-	if err == nil || data.VRID != expected {
-		t.Fail()
+		t.Run(tc.vrid, func(t *testing.T) {
+			t.Parallel()
+
+			data := VRRPData{}
+			if err := data.setVRID(tc.vrid); !errors.Is(err, tc.err) || data.VRID != tc.expected {
+				t.Fail()
+			}
+		})
 	}
 }
 

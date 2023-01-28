@@ -13,9 +13,11 @@ func TestInitPaths(t *testing.T) {
 	if k.jsonPath != "/custom-tmp/keepalived.json" {
 		t.Fail()
 	}
+
 	if k.statsPath != "/custom-tmp/keepalived.stats" {
 		t.Fail()
 	}
+
 	if k.dataPath != "/custom-tmp/keepalived.data" {
 		t.Fail()
 	}
@@ -23,6 +25,8 @@ func TestInitPaths(t *testing.T) {
 
 func TestHasVRRPScriptStateSupport(t *testing.T) {
 	notSupportingVersion := version.Must(version.NewVersion("1.3.5"))
+	supportingVersion := version.Must(version.NewVersion("1.4.0"))
+
 	c := KeepalivedContainerCollectorHost{
 		version: notSupportingVersion,
 	}
@@ -30,7 +34,6 @@ func TestHasVRRPScriptStateSupport(t *testing.T) {
 		t.Fail()
 	}
 
-	supportingVersion := version.Must(version.NewVersion("1.4.0"))
 	c = KeepalivedContainerCollectorHost{
 		version: supportingVersion,
 	}

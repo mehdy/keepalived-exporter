@@ -115,6 +115,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	keepalivedStats, err := k.getKeepalivedStats()
 	if err != nil {
 		logrus.WithError(err).Error("No data found to be exported")
+
 		keepalivedUp = 0
 	}
 
@@ -127,6 +128,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, vrrp := range keepalivedStats.VRRPs {
 		state := ""
 		ok := false
+
 		if state, ok = vrrp.Data.getStringState(); !ok {
 			logrus.WithField("state", vrrp.Data.State).Warn("Unknown State found for vrrp: ", vrrp.Data.IName)
 		}
@@ -156,11 +158,11 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			k.newConstMetric(ch, "keepalived_vrrp_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 
 			if k.scriptPath != "" {
-				ok := k.checkScript(ipAddr)
 				checkScript := float64(0)
-				if ok {
+				if ok := k.checkScript(ipAddr); ok {
 					checkScript = 1
 				}
+
 				k.newConstMetric(ch, "keepalived_exporter_check_script_status", prometheus.GaugeValue, checkScript, vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 			}
 		}
@@ -188,6 +190,7 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 		VRRPs:   make([]VRRP, 0),
 		Scripts: make([]VRRPScript, 0),
 	}
+
 	var err error
 
 	if k.useJSON {
@@ -235,13 +238,14 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 }
 
 func (k *KeepalivedCollector) checkScript(vip string) bool {
+	var stdout, stderr bytes.Buffer
+
 	script := k.scriptPath + " " + vip
 	cmd := exec.Command("/bin/sh", "-c", script)
-	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	err := cmd.Run()
-	if err != nil {
+
+	if err := cmd.Run(); err != nil {
 		logrus.WithFields(logrus.Fields{"VIP": vip, "stdout": stdout.String(), "stderr": stderr.String()}).WithError(err).Error("Check script failed")
 
 		return false

@@ -12,15 +12,13 @@ func TestGetIntStatus(t *testing.T) {
 
 	for expected, status := range acceptableStatuses {
 		script.Status = status
-		result, ok := script.getIntStatus()
-		if !ok || result != expected {
+		if result, ok := script.getIntStatus(); !ok || result != expected {
 			t.Fail()
 		}
 	}
 
 	script.Status = "NOTGOOD"
-	result, ok := script.getIntStatus()
-	if ok || result != -1 {
+	if result, ok := script.getIntStatus(); ok || result != -1 {
 		t.Fail()
 	}
 }
@@ -31,15 +29,13 @@ func TestGetIntState(t *testing.T) {
 
 	for expected, state := range acceptableStates {
 		script.State = state
-		result, ok := script.getIntState()
-		if !ok || result != expected {
+		if result, ok := script.getIntState(); !ok || result != expected {
 			t.Fail()
 		}
 	}
 
 	script.State = "NOTGOOD"
-	result, ok := script.getIntState()
-	if ok || result != -1 {
+	if result, ok := script.getIntState(); ok || result != -1 {
 		t.Fail()
 	}
 }
@@ -50,21 +46,18 @@ func TestGetStringState(t *testing.T) {
 
 	for state, expected := range acceptableStates {
 		data.State = state
-		result, ok := data.getStringState()
-		if !ok || result != expected {
+		if result, ok := data.getStringState(); !ok || result != expected {
 			t.Fail()
 		}
 	}
 
 	data.State = -1
-	result, ok := data.getStringState()
-	if ok || result != "" {
+	if result, ok := data.getStringState(); ok || result != "" {
 		t.Fail()
 	}
 
 	data.State = len(acceptableStates)
-	result, ok = data.getStringState()
-	if ok || result != "" {
+	if result, ok := data.getStringState(); ok || result != "" {
 		t.Fail()
 	}
 }
@@ -206,9 +199,11 @@ func TestV215ParseVRRPScript(t *testing.T) {
 		if script.Name != "chk_service" {
 			t.Fail()
 		}
+
 		if script.Status != "GOOD" {
 			t.Fail()
 		}
+
 		if script.State != "idle" {
 			t.Fail()
 		}
@@ -233,9 +228,11 @@ func TestV2010ParseVRRPScript(t *testing.T) {
 		if script.Name != "check_script" {
 			t.Fail()
 		}
+
 		if script.Status != "GOOD" {
 			t.Fail()
 		}
+
 		if script.State != "idle" {
 			t.Fail()
 		}
@@ -381,9 +378,11 @@ func TestV135ParseVRRPScript(t *testing.T) {
 		if script.Name != "check_haproxy" {
 			t.Fail()
 		}
+
 		if script.Status != "BAD" {
 			t.Fail()
 		}
+
 		if script.State != "" {
 			t.Fail()
 		}
@@ -448,8 +447,7 @@ func TestParseVIP(t *testing.T) {
 	}
 
 	badVIP := "192.168.2.2 dev"
-	ip, intf, ok := ParseVIP(badVIP)
-	if ok || ip != "" || intf != "" {
+	if ip, intf, ok := ParseVIP(badVIP); ok || ip != "" || intf != "" {
 		t.Fail()
 	}
 }

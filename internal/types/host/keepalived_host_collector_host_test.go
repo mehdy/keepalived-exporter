@@ -8,6 +8,8 @@ import (
 
 func TestHasVRRPScriptStateSupport(t *testing.T) {
 	notSupportingVersion := version.Must(version.NewVersion("1.3.5"))
+	supportingVersion := version.Must(version.NewVersion("1.4.0"))
+
 	c := KeepalivedHostCollectorHost{
 		version: notSupportingVersion,
 	}
@@ -15,7 +17,6 @@ func TestHasVRRPScriptStateSupport(t *testing.T) {
 		t.Fail()
 	}
 
-	supportingVersion := version.Must(version.NewVersion("1.4.0"))
 	c = KeepalivedHostCollectorHost{
 		version: supportingVersion,
 	}

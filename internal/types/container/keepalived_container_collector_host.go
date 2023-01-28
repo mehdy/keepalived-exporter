@@ -39,6 +39,7 @@ func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerT
 	}
 
 	var err error
+
 	k.dockerCli, err = client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		logrus.WithError(err).Fatal("Error creating docker env client")
@@ -65,6 +66,7 @@ func (k *KeepalivedContainerCollectorHost) initPaths(containerTmpDir string) {
 // GetKeepalivedVersion returns Keepalived version.
 func (k *KeepalivedContainerCollectorHost) getKeepalivedVersion() (*version.Version, error) {
 	getVersionCmd := []string{"keepalived", "-v"}
+
 	stdout, err := k.dockerExecCmd(getVersionCmd)
 	if err != nil {
 		return nil, err
@@ -77,6 +79,7 @@ func (k *KeepalivedContainerCollectorHost) initSignals() {
 	if k.useJSON {
 		k.SIGJSON = k.sigNum("JSON")
 	}
+
 	k.SIGDATA = k.sigNum("DATA")
 	k.SIGSTATS = k.sigNum("STATS")
 }
@@ -88,6 +91,7 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 	}
 
 	sigNumCommand := []string{"keepalived", "--signum", sigString}
+
 	stdout, err := k.dockerExecCmd(sigNumCommand)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{"signal": sigString, "container": k.containerName}).WithError(err).Fatal("Error getting signum")
@@ -95,6 +99,7 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 	reg := regexp.MustCompile("[^0-9]+")
 	strSigNum := reg.ReplaceAllString(stdout.String(), "")
+
 	signum, err := strconv.ParseInt(strSigNum, 10, 32)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{"signal": sigString, "signum": stdout.String()}).WithError(err).Fatal("Error parsing signum result")

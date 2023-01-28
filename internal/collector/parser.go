@@ -76,6 +76,7 @@ func isKeyArray(key string) bool {
 			return true
 		}
 	}
+
 	logrus.WithField("Key", key).Debug("Unsupported array key")
 
 	return false
@@ -88,13 +89,15 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 	prop := "="
 	arrayProp := ":"
 
-	scanner := bufio.NewScanner(bufio.NewReader(i))
 	var instance string
 
+	scanner := bufio.NewScanner(bufio.NewReader(i))
 	key := ""
 	val := ""
+
 	for scanner.Scan() {
 		l := scanner.Text()
+
 		switch {
 		case strings.HasPrefix(l, " "+sep) && strings.Contains(l, prop):
 			s := strings.Split(strings.TrimSpace(l), prop)
@@ -120,9 +123,11 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 				}
 				val = strings.TrimSpace(args[1])
 			}
+
 			if (strings.HasPrefix(key, "Virtual IP (") || key == "Virtual IP") && val != "" {
 				data[instance].addVIP(val)
 			}
+
 			switch key {
 			case "State":
 				if err := data[instance].setState(val); err != nil {
@@ -165,6 +170,7 @@ func ParseVRRPScript(i io.Reader) []VRRPScript {
 
 	for scanner.Scan() {
 		l := scanner.Text()
+
 		switch {
 		case strings.HasPrefix(l, " "+sep) && strings.Contains(l, prop):
 			if script.Name != "" {
@@ -178,9 +184,11 @@ func ParseVRRPScript(i io.Reader) []VRRPScript {
 			if !strings.Contains(l, prop) {
 				continue
 			}
+
 			s := strings.Split(strings.TrimSpace(l), prop)
 			key := strings.TrimSpace(s[0])
 			val := strings.TrimSpace(s[1])
+
 			switch key {
 			case "Status":
 				script.Status = val
@@ -214,6 +222,7 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 
 	for scanner.Scan() {
 		l := scanner.Text()
+
 		switch {
 		case strings.HasPrefix(l, sep) && strings.Contains(l, prop):
 			sp := strings.Split(strings.TrimSpace(l), prop)

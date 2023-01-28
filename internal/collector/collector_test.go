@@ -11,8 +11,9 @@ func TestNewConstMetric(t *testing.T) {
 	k.fillMetrics()
 
 	for metric := range k.metrics {
-		pm := make(chan prometheus.Metric, 1)
 		var valueType prometheus.ValueType
+
+		pm := make(chan prometheus.Metric, 1)
 		labelValues := []string{"iname", "intf", "vrid", "state"}
 
 		switch metric {

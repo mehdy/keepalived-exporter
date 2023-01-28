@@ -35,8 +35,7 @@ func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHos
 	}
 
 	var err error
-	k.version, err = k.getKeepalivedVersion()
-	if err != nil {
+	if k.version, err = k.getKeepalivedVersion(); err != nil {
 		logrus.WithError(err).Warn("Version detection failed. Assuming it's the latest one.")
 	}
 
@@ -49,16 +48,19 @@ func (k *KeepalivedHostCollectorHost) initSignals() {
 	if k.useJSON {
 		k.SIGJSON = k.sigNum("JSON")
 	}
+
 	k.SIGDATA = k.sigNum("DATA")
 	k.SIGSTATS = k.sigNum("STATS")
 }
 
 // GetKeepalivedVersion returns Keepalived version.
 func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, error) {
-	cmd := exec.Command("bash", "-c", "keepalived -v")
 	var stdout, stderr bytes.Buffer
+
+	cmd := exec.Command("bash", "-c", "keepalived -v")
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+
 	if err := cmd.Run(); err != nil {
 		logrus.WithFields(logrus.Fields{"stderr": stderr.String(), "stdout": stdout.String()}).WithError(err).Error("Error getting keepalived version")
 
@@ -110,11 +112,13 @@ func (k *KeepalivedHostCollectorHost) sigNum(sigString string) syscall.Signal {
 		return utils.GetDefaultSignal(sigString)
 	}
 
+	var stdout, stderr bytes.Buffer
+
 	sigNumCommand := "keepalived --signum=" + sigString
 	cmd := exec.Command("bash", "-c", sigNumCommand)
-	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+
 	if err := cmd.Run(); err != nil {
 		logrus.WithFields(logrus.Fields{"signal": sigString, "stderr": stderr.String()}).WithError(err).Fatal("Error getting signum")
 	}
