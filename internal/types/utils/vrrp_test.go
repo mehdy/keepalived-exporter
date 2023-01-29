@@ -9,17 +9,25 @@ import (
 func TestHasVRRPScriptStateSupport(t *testing.T) {
 	t.Parallel()
 
-	notSupportingVersion := version.Must(version.NewVersion("1.3.5"))
-	if HasSigNumSupport(notSupportingVersion) {
-		t.Fail()
+	testCaseses := []struct {
+		name            string
+		version         *version.Version
+		expectedSupport bool
+	}{
+		{name: "nil", version: nil, expectedSupport: true},
+		{name: "1.4.0", version: version.Must(version.NewVersion("1.4.0")), expectedSupport: true},
+		{name: "1.3.5", version: version.Must(version.NewVersion("1.3.5")), expectedSupport: false},
 	}
 
-	supportingVersion := version.Must(version.NewVersion("1.4.0"))
-	if !HasSigNumSupport(supportingVersion) {
-		t.Fail()
-	}
+	for _, tc := range testCaseses {
+		tc := tc
 
-	if !HasSigNumSupport(nil) {
-		t.Fail()
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			if HasSigNumSupport(tc.version) != tc.expectedSupport {
+				t.Fail()
+			}
+		})
 	}
 }

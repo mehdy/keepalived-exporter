@@ -28,25 +28,29 @@ func TestInitPaths(t *testing.T) {
 func TestHasVRRPScriptStateSupport(t *testing.T) {
 	t.Parallel()
 
-	notSupportingVersion := version.Must(version.NewVersion("1.3.5"))
-	supportingVersion := version.Must(version.NewVersion("1.4.0"))
-
-	c := KeepalivedContainerCollectorHost{
-		version: notSupportingVersion,
-	}
-	if c.HasVRRPScriptStateSupport() {
-		t.Fail()
-	}
-
-	c = KeepalivedContainerCollectorHost{
-		version: supportingVersion,
-	}
-	if !c.HasVRRPScriptStateSupport() {
-		t.Fail()
+	testCaseses := []struct {
+		name            string
+		version         *version.Version
+		expectedSupport bool
+	}{
+		{name: "nil", version: nil, expectedSupport: true},
+		{name: "1.4.0", version: version.Must(version.NewVersion("1.4.0")), expectedSupport: true},
+		{name: "1.3.5", version: version.Must(version.NewVersion("1.3.5")), expectedSupport: false},
 	}
 
-	c = KeepalivedContainerCollectorHost{}
-	if !c.HasVRRPScriptStateSupport() {
-		t.Fail()
+	for _, tc := range testCaseses {
+		tc := tc
+
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			c := KeepalivedContainerCollectorHost{
+				version: tc.version,
+			}
+
+			if c.HasVRRPScriptStateSupport() != tc.expectedSupport {
+				t.Fail()
+			}
+		})
 	}
 }

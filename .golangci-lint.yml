@@ -12,8 +12,8 @@ linters:
     - funlen
     - gocognit
     - gocyclo
+    - testpackage
     - nestif  # FIXME
-    - testpackage  # FIXME
     - gomnd  # FIXME
 
 linters-settings:
