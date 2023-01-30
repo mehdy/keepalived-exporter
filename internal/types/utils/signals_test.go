@@ -8,6 +8,8 @@ import (
 )
 
 func TestHasSigNumSupport(t *testing.T) {
+	t.Parallel()
+
 	notSupportingVersion := version.Must(version.NewVersion("1.3.5"))
 	if HasSigNumSupport(notSupportingVersion) {
 		t.Fail()
@@ -24,13 +26,13 @@ func TestHasSigNumSupport(t *testing.T) {
 }
 
 func TestGetDefaultSignal(t *testing.T) {
-	dataSignal := syscall.SIGUSR1
-	if GetDefaultSignal("DATA") != dataSignal {
+	t.Parallel()
+
+	if dataSignal := syscall.SIGUSR1; GetDefaultSignal("DATA") != dataSignal {
 		t.Fail()
 	}
 
-	statsSignal := syscall.SIGUSR2
-	if GetDefaultSignal("STATS") != statsSignal {
+	if statsSignal := syscall.SIGUSR2; GetDefaultSignal("STATS") != statsSignal {
 		t.Fail()
 	}
 }

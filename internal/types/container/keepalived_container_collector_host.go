@@ -39,6 +39,7 @@ func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerT
 	}
 
 	var err error
+
 	k.dockerCli, err = client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		logrus.WithError(err).Fatal("Error creating docker env client")
@@ -65,6 +66,7 @@ func (k *KeepalivedContainerCollectorHost) initPaths(containerTmpDir string) {
 // GetKeepalivedVersion returns Keepalived version.
 func (k *KeepalivedContainerCollectorHost) getKeepalivedVersion() (*version.Version, error) {
 	getVersionCmd := []string{"keepalived", "-v"}
+
 	stdout, err := k.dockerExecCmd(getVersionCmd)
 	if err != nil {
 		return nil, err
@@ -77,6 +79,7 @@ func (k *KeepalivedContainerCollectorHost) initSignals() {
 	if k.useJSON {
 		k.SIGJSON = k.sigNum("JSON")
 	}
+
 	k.SIGDATA = k.sigNum("DATA")
 	k.SIGSTATS = k.sigNum("STATS")
 }
@@ -88,6 +91,7 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 	}
 
 	sigNumCommand := []string{"keepalived", "--signum", sigString}
+
 	stdout, err := k.dockerExecCmd(sigNumCommand)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{"signal": sigString, "container": k.containerName}).WithError(err).Fatal("Error getting signum")
@@ -95,6 +99,7 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 	reg := regexp.MustCompile("[^0-9]+")
 	strSigNum := reg.ReplaceAllString(stdout.String(), "")
+
 	signum, err := strconv.ParseInt(strSigNum, 10, 32)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{"signal": sigString, "signum": stdout.String()}).WithError(err).Fatal("Error parsing signum result")
@@ -108,25 +113,28 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
 	if err != nil {
 		logrus.WithError(err).WithField("signal", int(signal)).Error("Failed to send signal")
+
 		return err
 	}
 
 	// Wait 10ms for Keepalived to create its files
 	time.Sleep(10 * time.Millisecond)
+
 	return nil
 }
 
 // JSONVrrps send SIGJSON and parse the data to the list of collector.VRRP struct.
 func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
-	err := k.signal(k.SIGJSON)
-	if err != nil {
+	if err := k.signal(k.SIGJSON); err != nil {
 		logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
+
 		return nil, err
 	}
 
 	f, err := os.Open(k.jsonPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.jsonPath).Error("Failed to open keepalived.json")
+
 		return nil, err
 	}
 	defer f.Close()
@@ -136,15 +144,16 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 
 // StatsVrrps send SIGSTATS and parse the stats.
 func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.VRRPStats, error) {
-	err := k.signal(k.SIGSTATS)
-	if err != nil {
+	if err := k.signal(k.SIGSTATS); err != nil {
 		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
+
 		return nil, err
 	}
 
 	f, err := os.Open(k.statsPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.statsPath).Error("Failed to open keepalived.stats")
+
 		return nil, err
 	}
 	defer f.Close()
@@ -154,15 +163,16 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 
 // DataVrrps send SIGDATA ans parse the data.
 func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VRRPData, error) {
-	err := k.signal(k.SIGDATA)
-	if err != nil {
+	if err := k.signal(k.SIGDATA); err != nil {
 		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
+
 		return nil, err
 	}
 
 	f, err := os.Open(k.dataPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
+
 		return nil, err
 	}
 	defer f.Close()
@@ -175,6 +185,7 @@ func (k *KeepalivedContainerCollectorHost) ScriptVrrps() ([]collector.VRRPScript
 	f, err := os.Open(k.dataPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
+
 		return nil, err
 	}
 	defer f.Close()

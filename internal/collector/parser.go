@@ -25,6 +25,7 @@ func (v *VRRPScript) getIntStatus() (int, bool) {
 			return i, true
 		}
 	}
+
 	return -1, false
 }
 
@@ -34,6 +35,7 @@ func (v *VRRPScript) getIntState() (int, bool) {
 			return i, true
 		}
 	}
+
 	return -1, false
 }
 
@@ -41,6 +43,7 @@ func (v *VRRPData) getStringState() (string, bool) {
 	if v.State < len(VRRPStates) && v.State >= 0 {
 		return VRRPStates[v.State], true
 	}
+
 	return "", false
 }
 
@@ -50,6 +53,7 @@ func vrrpDataStringToIntState(state string) (int, bool) {
 			return i, true
 		}
 	}
+
 	return -1, false
 }
 
@@ -72,7 +76,9 @@ func isKeyArray(key string) bool {
 			return true
 		}
 	}
+
 	logrus.WithField("Key", key).Debug("Unsupported array key")
+
 	return false
 }
 
@@ -83,27 +89,31 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 	prop := "="
 	arrayProp := ":"
 
-	scanner := bufio.NewScanner(bufio.NewReader(i))
 	var instance string
 
+	scanner := bufio.NewScanner(bufio.NewReader(i))
 	key := ""
 	val := ""
+
 	for scanner.Scan() {
 		l := scanner.Text()
-		if strings.HasPrefix(l, " "+sep) && strings.Contains(l, prop) {
+
+		switch {
+		case strings.HasPrefix(l, " "+sep) && strings.Contains(l, prop):
 			s := strings.Split(strings.TrimSpace(l), prop)
 			instance = strings.TrimSpace(s[1])
 			data[instance] = &VRRPData{IName: instance}
-		} else if strings.HasPrefix(l, "   ") && instance != "" {
+		case strings.HasPrefix(l, "   ") && instance != "":
 			if strings.HasPrefix(l, "     ") {
 				val = strings.TrimSpace(l)
 			} else {
 				var args []string
-				if strings.Contains(l, prop) {
+				switch {
+				case strings.Contains(l, prop):
 					args = strings.Split(strings.TrimSpace(l), prop)
-				} else if strings.Contains(l, arrayProp) {
+				case strings.Contains(l, arrayProp):
 					args = strings.Split(strings.TrimSpace(l), arrayProp)
-				} else {
+				default:
 					continue
 				}
 
@@ -113,9 +123,11 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 				}
 				val = strings.TrimSpace(args[1])
 			}
+
 			if (strings.HasPrefix(key, "Virtual IP (") || key == "Virtual IP") && val != "" {
 				data[instance].addVIP(val)
 			}
+
 			switch key {
 			case "State":
 				if err := data[instance].setState(val); err != nil {
@@ -136,10 +148,10 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 					return data, err
 				}
 			}
-		} else if strings.HasPrefix(l, " VRRP Version") || strings.HasPrefix(l, " VRRP Script") {
+		case strings.HasPrefix(l, " VRRP Version") || strings.HasPrefix(l, " VRRP Script"):
 			// Seen in version <= 1.3.5
 			continue
-		} else {
+		default:
 			instance = ""
 		}
 	}
@@ -158,7 +170,9 @@ func ParseVRRPScript(i io.Reader) []VRRPScript {
 
 	for scanner.Scan() {
 		l := scanner.Text()
-		if strings.HasPrefix(l, " "+sep) && strings.Contains(l, prop) {
+
+		switch {
+		case strings.HasPrefix(l, " "+sep) && strings.Contains(l, prop):
 			if script.Name != "" {
 				scripts = append(scripts, script)
 				script = VRRPScript{}
@@ -166,20 +180,22 @@ func ParseVRRPScript(i io.Reader) []VRRPScript {
 
 			s := strings.Split(strings.TrimSpace(l), prop)
 			script.Name = strings.TrimSpace(s[1])
-		} else if strings.HasPrefix(l, "   ") && script.Name != "" {
+		case strings.HasPrefix(l, "   ") && script.Name != "":
 			if !strings.Contains(l, prop) {
 				continue
 			}
+
 			s := strings.Split(strings.TrimSpace(l), prop)
 			key := strings.TrimSpace(s[0])
 			val := strings.TrimSpace(s[1])
+
 			switch key {
 			case "Status":
 				script.Status = val
 			case "State":
 				script.State = val
 			}
-		} else if !strings.HasPrefix(l, "    ") {
+		case !strings.HasPrefix(l, "    "):
 			if script.Name != "" {
 				scripts = append(scripts, script)
 				script = VRRPScript{}
@@ -206,14 +222,16 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 
 	for scanner.Scan() {
 		l := scanner.Text()
-		if strings.HasPrefix(l, sep) && strings.Contains(l, prop) {
+
+		switch {
+		case strings.HasPrefix(l, sep) && strings.Contains(l, prop):
 			sp := strings.Split(strings.TrimSpace(l), prop)
 			instance = strings.TrimSpace(sp[1])
 			stats[instance] = &VRRPStats{}
-		} else if strings.HasPrefix(l, "  ") && strings.HasSuffix(l, prop) {
+		case strings.HasPrefix(l, "  ") && strings.HasSuffix(l, prop):
 			sp := strings.Split(strings.TrimSpace(l), prop)
 			section = strings.TrimSpace(sp[0])
-		} else if strings.HasPrefix(l, "    ") && section != "" {
+		case strings.HasPrefix(l, "    ") && section != "":
 			sp := strings.Split(strings.TrimSpace(l), prop)
 			key := strings.TrimSpace(sp[0])
 			val := strings.TrimSpace(sp[1])
@@ -221,6 +239,7 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 			value, err := strconv.Atoi(val)
 			if err != nil {
 				logrus.WithFields(logrus.Fields{"key": key, "val": val}).WithError(err).Error("Unknown metric value from keepalived.stats")
+
 				return stats, err
 			}
 
@@ -262,7 +281,7 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 					stats[instance].PRIZeroSent = value
 				}
 			}
-		} else if strings.HasPrefix(l, "  ") && !strings.HasSuffix(l, prop) && !strings.HasPrefix(l, "    ") {
+		case strings.HasPrefix(l, "  ") && !strings.HasSuffix(l, prop) && !strings.HasPrefix(l, "    "):
 			sp := strings.Split(strings.TrimSpace(l), prop)
 			key := strings.TrimSpace(sp[0])
 			val := strings.TrimSpace(sp[1])
@@ -271,6 +290,7 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 			value, err := strconv.Atoi(val)
 			if err != nil {
 				logrus.WithFields(logrus.Fields{"key": key, "val": val}).WithError(err).Error("Unknown metric value from keepalived.stats")
+
 				return stats, err
 			}
 
@@ -290,6 +310,7 @@ func ParseVIP(vip string) (string, string, bool) {
 	args := strings.Split(vip, " ")
 	if len(args) < 3 {
 		logrus.WithField("VIP", vip).Error("Failed to parse VIP from keepalived data")
+
 		return "", "", false
 	}
 

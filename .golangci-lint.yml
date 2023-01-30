@@ -12,13 +12,8 @@ linters:
     - funlen
     - gocognit
     - gocyclo
-    - gocritic  # FIXME
+    - testpackage
     - nestif  # FIXME
-    - wsl  # FIXME
-    - testpackage  # FIXME
-    - paralleltest  # FIXME
-    - nlreturn  # FIXME
-    - ifshort  # FIXME
     - gomnd  # FIXME
 
 linters-settings:

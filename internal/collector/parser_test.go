@@ -7,69 +7,70 @@ import (
 )
 
 func TestGetIntStatus(t *testing.T) {
+	t.Parallel()
+
 	acceptableStatuses := []string{"BAD", "GOOD"}
 	script := VRRPScript{}
 
 	for expected, status := range acceptableStatuses {
 		script.Status = status
-		result, ok := script.getIntStatus()
-		if !ok || result != expected {
+		if result, ok := script.getIntStatus(); !ok || result != expected {
 			t.Fail()
 		}
 	}
 
 	script.Status = "NOTGOOD"
-	result, ok := script.getIntStatus()
-	if ok || result != -1 {
+	if result, ok := script.getIntStatus(); ok || result != -1 {
 		t.Fail()
 	}
 }
 
 func TestGetIntState(t *testing.T) {
+	t.Parallel()
+
 	acceptableStates := []string{"idle", "running", "requested termination", "forcing termination"}
 	script := VRRPScript{}
 
 	for expected, state := range acceptableStates {
 		script.State = state
-		result, ok := script.getIntState()
-		if !ok || result != expected {
+		if result, ok := script.getIntState(); !ok || result != expected {
 			t.Fail()
 		}
 	}
 
 	script.State = "NOTGOOD"
-	result, ok := script.getIntState()
-	if ok || result != -1 {
+	if result, ok := script.getIntState(); ok || result != -1 {
 		t.Fail()
 	}
 }
 
 func TestGetStringState(t *testing.T) {
+	t.Parallel()
+
 	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 	data := VRRPData{}
 
 	for state, expected := range acceptableStates {
 		data.State = state
-		result, ok := data.getStringState()
-		if !ok || result != expected {
+		if result, ok := data.getStringState(); !ok || result != expected {
 			t.Fail()
 		}
 	}
 
 	data.State = -1
-	result, ok := data.getStringState()
-	if ok || result != "" {
+	if result, ok := data.getStringState(); ok || result != "" {
 		t.Fail()
 	}
 
 	data.State = len(acceptableStates)
-	result, ok = data.getStringState()
-	if ok || result != "" {
+	if result, ok := data.getStringState(); ok || result != "" {
 		t.Fail()
 	}
 }
 
 func TestVRRPDataStringToIntState(t *testing.T) {
+	t.Parallel()
+
 	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
 
 	for expected, state := range acceptableStates {
@@ -86,6 +87,8 @@ func TestVRRPDataStringToIntState(t *testing.T) {
 }
 
 func TestV215ParseVRRPData(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.1.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -132,15 +135,16 @@ func TestV215ParseVRRPData(t *testing.T) {
 	}
 
 	for _, data := range vrrpData {
-		if data.IName == "VI_EXT_1" {
+		switch data.IName {
+		case "VI_EXT_1":
 			if !reflect.DeepEqual(*data, viExt1) {
 				t.Fail()
 			}
-		} else if data.IName == "VI_EXT_2" {
+		case "VI_EXT_2":
 			if !reflect.DeepEqual(*data, viExt2) {
 				t.Fail()
 			}
-		} else if data.IName == "VI_EXT_3" {
+		case "VI_EXT_3":
 			if !reflect.DeepEqual(*data, viExt3) {
 				t.Fail()
 			}
@@ -149,6 +153,8 @@ func TestV215ParseVRRPData(t *testing.T) {
 }
 
 func TestV2010ParseVRRPData(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.0.10/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -188,6 +194,8 @@ func TestV2010ParseVRRPData(t *testing.T) {
 }
 
 func TestV215ParseVRRPScript(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.0.10/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -205,9 +213,11 @@ func TestV215ParseVRRPScript(t *testing.T) {
 		if script.Name != "chk_service" {
 			t.Fail()
 		}
+
 		if script.Status != "GOOD" {
 			t.Fail()
 		}
+
 		if script.State != "idle" {
 			t.Fail()
 		}
@@ -215,6 +225,8 @@ func TestV215ParseVRRPScript(t *testing.T) {
 }
 
 func TestV2010ParseVRRPScript(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.1.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -232,9 +244,11 @@ func TestV2010ParseVRRPScript(t *testing.T) {
 		if script.Name != "check_script" {
 			t.Fail()
 		}
+
 		if script.Status != "GOOD" {
 			t.Fail()
 		}
+
 		if script.State != "idle" {
 			t.Fail()
 		}
@@ -242,6 +256,8 @@ func TestV2010ParseVRRPScript(t *testing.T) {
 }
 
 func TestV215ParseStats(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.1.5/keepalived.stats")
 	if err != nil {
 		t.Log(err)
@@ -324,6 +340,8 @@ func TestV215ParseStats(t *testing.T) {
 }
 
 func TestV135ParseVRRPData(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v1.3.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -363,6 +381,8 @@ func TestV135ParseVRRPData(t *testing.T) {
 }
 
 func TestV135ParseVRRPScript(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v1.3.5/keepalived.data")
 	if err != nil {
 		t.Log(err)
@@ -380,9 +400,11 @@ func TestV135ParseVRRPScript(t *testing.T) {
 		if script.Name != "check_haproxy" {
 			t.Fail()
 		}
+
 		if script.Status != "BAD" {
 			t.Fail()
 		}
+
 		if script.State != "" {
 			t.Fail()
 		}
@@ -390,6 +412,8 @@ func TestV135ParseVRRPScript(t *testing.T) {
 }
 
 func TestV135ParseStats(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v1.3.5/keepalived.stats")
 	if err != nil {
 		t.Log(err)
@@ -429,6 +453,8 @@ func TestV135ParseStats(t *testing.T) {
 }
 
 func TestParseVIP(t *testing.T) {
+	t.Parallel()
+
 	vips := []string{"192.168.2.2 dev ens192 scope global", "192.168.2.2 dev ens192 scope global set"}
 	excpectedIP := "192.168.2.2"
 	excpectedIntf := "ens192"
@@ -447,13 +473,14 @@ func TestParseVIP(t *testing.T) {
 	}
 
 	badVIP := "192.168.2.2 dev"
-	ip, intf, ok := ParseVIP(badVIP)
-	if ok || ip != "" || intf != "" {
+	if ip, intf, ok := ParseVIP(badVIP); ok || ip != "" || intf != "" {
 		t.Fail()
 	}
 }
 
 func TestIsKeyArray(t *testing.T) {
+	t.Parallel()
+
 	supportedKeys := []string{"Virtual IP"}
 
 	for _, key := range supportedKeys {
@@ -462,13 +489,14 @@ func TestIsKeyArray(t *testing.T) {
 		}
 	}
 
-	notArrayKey := "NoArray"
-	if isKeyArray(notArrayKey) {
+	if notArrayKey := "NoArray"; isKeyArray(notArrayKey) {
 		t.Fail()
 	}
 }
 
 func TestV227ParseVRRPData(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("../../test_files/v2.2.7/keepalived.data")
 	if err != nil {
 		t.Log(err)

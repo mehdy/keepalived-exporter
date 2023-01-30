@@ -7,6 +7,8 @@ import (
 )
 
 func TestParseVersion(t *testing.T) {
+	t.Parallel()
+
 	versionOutput := `Keepalived v2.0.20 (05/04,2020), git commit v20200428-362-g114364588e
 
 	Copyright(C) 2001-2020 Alexandre Cassen, <acassen@gmail.com>
@@ -21,17 +23,18 @@ func TestParseVersion(t *testing.T) {
 	System options:  PIPE2 SIGNALFD INOTIFY_INIT1 VSYSLOG EPOLL_CREATE1 IPV4_DEVCONF IPV6_ADVANCED_API LIBNL1 RTA_ENCAP RTA_EXPIRES RTA_NEWDST RTA_PREF FRA_SUPPRESS_PREFIXLEN FRA_SUPPRESS_IFGROUP FRA_TUN_ID RTAX_CC_ALGO RTAX_QUICKACK RTEXT_FILTER_SKIP_STATS FRA_L3MDEV FRA_UID_RANGE RTAX_FASTOPEN_NO_COOKIE RTA_VIA FRA_OIFNAME FRA_PROTOCOL FRA_IP_PROTO FRA_SPORT_RANGE FRA_DPORT_RANGE RTA_TTL_PROPAGATE IFA_FLAGS IP_MULTICAST_ALL LWTUNNEL_ENCAP_MPLS LWTUNNEL_ENCAP_ILA NET_LINUX_IF_H_COLLISION NETINET_LINUX_IF_ETHER_H_COLLISION LIBIPTC_LINUX_NET_IF_H_COLLISION LIBIPVS_NETLINK IPVS_DEST_ATTR_ADDR_FAMILY IPVS_SYNCD_ATTRIBUTES IPVS_64BIT_STATS IPVS_TUN_TYPE IPVS_TUN_CSUM IPVS_TUN_GRE VRRP_VMAC VRRP_IPVLAN IFLA_LINK_NETNSID CN_PROC SOCK_NONBLOCK SOCK_CLOEXEC O_PATH INET6_ADDR_GEN_MODE VRF SO_MARK SCHED_RESET_ON_FORK
 	`
 	excpectedVersion := version.Must(version.NewVersion("2.0.20"))
+
 	v, err := ParseVersion(versionOutput)
 	if err != nil {
 		t.Fail()
 	}
+
 	if v.Compare(excpectedVersion) != 0 {
 		t.Fail()
 	}
 
 	versionOutput = "Keepalived v2.0.20 (05/04,2020), git commit v20200428-362-g114364588e"
-	_, err = ParseVersion(versionOutput)
-	if err == nil {
+	if _, err := ParseVersion(versionOutput); err == nil {
 		t.Fail()
 	}
 
@@ -39,8 +42,7 @@ func TestParseVersion(t *testing.T) {
 
 	Copyright(C) 2001-2020 Alexandre Cassen, <acassen@gmail.com>
 	`
-	_, err = ParseVersion(versionOutput)
-	if err == nil {
+	if _, err := ParseVersion(versionOutput); err == nil {
 		t.Fail()
 	}
 
@@ -48,8 +50,7 @@ func TestParseVersion(t *testing.T) {
 
 	Copyright(C) 2001-2020 Alexandre Cassen, <acassen@gmail.com>
 	`
-	_, err = ParseVersion(versionOutput)
-	if err == nil {
+	if _, err := ParseVersion(versionOutput); err == nil {
 		t.Fail()
 	}
 }

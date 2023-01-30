@@ -7,12 +7,15 @@ import (
 )
 
 func TestNewConstMetric(t *testing.T) {
+	t.Parallel()
+
 	k := &KeepalivedCollector{}
 	k.fillMetrics()
 
 	for metric := range k.metrics {
-		pm := make(chan prometheus.Metric, 1)
 		var valueType prometheus.ValueType
+
+		pm := make(chan prometheus.Metric, 1)
 		labelValues := []string{"iname", "intf", "vrid", "state"}
 
 		switch metric {
@@ -49,6 +52,8 @@ func TestNewConstMetric(t *testing.T) {
 }
 
 func TestFillMetrics(t *testing.T) {
+	t.Parallel()
+
 	k := &KeepalivedCollector{}
 	k.fillMetrics()
 

@@ -7,39 +7,50 @@ import (
 )
 
 func TestInitPaths(t *testing.T) {
+	t.Parallel()
+
 	k := KeepalivedContainerCollectorHost{}
 	k.initPaths("/custom-tmp")
 
 	if k.jsonPath != "/custom-tmp/keepalived.json" {
 		t.Fail()
 	}
+
 	if k.statsPath != "/custom-tmp/keepalived.stats" {
 		t.Fail()
 	}
+
 	if k.dataPath != "/custom-tmp/keepalived.data" {
 		t.Fail()
 	}
 }
 
 func TestHasVRRPScriptStateSupport(t *testing.T) {
-	notSupportingVersion := version.Must(version.NewVersion("1.3.5"))
-	c := KeepalivedContainerCollectorHost{
-		version: notSupportingVersion,
-	}
-	if c.HasVRRPScriptStateSupport() {
-		t.Fail()
+	t.Parallel()
+
+	testCaseses := []struct {
+		name            string
+		version         *version.Version
+		expectedSupport bool
+	}{
+		{name: "nil", version: nil, expectedSupport: true},
+		{name: "1.4.0", version: version.Must(version.NewVersion("1.4.0")), expectedSupport: true},
+		{name: "1.3.5", version: version.Must(version.NewVersion("1.3.5")), expectedSupport: false},
 	}
 
-	supportingVersion := version.Must(version.NewVersion("1.4.0"))
-	c = KeepalivedContainerCollectorHost{
-		version: supportingVersion,
-	}
-	if !c.HasVRRPScriptStateSupport() {
-		t.Fail()
-	}
+	for _, tc := range testCaseses {
+		tc := tc
 
-	c = KeepalivedContainerCollectorHost{}
-	if !c.HasVRRPScriptStateSupport() {
-		t.Fail()
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			c := KeepalivedContainerCollectorHost{
+				version: tc.version,
+			}
+
+			if c.HasVRRPScriptStateSupport() != tc.expectedSupport {
+				t.Fail()
+			}
+		})
 	}
 }

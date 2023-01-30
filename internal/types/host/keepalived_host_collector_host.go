@@ -35,8 +35,7 @@ func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHos
 	}
 
 	var err error
-	k.version, err = k.getKeepalivedVersion()
-	if err != nil {
+	if k.version, err = k.getKeepalivedVersion(); err != nil {
 		logrus.WithError(err).Warn("Version detection failed. Assuming it's the latest one.")
 	}
 
@@ -49,18 +48,22 @@ func (k *KeepalivedHostCollectorHost) initSignals() {
 	if k.useJSON {
 		k.SIGJSON = k.sigNum("JSON")
 	}
+
 	k.SIGDATA = k.sigNum("DATA")
 	k.SIGSTATS = k.sigNum("STATS")
 }
 
 // GetKeepalivedVersion returns Keepalived version.
 func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, error) {
-	cmd := exec.Command("bash", "-c", "keepalived -v")
 	var stdout, stderr bytes.Buffer
+
+	cmd := exec.Command("bash", "-c", "keepalived -v")
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+
 	if err := cmd.Run(); err != nil {
 		logrus.WithFields(logrus.Fields{"stderr": stderr.String(), "stdout": stdout.String()}).WithError(err).Error("Error getting keepalived version")
+
 		return nil, errors.New("error getting keepalived version")
 	}
 
@@ -72,29 +75,34 @@ func (k *KeepalivedHostCollectorHost) signal(signal os.Signal) error {
 	data, err := os.ReadFile(k.pidPath)
 	if err != nil {
 		logrus.WithField("path", k.pidPath).WithError(err).Error("Can't find keepalived")
+
 		return err
 	}
 
 	pid, err := strconv.Atoi(strings.TrimSuffix(string(data), "\n"))
 	if err != nil {
 		logrus.WithField("path", k.pidPath).WithError(err).Error("Unknown pid found for keepalived")
+
 		return err
 	}
 
 	proc, err := os.FindProcess(pid)
 	if err != nil {
 		logrus.WithField("pid", pid).WithError(err).Error("Failed to find process")
+
 		return err
 	}
 
 	err = proc.Signal(signal)
 	if err != nil {
 		logrus.WithField("pid", pid).WithError(err).Error("Failed to send signal")
+
 		return err
 	}
 
 	// Wait 10ms for Keepalived to create its files
 	time.Sleep(10 * time.Millisecond)
+
 	return nil
 }
 
@@ -104,11 +112,13 @@ func (k *KeepalivedHostCollectorHost) sigNum(sigString string) syscall.Signal {
 		return utils.GetDefaultSignal(sigString)
 	}
 
+	var stdout, stderr bytes.Buffer
+
 	sigNumCommand := "keepalived --signum=" + sigString
 	cmd := exec.Command("bash", "-c", sigNumCommand)
-	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+
 	if err := cmd.Run(); err != nil {
 		logrus.WithFields(logrus.Fields{"signal": sigString, "stderr": stderr.String()}).WithError(err).Fatal("Error getting signum")
 	}
@@ -117,15 +127,16 @@ func (k *KeepalivedHostCollectorHost) sigNum(sigString string) syscall.Signal {
 }
 
 func (k *KeepalivedHostCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
-	err := k.signal(k.SIGJSON)
-	if err != nil {
+	if err := k.signal(k.SIGJSON); err != nil {
 		logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
+
 		return nil, err
 	}
 
 	f, err := os.Open("/tmp/keepalived.json")
 	if err != nil {
 		logrus.WithError(err).Error("Failed to open /tmp/keepalived.json")
+
 		return nil, err
 	}
 	defer f.Close()
@@ -134,15 +145,16 @@ func (k *KeepalivedHostCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
 }
 
 func (k *KeepalivedHostCollectorHost) StatsVrrps() (map[string]*collector.VRRPStats, error) {
-	err := k.signal(k.SIGSTATS)
-	if err != nil {
+	if err := k.signal(k.SIGSTATS); err != nil {
 		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
+
 		return nil, err
 	}
 
 	f, err := os.Open("/tmp/keepalived.stats")
 	if err != nil {
 		logrus.WithError(err).Error("Failed to open /tmp/keepalived.stats")
+
 		return nil, err
 	}
 	defer f.Close()
@@ -151,15 +163,16 @@ func (k *KeepalivedHostCollectorHost) StatsVrrps() (map[string]*collector.VRRPSt
 }
 
 func (k *KeepalivedHostCollectorHost) DataVrrps() (map[string]*collector.VRRPData, error) {
-	err := k.signal(k.SIGDATA)
-	if err != nil {
+	if err := k.signal(k.SIGDATA); err != nil {
 		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
+
 		return nil, err
 	}
 
 	f, err := os.Open("/tmp/keepalived.data")
 	if err != nil {
 		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
+
 		return nil, err
 	}
 	defer f.Close()
@@ -171,6 +184,7 @@ func (k *KeepalivedHostCollectorHost) ScriptVrrps() ([]collector.VRRPScript, err
 	f, err := os.Open("/tmp/keepalived.data")
 	if err != nil {
 		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
+
 		return nil, err
 	}
 	defer f.Close()
