@@ -6,14 +6,16 @@ WORKDIR /build
 
 RUN apk add --no-cache make git bash
 
-ADD . .
+ADD go.mod .
+ADD go.sum .
+ADD Makefile .
+RUN make dep
 
+ADD . .
 RUN make build
 
 FROM alpine:3.17
 
-COPY --from=builder /build/keepalived-exporter . 
+COPY --from=builder /build/keepalived-exporter /bin/keepalived-exporter
 
-EXPOSE 9165
-
-ENTRYPOINT [ "./keepalived-exporter" ]
+ENTRYPOINT [ "/bin/keepalived-exporter" ]

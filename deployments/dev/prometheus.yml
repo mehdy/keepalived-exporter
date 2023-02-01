@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "keepalived-exporter"
+    static_configs:
+      - targets:
+          - keepalived-exporter:9165
