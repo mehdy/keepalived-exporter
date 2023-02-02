@@ -15,25 +15,22 @@ services:
 
   keepalived-exporter:
     build: .
+    entrypoint: /entrypoint.sh
     environment:
       - COMPOSE_PROJECT_NAME
-    command:
-      - --container-name
-      - ${COMPOSE_PROJECT_NAME}-keepalived-1
-      - --container-tmp-dir
-      - /tmp/keepalived-tmp/
-      - --cs
-      - /keepalived-exporter-cs.sh
     volumes:
-      - keepalived_data:/tmp/keepalived-tmp/:ro
+      - ./deployments/dev/entrypoint.sh:/entrypoint.sh
       - ./deployments/dev/keepalived-exporter-cs.sh:/keepalived-exporter-cs.sh
+      - keepalived_data:/tmp/keepalived-tmp/:ro
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - 9165:9165
+      - 9165-9166:9165
     networks:
       - keepalived
     depends_on:
       - keepalived
+    deploy:
+      replicas: 2
 
   prometheus:
     image: quay.io/prometheus/prometheus:latest

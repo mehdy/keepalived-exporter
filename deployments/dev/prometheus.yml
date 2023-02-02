@@ -4,6 +4,8 @@ global:
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: "keepalived-exporter"
-    static_configs:
-      - targets:
-          - keepalived-exporter:9165
+    dns_sd_configs:
+      - names:
+          - keepalived-exporter
+        type: A
+        port: 9165
