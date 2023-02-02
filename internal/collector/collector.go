@@ -126,28 +126,21 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	for _, vrrp := range keepalivedStats.VRRPs {
-		state := ""
-		ok := false
-
-		if state, ok = vrrp.Data.getStringState(); !ok {
-			logrus.WithField("state", vrrp.Data.State).Warn("Unknown State found for vrrp: ", vrrp.Data.IName)
-		}
-
-		k.newConstMetric(ch, "keepalived_advertisements_received_total", prometheus.CounterValue, float64(vrrp.Stats.AdvertRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_advertisements_sent_total", prometheus.CounterValue, float64(vrrp.Stats.AdvertSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_become_master_total", prometheus.CounterValue, float64(vrrp.Stats.BecomeMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_release_master_total", prometheus.CounterValue, float64(vrrp.Stats.ReleaseMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_packet_length_errors_total", prometheus.CounterValue, float64(vrrp.Stats.PacketLenErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_advertisements_interval_errors_total", prometheus.CounterValue, float64(vrrp.Stats.AdvertIntervalErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_ip_ttl_errors_total", prometheus.CounterValue, float64(vrrp.Stats.IPTTLErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_invalid_type_received_total", prometheus.CounterValue, float64(vrrp.Stats.InvalidTypeRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_address_list_errors_total", prometheus.CounterValue, float64(vrrp.Stats.AddrListErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_authentication_invalid_total", prometheus.CounterValue, float64(vrrp.Stats.InvalidAuthType), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_authentication_mismatch_total", prometheus.CounterValue, float64(vrrp.Stats.AuthTypeMismatch), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_authentication_failure_total", prometheus.CounterValue, float64(vrrp.Stats.AuthFailure), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_priority_zero_received_total", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_priority_zero_sent_total", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
-		k.newConstMetric(ch, "keepalived_gratuitous_arp_delay_total", prometheus.CounterValue, float64(vrrp.Data.GArpDelay), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), state)
+		k.newConstMetric(ch, "keepalived_advertisements_received_total", prometheus.CounterValue, float64(vrrp.Stats.AdvertRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_advertisements_sent_total", prometheus.CounterValue, float64(vrrp.Stats.AdvertSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_become_master_total", prometheus.CounterValue, float64(vrrp.Stats.BecomeMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_release_master_total", prometheus.CounterValue, float64(vrrp.Stats.ReleaseMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_packet_length_errors_total", prometheus.CounterValue, float64(vrrp.Stats.PacketLenErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_advertisements_interval_errors_total", prometheus.CounterValue, float64(vrrp.Stats.AdvertIntervalErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_ip_ttl_errors_total", prometheus.CounterValue, float64(vrrp.Stats.IPTTLErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_invalid_type_received_total", prometheus.CounterValue, float64(vrrp.Stats.InvalidTypeRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_address_list_errors_total", prometheus.CounterValue, float64(vrrp.Stats.AddrListErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_authentication_invalid_total", prometheus.CounterValue, float64(vrrp.Stats.InvalidAuthType), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_authentication_mismatch_total", prometheus.CounterValue, float64(vrrp.Stats.AuthTypeMismatch), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_authentication_failure_total", prometheus.CounterValue, float64(vrrp.Stats.AuthFailure), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_priority_zero_received_total", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_priority_zero_sent_total", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(ch, "keepalived_gratuitous_arp_delay_total", prometheus.CounterValue, float64(vrrp.Data.GArpDelay), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
 
 		for _, ip := range vrrp.Data.VIPs {
 			ipAddr, intf, ok := ParseVIP(ip)
@@ -262,7 +255,7 @@ func (k *KeepalivedCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (k *KeepalivedCollector) fillMetrics() {
-	commonLabels := []string{"iname", "intf", "vrid", "state"}
+	commonLabels := []string{"iname", "intf", "vrid"}
 	k.metrics = map[string]*prometheus.Desc{
 		"keepalived_up":                                   prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state":                           prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),

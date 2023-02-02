@@ -44,30 +44,6 @@ func TestGetIntState(t *testing.T) {
 	}
 }
 
-func TestGetStringState(t *testing.T) {
-	t.Parallel()
-
-	acceptableStates := []string{"INIT", "BACKUP", "MASTER", "FAULT"}
-	data := VRRPData{}
-
-	for state, expected := range acceptableStates {
-		data.State = state
-		if result, ok := data.getStringState(); !ok || result != expected {
-			t.Fail()
-		}
-	}
-
-	data.State = -1
-	if result, ok := data.getStringState(); ok || result != "" {
-		t.Fail()
-	}
-
-	data.State = len(acceptableStates)
-	if result, ok := data.getStringState(); ok || result != "" {
-		t.Fail()
-	}
-}
-
 func TestVRRPDataStringToIntState(t *testing.T) {
 	t.Parallel()
 
