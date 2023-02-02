@@ -39,14 +39,6 @@ func (v *VRRPScript) getIntState() (int, bool) {
 	return -1, false
 }
 
-func (v *VRRPData) getStringState() (string, bool) {
-	if v.State < len(VRRPStates) && v.State >= 0 {
-		return VRRPStates[v.State], true
-	}
-
-	return "", false
-}
-
 func vrrpDataStringToIntState(state string) (int, bool) {
 	for i, s := range VRRPStates {
 		if s == state {
