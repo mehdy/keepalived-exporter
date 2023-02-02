@@ -1,0 +1,69 @@
+version: '3'
+
+services:
+  keepalived:
+    build:
+      context: ./deployments/dev/
+      dockerfile: keepalived.Dockerfile
+    volumes:
+      - ./deployments/dev/keepalived.conf:/etc/keepalived/keepalived.conf
+      - keepalived_data:/tmp/
+    networks:
+      - keepalived
+    deploy:
+      replicas: 2
+
+  keepalived-exporter:
+    build: .
+    entrypoint: /entrypoint.sh
+    environment:
+      - COMPOSE_PROJECT_NAME
+    volumes:
+      - ./deployments/dev/entrypoint.sh:/entrypoint.sh
+      - ./deployments/dev/keepalived-exporter-cs.sh:/keepalived-exporter-cs.sh
+      - keepalived_data:/tmp/keepalived-tmp/:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 9165-9166:9165
+    networks:
+      - keepalived
+    depends_on:
+      - keepalived
+    deploy:
+      replicas: 2
+
+  prometheus:
+    image: quay.io/prometheus/prometheus:latest
+    volumes:
+      - ./deployments/dev/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    networks:
+      - keepalived
+    depends_on:
+      - keepalived-exporter
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./deployments/dev/grafana/datasources/:/etc/grafana/provisioning/datasources/
+      - ./deployments/dev/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./grafana/dashboards/keepalived-exporter.json:/etc/grafana/provisioning/dashboards/keepalived-exporter.json
+    networks:
+      - keepalived
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+
+volumes:
+  keepalived_data:
+
+networks:
+  keepalived:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24

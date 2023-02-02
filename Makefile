@@ -22,7 +22,7 @@ RELEASE_FILENAME := $(PROJECT_NAME)-$(VERSION).linux-$(ARCH)
 
 .PHONY: all dep lint build clean
 
-all: build
+all: dep build
 
 dep: ## Get the dependencies
 	@go mod tidy
