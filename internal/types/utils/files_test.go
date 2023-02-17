@@ -15,18 +15,22 @@ func TestOpenFileWithRetry(t *testing.T) {
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 
-		_ = os.WriteFile(fileName, []byte(testBody), 0666)
+		_ = os.WriteFile(fileName, []byte(testBody), 0o600)
 	}()
 
 	f, err := OpenFileWithRetry(fileName, 50*time.Millisecond, 2*time.Second)
 	if err != nil {
+		t.Fail()
 	}
-	defer f.Close()
+
+	defer func() {
+		_ = f.Close()
+
+		_ = os.Remove(fileName)
+	}()
 
 	body := make([]byte, 19)
 	_, _ = f.Read(body)
-
-	_ = os.Remove(fileName)
 
 	if string(body) != testBody {
 		t.Fail()
