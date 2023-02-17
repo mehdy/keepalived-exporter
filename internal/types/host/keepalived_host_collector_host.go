@@ -133,9 +133,11 @@ func (k *KeepalivedHostCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
 		return nil, err
 	}
 
-	f, err := os.Open("/tmp/keepalived.json")
+	fileName := "/tmp/keepalived.json"
+
+	f, err := utils.OpenFileWithRetry(fileName, 50*time.Millisecond, 2*time.Second)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.json")
+		logrus.WithError(err).Errorf("Failed to open %v", fileName)
 
 		return nil, err
 	}
@@ -151,9 +153,11 @@ func (k *KeepalivedHostCollectorHost) StatsVrrps() (map[string]*collector.VRRPSt
 		return nil, err
 	}
 
-	f, err := os.Open("/tmp/keepalived.stats")
+	fileName := "/tmp/keepalived.stats"
+
+	f, err := utils.OpenFileWithRetry(fileName, 50*time.Millisecond, 2*time.Second)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.stats")
+		logrus.WithError(err).Errorf("Failed to open %v", fileName)
 
 		return nil, err
 	}
@@ -169,9 +173,11 @@ func (k *KeepalivedHostCollectorHost) DataVrrps() (map[string]*collector.VRRPDat
 		return nil, err
 	}
 
-	f, err := os.Open("/tmp/keepalived.data")
+	fileName := "/tmp/keepalived.data"
+
+	f, err := utils.OpenFileWithRetry(fileName, 50*time.Millisecond, 2*time.Second)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
+		logrus.WithError(err).Errorf("Failed to open %v", fileName)
 
 		return nil, err
 	}
@@ -181,9 +187,11 @@ func (k *KeepalivedHostCollectorHost) DataVrrps() (map[string]*collector.VRRPDat
 }
 
 func (k *KeepalivedHostCollectorHost) ScriptVrrps() ([]collector.VRRPScript, error) {
-	f, err := os.Open("/tmp/keepalived.data")
+	fileName := "/tmp/keepalived.data"
+
+	f, err := utils.OpenFileWithRetry(fileName, 50*time.Millisecond, 2*time.Second)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to open /tmp/keepalived.data")
+		logrus.WithError(err).Errorf("Failed to open %v", fileName)
 
 		return nil, err
 	}
