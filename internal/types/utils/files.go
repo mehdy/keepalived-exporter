@@ -3,30 +3,20 @@ package utils
 import (
 	"os"
 	"time"
+
+	"github.com/cenkalti/backoff/v4"
 )
 
 // OpenFileWithRetry used to open a file if it didn't exist and retry until the max waiting time.
-func OpenFileWithRetry(fileName string, firstTryTime, maxWaitTime time.Duration) (*os.File, error) {
-	waitTime := firstTryTime
-	startTime := time.Now()
-
-	for time.Since(startTime) < maxWaitTime {
-		file, err := os.Open(fileName)
-		if err == nil {
-			return file, nil
-		}
-
-		if !os.IsNotExist(err) {
-			return nil, err
-		}
-
-		time.Sleep(waitTime)
-
-		waitTime *= 2
-		if waitTime >= maxWaitTime/2 {
-			waitTime = maxWaitTime / 2
-		}
+func OpenFileWithRetry(fileName string) (*os.File, error) {
+	openFile := func() (*os.File, error) {
+		return os.Open(fileName)
 	}
 
-	return nil, os.ErrNotExist
+	b := backoff.NewExponentialBackOff()
+	b.InitialInterval = 10 * time.Millisecond
+	b.MaxElapsedTime = 2 * time.Second
+	b.Reset()
+
+	return backoff.RetryWithData(openFile, b)
 }

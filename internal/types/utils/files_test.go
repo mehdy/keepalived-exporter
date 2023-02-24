@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"bytes"
+	"io"
 	"os"
+	"path"
 	"testing"
 	"time"
 )
@@ -9,30 +12,23 @@ import (
 func TestOpenFileWithRetry(t *testing.T) {
 	t.Parallel()
 
-	fileName := "/tmp/keepalived-exporter-test.txt"
-	testBody := "keepalived-exporter"
+	fileName := path.Join(t.TempDir(), t.Name())
+	testBody := []byte(t.Name())
 
-	go func() {
+	go func(fileName string, testBody []byte) {
 		time.Sleep(100 * time.Millisecond)
 
-		_ = os.WriteFile(fileName, []byte(testBody), 0o600)
-	}()
+		_ = os.WriteFile(fileName, testBody, 0o600)
+	}(fileName, testBody)
 
-	f, err := OpenFileWithRetry(fileName, 50*time.Millisecond, 2*time.Second)
+	f, err := OpenFileWithRetry(fileName)
 	if err != nil {
 		t.Fail()
 	}
 
-	defer func() {
-		_ = f.Close()
+	defer f.Close()
 
-		_ = os.Remove(fileName)
-	}()
-
-	body := make([]byte, 19)
-	_, _ = f.Read(body)
-
-	if string(body) != testBody {
+	if body, _ := io.ReadAll(f); !bytes.Equal(body, testBody) {
 		t.Fail()
 	}
 }
