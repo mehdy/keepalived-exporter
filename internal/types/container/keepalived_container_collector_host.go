@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strconv"
 	"syscall"
-	"time"
 
 	"github.com/docker/docker/client"
 	"github.com/hashicorp/go-version"
@@ -117,9 +116,6 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 		return err
 	}
 
-	// Wait 10ms for Keepalived to create its files
-	time.Sleep(10 * time.Millisecond)
-
 	return nil
 }
 
@@ -131,7 +127,7 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 		return nil, err
 	}
 
-	f, err := utils.OpenFileWithRetry(k.jsonPath, 50*time.Millisecond, 2*time.Second)
+	f, err := utils.OpenFileWithRetry(k.jsonPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.jsonPath).Error("Failed to open keepalived.json")
 
@@ -150,7 +146,7 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 		return nil, err
 	}
 
-	f, err := utils.OpenFileWithRetry(k.statsPath, 50*time.Millisecond, 2*time.Second)
+	f, err := utils.OpenFileWithRetry(k.statsPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.statsPath).Error("Failed to open keepalived.stats")
 
@@ -169,7 +165,7 @@ func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VR
 		return nil, err
 	}
 
-	f, err := utils.OpenFileWithRetry(k.dataPath, 50*time.Millisecond, 2*time.Second)
+	f, err := utils.OpenFileWithRetry(k.dataPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
 

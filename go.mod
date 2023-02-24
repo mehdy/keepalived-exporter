@@ -3,7 +3,8 @@ module github.com/mehdy/keepalived-exporter
 go 1.19
 
 require (
-	github.com/docker/docker v20.10.23+incompatible
+	github.com/cenkalti/backoff/v4 v4.2.0
+	github.com/docker/docker v23.0.1+incompatible
 	github.com/hashicorp/go-version v1.6.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/sirupsen/logrus v1.9.0
@@ -27,8 +28,8 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
-	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gotest.tools/v3 v3.4.0 // indirect
 )
