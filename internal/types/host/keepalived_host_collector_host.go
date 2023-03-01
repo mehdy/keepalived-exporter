@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"path/filepath"
 
 	"github.com/hashicorp/go-version"
 	"github.com/mehdy/keepalived-exporter/internal/collector"
@@ -25,6 +26,42 @@ type KeepalivedHostCollectorHost struct {
 	SIGDATA  syscall.Signal
 	SIGSTATS syscall.Signal
 }
+
+func findFileInDir(dirPath string, fileName string) (string, error) {
+    absDirPath, err := filepath.Abs(dirPath)
+    if err != nil {
+        return "", err
+    }
+
+    var result string
+    err = filepath.Walk(absDirPath, func(path string, info os.FileInfo, err error) error {
+        if err != nil {
+            return err
+        }
+
+        if info.IsDir() {
+            return nil
+        }
+
+        if info.Name() == fileName {
+            result = path
+            return filepath.SkipDir
+        }
+
+        return nil
+    })
+
+    if err != nil {
+        return "", err
+    }
+
+    if result == "" {
+	    return "", err
+    }
+
+    return result, nil
+}
+
 
 // NewKeepalivedHostCollectorHost is creating new instance of KeepalivedHostCollectorHost.
 func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHostCollectorHost {
@@ -128,8 +165,7 @@ func (k *KeepalivedHostCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
 
 		return nil, err
 	}
-
-	const fileName = "/tmp/keepalived.json"
+	fileName, err := findFileInDir("/tmp", "keepalived.json")
 
 	f, err := utils.OpenFileWithRetry(fileName)
 	if err != nil {
@@ -149,7 +185,7 @@ func (k *KeepalivedHostCollectorHost) StatsVrrps() (map[string]*collector.VRRPSt
 		return nil, err
 	}
 
-	const fileName = "/tmp/keepalived.stats"
+	fileName, err := findFileInDir("/tmp", "keepalived.stats")
 
 	f, err := utils.OpenFileWithRetry(fileName)
 	if err != nil {
@@ -169,7 +205,7 @@ func (k *KeepalivedHostCollectorHost) DataVrrps() (map[string]*collector.VRRPDat
 		return nil, err
 	}
 
-	const fileName = "/tmp/keepalived.data"
+	fileName, err := findFileInDir("/tmp", "keepalived.data")
 
 	f, err := utils.OpenFileWithRetry(fileName)
 	if err != nil {
@@ -183,7 +219,7 @@ func (k *KeepalivedHostCollectorHost) DataVrrps() (map[string]*collector.VRRPDat
 }
 
 func (k *KeepalivedHostCollectorHost) ScriptVrrps() ([]collector.VRRPScript, error) {
-	const fileName = "/tmp/keepalived.data"
+	fileName, err := findFileInDir("/tmp", "keepalived.data")
 
 	f, err := utils.OpenFileWithRetry(fileName)
 	if err != nil {
