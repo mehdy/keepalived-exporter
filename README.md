@@ -6,10 +6,26 @@ Prometheus exporter for [Keepalived](https://keepalived.org) metrics.
 
 ## Installation
 
-### Binary releases (Recommended)
+### Debian/Ubuntu
+
+Download the latest release from [here](https://github.com/mehdy/keepalived-exporter/releases) and install it using dpkg
 
 ```bash
-export VERSION=1.0.0
+dpkg -i keepalived-exporter-downloaded-pkg.deb
+```
+
+### RedHat/CentOS
+
+Download the latest release from [here](https://github.com/mehdy/keepalived-exporter/releases) and install it using rpm
+
+```bash
+rpm -i keepalived-exporter-downloaded-pkg.rpm
+```
+
+### Binary releases
+
+```bash
+export VERSION=1.3.0
 wget https://github.com/mehdy/keepalived-exporter/releases/download/v${VERSION}/keepalived-exporter-${VERSION}.linux-amd64.tar.gz
 tar xvzf keepalived-exporter-${VERSION}.linux-amd64.tar.gz keepalived-exporter-${VERSION}.linux-amd64/keepalived-exporter
 sudo mv keepalived-exporter-${VERSION}.linux-amd64/keepalived-exporter /usr/local/bin/
