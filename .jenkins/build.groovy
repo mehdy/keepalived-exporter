@@ -45,7 +45,7 @@ pipeline {
                     stage('deploy to jenkins') {
                         steps {
                             sh '''
-                                ls -la
+                                tar cvfz keepalived-exporter.tar.gz keepalived-exporter
                             '''
 
                             archiveArtifacts artifacts: '*.tar.gz',
