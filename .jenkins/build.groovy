@@ -58,7 +58,7 @@ pipeline {
                     stage('deploy to jenkins') {
                         steps {
                             sh '''
-                                ...
+                                ls -la
                             '''
 
                             archiveArtifacts artifacts: '*.tar.gz',
