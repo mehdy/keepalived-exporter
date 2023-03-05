@@ -49,7 +49,7 @@ pipeline {
                     stage('Build') {
                         steps {
                             sh '''
-                                go build ?
+                                make build
                             '''
                         }
                     }
