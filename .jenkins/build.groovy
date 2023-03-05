@@ -29,6 +29,7 @@ pipeline {
                     timeout(time: params.WITH_SSH ? 100 : 60, unit: 'MINUTES')
                 }
                 stages {
+                    /*
                     stage('Infrastructure actions') {
                         steps {
                             script {
@@ -38,6 +39,7 @@ pipeline {
                             }
                         }
                     }
+                    */
                     stage('checkout') {
                         steps {
                             changeOwnerFile()
