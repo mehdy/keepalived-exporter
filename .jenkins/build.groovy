@@ -22,28 +22,15 @@ pipeline {
                 agent {
                     ecs {
                         inheritFrom 'large'
-                        image "633878423432.dkr.ecr.eu-central-1.amazonaws.com/jenkins_netweave:x86_64_ubuntu_focal"
+                        image "633878423432.dkr.ecr.eu-central-1.amazonaws.com/${REPO_NAME}"
                     }
                 }
                 options {
                     timeout(time: params.WITH_SSH ? 100 : 60, unit: 'MINUTES')
                 }
                 stages {
-                    /*
-                    stage('Infrastructure actions') {
-                        steps {
-                            script {
-                                if (BUILD_TYPE == 'Debug' && TARGET_SYSTEM == 'x86_64_ubuntu_focal') {
-                                    infraFunc pr_number: env.CHANGE_ID, repo_name: REPO_NAME
-                                }
-                            }
-                        }
-                    }
-                    */
                     stage('checkout') {
                         steps {
-                            changeOwnerFile()
-                            deleteDir()
                             publishChecks name: "${REPO_NAME}", status: 'IN_PROGRESS', summary: 'Summary', text: 'Build is in progress', title: "Jenkins Build ${REPO_NAME}" 
                             gitClone credentials: 'github_ottopia-rnd', branchName: BRANCH_NAME, repoName: REPO_NAME
                         }
