@@ -1,0 +1,42 @@
+before:
+  hooks:
+    - make dep
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.buildTime={{.Date}}
+    main: ./cmd/keepalived-exporter
+archives:
+  - name_template: "{{ .ProjectName }}-{{ .Version }}.{{ .Os }}-{{ .Arch }}"
+nfpms:
+  - id: keepalived-exporter
+    package_name: keepalived-exporter
+    homepage: https://github.com/mehdy/keepalived-exporter
+    maintainer: Mehdi Khoshnoodi <mehdy.khoshnoody@gmail.com>
+    description: Prometheus exporter for keepalived
+    license: GPL-3.0
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+dockers:
+  - image_templates:
+      - mehdy/keepalived-exporter:latest
+      - mehdy/keepalived-exporter:v{{ .Tag }}
+      - ghcr.io/mehdy/keepalived-exporter:latest
+      - ghcr.io/mehdy/keepalived-exporter:v{{ .Tag }}
+    dockerfile: deployments/release/Dockerfile
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "*.md"
+      - "^docs:"
+      - "^test:"

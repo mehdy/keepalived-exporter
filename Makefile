@@ -13,12 +13,6 @@ LD_FLAGS += -X main.version=$(VERSION)
 LD_FLAGS += -X main.commit=$(COMMIT)
 LD_FLAGS += -X main.buildTime=$(BUILD_TIME)
 
-ARCH := $(shell uname -m)
-ifeq ($(ARCH), x86_64)
-	ARCH = amd64
-endif
-
-RELEASE_FILENAME := $(PROJECT_NAME)-$(VERSION).linux-$(ARCH)
 
 .PHONY: all dep lint build clean
 
@@ -45,11 +39,3 @@ clean: ## Remove previous build and release files
 	@rm -f $(PROJECT_NAME)
 	@rm -f $(RELEASE_FILENAME).zip
 	@rm -f $(RELEASE_FILENAME).tar.gz
-
-release: build
-	@mkdir $(RELEASE_FILENAME)
-	@cp $(PROJECT_NAME) $(RELEASE_FILENAME)/
-	@cp LICENSE $(RELEASE_FILENAME)/
-	@zip -r $(RELEASE_FILENAME).zip $(RELEASE_FILENAME)
-	@tar -czvf $(RELEASE_FILENAME).tar.gz $(RELEASE_FILENAME)
-	@rm -rf $(RELEASE_FILENAME)
