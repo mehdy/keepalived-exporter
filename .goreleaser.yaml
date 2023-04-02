@@ -14,6 +14,7 @@ archives:
 nfpms:
   - id: keepalived-exporter
     package_name: keepalived-exporter
+    file_name_template: "{{ .ProjectName }}-{{ .Version }}.{{ .Os }}-{{ .Arch }}"
     homepage: https://github.com/mehdy/keepalived-exporter
     maintainer: Mehdi Khoshnoodi <mehdy.khoshnoody@gmail.com>
     description: Prometheus exporter for keepalived
@@ -25,9 +26,9 @@ nfpms:
 dockers:
   - image_templates:
       - mehdy/keepalived-exporter:latest
-      - mehdy/keepalived-exporter:v{{ .Tag }}
+      - mehdy/keepalived-exporter:{{ .Tag }}
       - ghcr.io/mehdy/keepalived-exporter:latest
-      - ghcr.io/mehdy/keepalived-exporter:v{{ .Tag }}
+      - ghcr.io/mehdy/keepalived-exporter:{{ .Tag }}
     dockerfile: deployments/release/Dockerfile
 checksum:
   name_template: "checksums.txt"
