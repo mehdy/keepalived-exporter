@@ -81,11 +81,9 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 	prop := "="
 	arrayProp := ":"
 
-	var instance string
+	var instance, key, val string
 
 	scanner := bufio.NewScanner(bufio.NewReader(i))
-	key := ""
-	val := ""
 
 	for scanner.Scan() {
 		l := scanner.Text()
