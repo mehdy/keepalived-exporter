@@ -28,7 +28,7 @@ func TestNewConstMetric(t *testing.T) {
 		case "keepalived_up":
 			valueType = prometheus.GaugeValue
 			labelValues = nil
-		case "keepalived_vrrp_state", "keepalived_exporter_check_script_status":
+		case "keepalived_vrrp_state", "keepalived_vrrp_excluded_state", "keepalived_exporter_check_script_status":
 			valueType = prometheus.GaugeValue
 			labelValues = []string{"iname", "intf", "vrid", "ip_address"}
 		case "keepalived_script_status", "keepalived_script_state":
@@ -60,6 +60,7 @@ func TestFillMetrics(t *testing.T) {
 	excpectedMetrics := map[string]*prometheus.Desc{
 		"keepalived_up":                                   prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state":                           prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
+		"keepalived_vrrp_excluded_state":                  prometheus.NewDesc("keepalived_vrrp_excluded_state", "State of vrrp with excluded VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_exporter_check_script_status":         prometheus.NewDesc("keepalived_exporter_check_script_status", "Check Script status for each VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_gratuitous_arp_delay_total":           prometheus.NewDesc("keepalived_gratuitous_arp_delay_total", "Gratuitous ARP delay", []string{"iname", "intf", "vrid"}, nil),
 		"keepalived_advertisements_received_total":        prometheus.NewDesc("keepalived_advertisements_received_total", "Advertisements received", []string{"iname", "intf", "vrid"}, nil),

@@ -160,6 +160,16 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				k.newConstMetric(ch, "keepalived_exporter_check_script_status", prometheus.GaugeValue, checkScript, vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 			}
 		}
+
+		// iter over excluded vips
+		for _, ip := range vrrp.Data.ExcludedVIPs {
+			ipAddr, intf, ok := ParseVIP(ip)
+			if !ok {
+				continue
+			}
+
+			k.newConstMetric(ch, "keepalived_vrrp_excluded_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
+		}
 	}
 
 	for _, script := range keepalivedStats.Scripts {
