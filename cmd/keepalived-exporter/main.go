@@ -47,7 +47,7 @@ func main() {
 		c = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
 	}
 
-	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedCheckScript, c)
+	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedCheckScript, c, version)
 	prometheus.MustRegister(keepalivedCollector)
 
 	http.Handle(*metricsPath, promhttp.Handler())

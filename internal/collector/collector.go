@@ -26,6 +26,7 @@ type KeepalivedCollector struct {
 	scriptPath string
 	metrics    map[string]*prometheus.Desc
 	collector  Collector
+	version    string
 }
 
 // VRRPStats represents Keepalived stats about VRRP.
@@ -77,11 +78,12 @@ type KeepalivedStats struct {
 }
 
 // NewKeepalivedCollector is creating new instance of KeepalivedCollector.
-func NewKeepalivedCollector(useJSON bool, scriptPath string, collector Collector) *KeepalivedCollector {
+func NewKeepalivedCollector(useJSON bool, scriptPath string, collector Collector, version string) *KeepalivedCollector {
 	kc := &KeepalivedCollector{
 		useJSON:    useJSON,
 		scriptPath: scriptPath,
 		collector:  collector,
+		version:    version,
 	}
 
 	kc.fillMetrics()
@@ -120,6 +122,8 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	k.newConstMetric(ch, "keepalived_up", prometheus.GaugeValue, keepalivedUp)
+
+	k.newConstMetric(ch, "keepalived_info", prometheus.GaugeValue, 1, k.version)
 
 	if keepalivedUp == 0 {
 		return
@@ -257,6 +261,7 @@ func (k *KeepalivedCollector) Describe(ch chan<- *prometheus.Desc) {
 func (k *KeepalivedCollector) fillMetrics() {
 	commonLabels := []string{"iname", "intf", "vrid"}
 	k.metrics = map[string]*prometheus.Desc{
+		"keepalived_info":                                 prometheus.NewDesc("keepalived_info", "Exporter info", []string{"version"}, nil),
 		"keepalived_up":                                   prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state":                           prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_exporter_check_script_status":         prometheus.NewDesc("keepalived_exporter_check_script_status", "Check Script status for each VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
