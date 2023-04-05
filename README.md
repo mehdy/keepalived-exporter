@@ -90,6 +90,7 @@ docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/
 |-------------------------------------------------|------------------------------------
 | keepalived_up                                   | Status of Keepalived service
 | keepalived_vrrp_state                           | State of vrrp
+| keepalived_vrrp_excluded_state                  | State of vrrp with excluded VIP
 | keepalived_exporter_check_script_status         | Check Script status for each VIP
 | keepalived_gratuitous_arp_delay_total           | Gratuitous ARP delay
 | keepalived_advertisements_received_total        | Advertisements received

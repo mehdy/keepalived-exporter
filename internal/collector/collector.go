@@ -48,13 +48,14 @@ type VRRPStats struct {
 
 // VRRPData represents Keepalived data about VRRP.
 type VRRPData struct {
-	IName     string   `json:"iname"`
-	State     int      `json:"state"`
-	WantState int      `json:"wantstate"`
-	Intf      string   `json:"ifp_ifname"`
-	GArpDelay int      `json:"garp_delay"`
-	VRID      int      `json:"vrid"`
-	VIPs      []string `json:"vips"`
+	IName        string   `json:"iname"`
+	State        int      `json:"state"`
+	WantState    int      `json:"wantstate"`
+	Intf         string   `json:"ifp_ifname"`
+	GArpDelay    int      `json:"garp_delay"`
+	VRID         int      `json:"vrid"`
+	VIPs         []string `json:"vips"`
+	ExcludedVIPs []string `json:"excluded_vips"`
 }
 
 // VRRPScript represents Keepalived script about VRRP.
@@ -259,6 +260,7 @@ func (k *KeepalivedCollector) fillMetrics() {
 	k.metrics = map[string]*prometheus.Desc{
 		"keepalived_up":                                   prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state":                           prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
+		"keepalived_vrrp_excluded_state":                  prometheus.NewDesc("keepalived_vrrp_excluded_state", "State of vrrp with excluded VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_exporter_check_script_status":         prometheus.NewDesc("keepalived_exporter_check_script_status", "Check Script status for each VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_gratuitous_arp_delay_total":           prometheus.NewDesc("keepalived_gratuitous_arp_delay_total", "Gratuitous ARP delay", commonLabels, nil),
 		"keepalived_advertisements_received_total":        prometheus.NewDesc("keepalived_advertisements_received_total", "Advertisements received", commonLabels, nil),
