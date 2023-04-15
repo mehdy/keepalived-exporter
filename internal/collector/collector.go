@@ -159,6 +159,11 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				k.newConstMetric(ch, "keepalived_exporter_check_script_status", prometheus.GaugeValue, checkScript, vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
 			}
 		}
+
+		// record vrrp_state metric even when VIPs are not defined, to support old keepalived release
+		if len(vrrp.Data.VIPs) == 0 {
+			k.newConstMetric(ch, "keepalived_vrrp_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), "")
+		}
 	}
 
 	for _, script := range keepalivedStats.Scripts {
