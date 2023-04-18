@@ -58,7 +58,6 @@ func TestFillMetrics(t *testing.T) {
 	k.fillMetrics()
 
 	excpectedMetrics := map[string]*prometheus.Desc{
-		"keepalived_info":                                 prometheus.NewDesc("keepalived_info", "Exporter info", []string{"version"}, nil),
 		"keepalived_up":                                   prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state":                           prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
 		"keepalived_exporter_check_script_status":         prometheus.NewDesc("keepalived_exporter_check_script_status", "Check Script status for each VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
