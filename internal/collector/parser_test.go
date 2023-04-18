@@ -508,3 +508,57 @@ func TestV227ParseVRRPData(t *testing.T) {
 		}
 	}
 }
+
+func TestV224ParseVRRPData(t *testing.T) {
+	t.Parallel()
+
+	f, err := os.Open("../../test_files/v2.2.4/keepalived.data")
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	defer f.Close()
+
+	vrrpData, err := ParseVRRPData(f)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+
+	if len(vrrpData) != 2 {
+		t.Fail()
+	}
+
+	vi1 := VRRPData{
+		IName:        "VI_IPV4",
+		State:        2,
+		WantState:    2,
+		Intf:         "ens224",
+		GArpDelay:    5,
+		VRID:         105,
+		VIPs:         []string{"10.0.0.167 dev ens224 scope global set"},
+		ExcludedVIPs: []string{"10.10.0.1 dev ens224 scope global set"},
+	}
+	vi2 := VRRPData{
+		IName:     "VI_IPV6",
+		State:     2,
+		WantState: 2,
+		Intf:      "ens254",
+		GArpDelay: 5,
+		VRID:      105,
+		VIPs:      []string{"1001:ac14:550:10:1::53 dev ens254 scope global deprecated set"},
+	}
+
+	for _, data := range vrrpData {
+		switch data.IName {
+		case "VI_IPV4":
+			if !reflect.DeepEqual(*data, vi1) {
+				t.Fail()
+			}
+		case "VI_IPV6":
+			if !reflect.DeepEqual(*data, vi2) {
+				t.Fail()
+			}
+		}
+	}
+}

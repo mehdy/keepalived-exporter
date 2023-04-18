@@ -1,0 +1,98 @@
+------< VRRP Topology >------
+ VRRP Instance = VI_IPV4
+   VRRP Version = 2
+   State = MASTER
+   Wantstate = MASTER
+   Number of interface and track script faults = 0
+   Number of track scripts init = 0
+   Last transition = 1680682119.036834 (Wed Apr  5 10:08:39 2023.036834)
+   Read timeout = 1680682667.076804 (Wed Apr  5 10:17:47.076804)
+   Master down timer = 609375 usecs
+   Interface = ens224
+   Using src_ip = 10.0.0.166
+   Gratuitous ARP delay = 5
+   Gratuitous ARP repeat = 5
+   Gratuitous ARP refresh = 0
+   Gratuitous ARP refresh repeat = 1
+   Gratuitous ARP lower priority delay = 5
+   Gratuitous ARP lower priority repeat = 5
+   Down timer adverts = 3
+   Send advert after receive lower priority advert = true
+   Send advert after receive higher priority advert = false
+   Virtual Router ID = 105
+   Priority = 100
+   Effective priority = 100
+   Total priority = 100
+   Advert interval = 1 sec
+   Accept = enabled
+   Preempt = disabled
+   Promote_secondaries = disabled
+   Authentication type = SIMPLE_PASSWORD
+   Password = keep105
+   Virtual IP :
+     10.0.0.167 dev ens224 scope global set
+   Virtual IP Excluded :
+     10.10.0.1 dev ens224 scope global set
+   fd_in 15, fd_out 16
+   Tracked interfaces :
+     dummy0 weight 0
+   Tracked scripts :
+     lookup_ipv4 weight 0
+   Using smtp notification = no
+   Notify deleted = Fault
+   Notify priority changes = false
+ VRRP Instance = VI_IPV6
+   VRRP Version = 3
+   Using Native IPv6
+   State = MASTER
+   Wantstate = MASTER
+   Number of interface and track script faults = 0
+   Number of track scripts init = 0
+   Last transition = 1680682119.037752 (Wed Apr  5 10:08:39 2023.037752)
+   Read timeout = 1680682667.076831 (Wed Apr  5 10:17:47.076831)
+   Master down timer = 609375 usecs
+   Interface = ens254
+   Using src_ip = fe80::151:46fe:aebc:1ef5
+   Gratuitous ARP delay = 5
+   Gratuitous ARP repeat = 5
+   Gratuitous ARP refresh = 0
+   Gratuitous ARP refresh repeat = 1
+   Gratuitous ARP lower priority delay = 5
+   Gratuitous ARP lower priority repeat = 5
+   Down timer adverts = 3
+   Send advert after receive lower priority advert = true
+   Send advert after receive higher priority advert = false
+   Virtual Router ID = 105
+   Priority = 100
+   Effective priority = 100
+   Total priority = 100
+   Advert interval = 1000 milli-sec
+   Accept = enabled
+   Preempt = disabled
+   Promote_secondaries = disabled
+   Virtual IP :
+     1001:ac14:550:10:1::53 dev ens254 scope global deprecated set
+   fd_in 17, fd_out 18
+   Tracked interfaces :
+     dummy0 weight 0
+   Tracked scripts :
+     lookup_ipv4 weight 0
+   Using smtp notification = no
+   Notify deleted = Fault
+   Notify priority changes = false
+------< VRRP Scripts >------
+ VRRP Script = lookup_ipv4
+   Command = '/etc/keepalived/keepalived_check.sh'
+   Interval = 1 sec
+   Timeout = 2 sec
+   Weight = 0
+   Rise = 1
+   Fall = 1
+   Insecure = no
+   Status = GOOD
+   Script uid:gid = 997:997
+   VRRP instances :
+   Tracking instances :
+     VI_IPV4, weight 0
+     VI_IPV6, weight 0
+   State = idle

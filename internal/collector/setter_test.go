@@ -115,3 +115,20 @@ func TestAddVIP(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestAddExcludedVIP(t *testing.T) {
+	t.Parallel()
+
+	data := VRRPData{}
+
+	vips := []string{"   1.1.1.1", "2.2.2.2", "3.3.3.3   "}
+	expectedVIPs := []string{"1.1.1.1", "2.2.2.2", "3.3.3.3"}
+
+	for _, vip := range vips {
+		data.addExcludedVIP(vip)
+	}
+
+	if !reflect.DeepEqual(expectedVIPs, data.ExcludedVIPs) {
+		t.Fail()
+	}
+}
