@@ -11,6 +11,7 @@ import (
 	"github.com/mehdy/keepalived-exporter/internal/types/host"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	promver "github.com/prometheus/common/version"
 	"github.com/sirupsen/logrus"
 )
 
@@ -47,8 +48,11 @@ func main() {
 		c = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
 	}
 
-	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedCheckScript, c, version)
+	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedCheckScript, c)
 	prometheus.MustRegister(keepalivedCollector)
+
+	promver.Version = version
+	prometheus.MustRegister(promver.NewCollector("keepalived_exporter"))
 
 	http.Handle(*metricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

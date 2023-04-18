@@ -34,9 +34,6 @@ func TestNewConstMetric(t *testing.T) {
 		case "keepalived_script_status", "keepalived_script_state":
 			valueType = prometheus.GaugeValue
 			labelValues = []string{"name"}
-		case "keepalived_info":
-			valueType = prometheus.GaugeValue
-			labelValues = []string{"version"}
 		default:
 			t.Fail()
 		}
