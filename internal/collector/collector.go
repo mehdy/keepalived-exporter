@@ -26,7 +26,6 @@ type KeepalivedCollector struct {
 	scriptPath string
 	metrics    map[string]*prometheus.Desc
 	collector  Collector
-	version    string
 }
 
 // VRRPStats represents Keepalived stats about VRRP.
