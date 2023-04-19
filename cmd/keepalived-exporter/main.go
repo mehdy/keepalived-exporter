@@ -31,6 +31,7 @@ func main() {
 		logrus.WithFields(logrus.Fields{
 			"commit": version.Revision, "version": version.Version, "build_time": version.BuildDate,
 		}).Info("Keepalived Exporter")
+
 		return
 	}
 
