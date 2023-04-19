@@ -15,7 +15,7 @@ LD_FLAGS += -X github.com/prometheus/common/version.Revision=$(COMMIT)
 LD_FLAGS += -X github.com/prometheus/common/version.Branch=$(BRANCH)
 LD_FLAGS += -X github.com/prometheus/common/version.BuildDate=$(BUILD_TIME)
 
-.PHONY: all dep lint build clean
+.PHONY: all dep lint build unused clean
 
 all: dep build
 
@@ -35,6 +35,10 @@ build: ## Build the binary file
 
 test:
 	@go test -v -cover -race ./...
+
+unused: dep
+	@echo ">> running check for unused/missing packages in go.mod"
+	@git diff --exit-code -- go.sum go.mod
 
 clean: ## Remove previous build and release files
 	@rm -f $(PROJECT_NAME)
