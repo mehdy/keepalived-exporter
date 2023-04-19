@@ -56,3 +56,8 @@ func (v *VRRPData) addVIP(vip string) {
 	vip = strings.TrimSpace(vip)
 	v.VIPs = append(v.VIPs, vip)
 }
+
+func (v *VRRPData) addExcludedVIP(vip string) {
+	vip = strings.TrimSpace(vip)
+	v.ExcludedVIPs = append(v.ExcludedVIPs, vip)
+}

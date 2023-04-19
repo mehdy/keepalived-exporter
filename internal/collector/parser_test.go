@@ -491,13 +491,14 @@ func TestV227ParseVRRPData(t *testing.T) {
 	}
 
 	viExt1 := VRRPData{
-		IName:     "VI_227_1",
-		State:     2,
-		WantState: 2,
-		Intf:      "ens3",
-		GArpDelay: 5,
-		VRID:      52,
-		VIPs:      []string{"10.1.0.1/24 dev ens3 scope global set"},
+		IName:        "VI_227_1",
+		State:        2,
+		WantState:    2,
+		Intf:         "ens3",
+		GArpDelay:    5,
+		VRID:         52,
+		VIPs:         []string{"10.1.0.1/24 dev ens3 scope global set"},
+		ExcludedVIPs: []string{"10.10.0.1 dev ens3 scope global set"},
 	}
 
 	for _, data := range vrrpData {

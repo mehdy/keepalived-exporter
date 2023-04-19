@@ -118,6 +118,10 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 				data[instance].addVIP(val)
 			}
 
+			if (strings.HasPrefix(key, "Virtual IP Excluded")) && val != "" {
+				data[instance].addExcludedVIP(val)
+			}
+
 			switch key {
 			case "State":
 				if err := data[instance].setState(val); err != nil {
