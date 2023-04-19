@@ -11,13 +11,8 @@ import (
 	"github.com/mehdy/keepalived-exporter/internal/types/host"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/common/version"
 	"github.com/sirupsen/logrus"
-)
-
-var (
-	commit    string
-	version   string
-	buildTime string
 )
 
 func main() {
@@ -34,7 +29,7 @@ func main() {
 
 	if *versionFlag {
 		logrus.WithFields(logrus.Fields{
-			"commit": commit, "version": version, "build_time": buildTime,
+			"commit": version.Revision, "version": version.Version, "build_time": version.BuildDate,
 		}).Info("Keepalived Exporter")
 
 		return
@@ -49,6 +44,7 @@ func main() {
 
 	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedCheckScript, c)
 	prometheus.MustRegister(keepalivedCollector)
+	prometheus.MustRegister(version.NewCollector("keepalived_exporter"))
 
 	http.Handle(*metricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

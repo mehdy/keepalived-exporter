@@ -88,6 +88,7 @@ docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/
 
 | Metric                                          | Notes
 |-------------------------------------------------|------------------------------------
+| keepalived_exporter_build_info                  | Exporter build info
 | keepalived_up                                   | Status of Keepalived service
 | keepalived_vrrp_state                           | State of vrrp
 | keepalived_vrrp_excluded_state                  | State of vrrp with excluded VIP

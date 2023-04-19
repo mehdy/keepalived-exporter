@@ -6,13 +6,14 @@ CURRENT_LINTER_VERSION := $(shell golangci-lint version 2>/dev/null | awk '{ pri
 
 BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
 COMMIT := $(shell git rev-parse --short HEAD)
+BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 VERSION ?= $(shell git describe --tags ${COMMIT} 2>/dev/null | cut -c2-)
 VERSION := $(or $(VERSION),$(COMMIT))
 LD_FLAGS ?=
-LD_FLAGS += -X main.version=$(VERSION)
-LD_FLAGS += -X main.commit=$(COMMIT)
-LD_FLAGS += -X main.buildTime=$(BUILD_TIME)
-
+LD_FLAGS += -X github.com/prometheus/common/version.Version=$(VERSION)
+LD_FLAGS += -X github.com/prometheus/common/version.Revision=$(COMMIT)
+LD_FLAGS += -X github.com/prometheus/common/version.Branch=$(BRANCH)
+LD_FLAGS += -X github.com/prometheus/common/version.BuildDate=$(BUILD_TIME)
 
 .PHONY: all dep lint build clean
 
