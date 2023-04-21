@@ -6,7 +6,9 @@ import (
 	"os/exec"
 	"strconv"
 	"sync"
+	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
@@ -208,21 +210,40 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 			return nil, err
 		}
 	} else {
-		vrrpStats, err := k.collector.StatsVrrps()
+		retryFetchData := func() (map[string]interface{}, error) {
+			vrrpStats, err := k.collector.StatsVrrps()
+			if err != nil {
+				return nil, err
+			}
+
+			vrrpData, err := k.collector.DataVrrps()
+			if err != nil {
+				return nil, err
+			}
+
+			if len(vrrpData) == len(vrrpStats) {
+				return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
+			}
+
+			return map[string]interface{}{
+				"vrrpStats": vrrpStats,
+				"vrrpData":  vrrpData,
+			}, nil
+		}
+
+		b := backoff.NewExponentialBackOff()
+		b.InitialInterval = 100 * time.Millisecond
+		b.MaxElapsedTime = 2 * time.Second
+		b.Reset()
+
+		var vrrpStats map[string]*VRRPStats
+		var vrrpData map[string]*VRRPData
+		result, err := backoff.RetryWithData(retryFetchData, b)
 		if err != nil {
 			return nil, err
 		}
-
-		vrrpData, err := k.collector.DataVrrps()
-		if err != nil {
-			return nil, err
-		}
-
-		if len(vrrpData) != len(vrrpStats) {
-			logrus.Error("keepalived.data and keepalived.stats datas are not synced")
-
-			return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
-		}
+		vrrpStats = result["vrrpStats"].(map[string]*VRRPStats)
+		vrrpData = result["vrrpData"].(map[string]*VRRPData)
 
 		for instance, vData := range vrrpData {
 			if vStat, ok := vrrpStats[instance]; ok {
