@@ -242,8 +242,8 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 		if err != nil {
 			return nil, err
 		}
-		vrrpStats = result["vrrpStats"].(map[string]*VRRPStats)
-		vrrpData = result["vrrpData"].(map[string]*VRRPData)
+		vrrpStats, _ = result["vrrpStats"].(map[string]*VRRPStats)
+		vrrpData, _ = result["vrrpData"].(map[string]*VRRPData)
 
 		for instance, vData := range vrrpData {
 			if vStat, ok := vrrpStats[instance]; ok {
