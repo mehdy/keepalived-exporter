@@ -49,6 +49,9 @@ jobs:
     - name: Get dependencies
       run: make dep
 
+    - name: Check for unused
+      run: make unused
+
     - name: Test
       run: make test
 
