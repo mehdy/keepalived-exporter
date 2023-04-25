@@ -1,0 +1,43 @@
+#!/bin/bash
+
+readonly POSTINST_SCRIPTS_PATH=/var/lib/dpkg/info/ottopia-keepalived-exporter/postinst.d
+
+load_scripts() {
+    local -r SCRIPTS="constants.sh,logger.sh"
+
+    local IFS=","
+    for script in ${SCRIPTS}
+    do
+        . ${POSTINST_SCRIPTS_PATH}/utils/${script}
+        if [ $? -ne 0 ]
+        then
+            echo "[$(date +"%Y-%m-%d %H:%M:%S")] [ERROR] failed to run ${script}"
+            exit 1
+        fi
+    done
+}
+
+main() {
+    load_scripts
+    log_message ${LOG_LEVEL_INFO} "running ${SERVICE_NAME} service setup"
+
+    for script in ${POSTINST_SCRIPTS_PATH}/*.sh
+    do
+        if [ ! -x ${script} ]
+        then
+            log_message ${LOG_LEVEL_DEBUG} "${script} is not executable, skipping..."
+            continue
+        fi
+
+        . ${script}
+        if [ $? -ne 0 ]
+        then
+            log_message ${LOG_LEVEL_ERROR} "failed to run ${script}"
+            exit 1
+        fi
+    done
+
+    return 0
+}
+
+main

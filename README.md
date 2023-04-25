@@ -1,6 +1,6 @@
 # Keepalived Exporter
 
-[![Continuous Integration](https://github.com/mehdy/keepalived-exporter/workflows/Continuous%20Integration/badge.svg)](https://github.com/mehdy/keepalived-exporter/actions)
+[![Continuous Integration](https://github.com/ottopia-tech/keepalived-exporter/workflows/Continuous%20Integration/badge.svg)](https://github.com/ottopia-tech/keepalived-exporter/actions)
 
 Prometheus exporter for [Keepalived](https://keepalived.org) metrics.
 
@@ -10,7 +10,7 @@ Prometheus exporter for [Keepalived](https://keepalived.org) metrics.
 
 ```bash
 export VERSION=1.0.0
-wget https://github.com/mehdy/keepalived-exporter/releases/download/v${VERSION}/keepalived-exporter-${VERSION}.linux-amd64.tar.gz
+wget https://github.com/ottopia-tech/keepalived-exporter/releases/download/v${VERSION}/keepalived-exporter-${VERSION}.linux-amd64.tar.gz
 tar xvzf keepalived-exporter-${VERSION}.linux-amd64.tar.gz keepalived-exporter-${VERSION}.linux-amd64/keepalived-exporter
 sudo mv keepalived-exporter-${VERSION}.linux-amd64/keepalived-exporter /usr/local/bin/
 ```
@@ -18,7 +18,7 @@ sudo mv keepalived-exporter-${VERSION}.linux-amd64/keepalived-exporter /usr/loca
 ### From source
 
 ```bash
-git clone --depth 1 https://github.com/mehdy/keepalived-exporter.git
+git clone --depth 1 https://github.com/ottopia-tech/keepalived-exporter.git
 cd keepalived-exporter
 make build
 sudo mv keepalived-exporter /usr/local/bin/
@@ -65,7 +65,7 @@ Volume docker socket (`/var/run/docker.sock`) to Keepalived Exporter cotnainer i
 ```bash
 docker pull ghcr.io/mehdy/keepalived-exporter
 docker run -v keepalived-data:/tmp/ ... $KEEPALIVED_IMAGE
-docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -p 9165:9165 ghcr.io/mehdy/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -p 9165:9165 ghcr.io/ottopia-tech/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
 ```
 
 ## Metrics

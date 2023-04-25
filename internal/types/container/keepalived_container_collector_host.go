@@ -10,8 +10,8 @@ import (
 
 	"github.com/docker/docker/client"
 	"github.com/hashicorp/go-version"
-	"github.com/mehdy/keepalived-exporter/internal/collector"
-	"github.com/mehdy/keepalived-exporter/internal/types/utils"
+	"github.com/ottopia-tech/keepalived-exporter/internal/collector"
+	"github.com/ottopia-tech/keepalived-exporter/internal/types/utils"
 	"github.com/sirupsen/logrus"
 )
 

@@ -1,0 +1,16 @@
+Source: ottopia-keepalived-exporter
+Section: embedded
+Priority: optional
+Maintainer: Ottopia Technologies <info@ottopia.tech>
+Build-Depends: debhelper (>= 7.0.0),
+ build-essential,
+ make
+Standards-Version: 3.9.1
+Homepage: http://ottopia.tech
+
+Package: ottopia-keepalived-exporter
+#Version: 0.5.0-1
+Architecture: any
+Description: Communicating the status and metrics of Keepalived to Prometheus
+Depends: keepalived
+

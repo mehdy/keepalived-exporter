@@ -1,5 +1,7 @@
+VERSION_FILE := version.txt
+
 PROJECT_NAME := keepalived-exporter
-PKG := "github.com/mehdy/$(PROJECT_NAME)"
+PKG := "github.com/ottopia-tech/$(PROJECT_NAME)"
 LINTER = golangci-lint
 LINTER_VERSION = 1.50.1
 CURRENT_LINTER_VERSION := $(shell golangci-lint version 2>/dev/null | awk '{ print $$4 }')
@@ -35,7 +37,7 @@ endif
 lint: lintdeps ## to lint the files
 	$(LINTER) run --config=.golangci-lint.yml ./...
 
-build: ## Build the binary file
+build: $(VERSION_FILE) ## Build the binary file
 	@go build -v -ldflags="$(LD_FLAGS)" $(PKG)/cmd/$(PROJECT_NAME)
 
 test:
@@ -53,3 +55,8 @@ release: build
 	@zip -r $(RELEASE_FILENAME).zip $(RELEASE_FILENAME)
 	@tar -czvf $(RELEASE_FILENAME).tar.gz $(RELEASE_FILENAME)
 	@rm -rf $(RELEASE_FILENAME)
+
+$(VERSION_FILE): # Creates $(VERSION_FILE) file
+	@echo "GIT_BRANCH \"`git rev-parse --abbrev-ref HEAD`\"" > $(VERSION_FILE)
+	@echo "COMMIT_HASH \"`git rev-parse --short HEAD`\"" >> $(VERSION_FILE)
+	@echo "BUILD_DATE_UTC \"`date -u +"%F %T %Z"`\"" >> $(VERSION_FILE)

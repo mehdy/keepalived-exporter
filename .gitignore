@@ -18,7 +18,14 @@ netweave_build/
 *.debhelper
 *.substvars
 debian/tmp/
-debian/files/
+debian/files
+debian/.debhelper
+debian/ottopia*
+debian/debhelper-build-stamp
 CMakeUserPresets.json
 conan_imports_manifest.txt
 ignore
+keepalived-exporter
+version.txt
+go.mod
+go.sum
