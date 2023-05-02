@@ -1,4 +1,4 @@
-module github.com/mehdy/keepalived-exporter
+module github.com/ottopia-tech/keepalived-exporter
 
 go 1.19
 

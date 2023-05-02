@@ -15,6 +15,11 @@ pipeline {
     environment { 
         REPO_NAME = 'keepalived-exporter'
         BRANCH_NAME_NO_SLASHES = BRANCH_NAME.replace("/","_")
+
+        AWS_CREDS = 'jenkins-ecr-credentials'
+        AWS_ECR_REGION = 'eu-central-1'
+
+        PYPI_SERVER = credentials('jfrog-pypi-server')
     }
     
     stages {
@@ -22,7 +27,7 @@ pipeline {
                 agent {
                     ecs {
                         inheritFrom 'large'
-                        image "633878423432.dkr.ecr.eu-central-1.amazonaws.com/${REPO_NAME}"
+                        image "633878423432.dkr.ecr.eu-central-1.amazonaws.com/jenkins_${REPO_NAME}:x86_64_ubuntu_focal"
                     }
                 }
                 options {
@@ -38,17 +43,14 @@ pipeline {
                     stage('Build') {
                         steps {
                             sh '''
-                                make build
+                                dpkg-buildpackage -b -uc -ui
+                                mv ../*.deb .
                             '''
                         }
                     }
                     stage('deploy to jenkins') {
                         steps {
-                            sh '''
-                                tar cvfz keepalived-exporter.tar.gz keepalived-exporter
-                            '''
-
-                            archiveArtifacts artifacts: '*.tar.gz',
+                            archiveArtifacts artifacts: '*.deb',
                             fingerprint: true,
                             onlyIfSuccessful: true
                         }

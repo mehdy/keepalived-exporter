@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/mehdy/keepalived-exporter/internal/collector"
-	"github.com/mehdy/keepalived-exporter/internal/types/container"
-	"github.com/mehdy/keepalived-exporter/internal/types/host"
+	"github.com/ottopia-tech/keepalived-exporter/internal/collector"
+	"github.com/ottopia-tech/keepalived-exporter/internal/types/container"
+	"github.com/ottopia-tech/keepalived-exporter/internal/types/host"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"

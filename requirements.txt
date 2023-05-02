@@ -1,0 +1,4 @@
+colorlog == 6.6.0
+pydantic ~=1.9.2
+python-logstash ~= 0.4.8
+docker

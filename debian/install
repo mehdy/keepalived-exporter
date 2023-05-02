@@ -1,0 +1,8 @@
+debian/postinst.d/10-groups-creator.sh var/lib/dpkg/info/ottopia-keepalived-exporter/postinst.d
+debian/postinst.d/11-user-creator.sh var/lib/dpkg/info/ottopia-keepalived-exporter/postinst.d
+debian/postinst.d/12-add-to-group.sh var/lib/dpkg/info/ottopia-keepalived-exporter/postinst.d
+debian/postinst.d/13-set-capabilities.sh var/lib/dpkg/info/ottopia-keepalived-exporter/postinst.d
+debian/postinst.d/14-python-packages.sh var/lib/dpkg/info/ottopia-keepalived-exporter/postinst.d
+debian/postinst.d/utils/constants.sh var/lib/dpkg/info/ottopia-keepalived-exporter/postinst.d/utils
+debian/postinst.d/utils/logger.sh var/lib/dpkg/info/ottopia-keepalived-exporter/postinst.d/utils
+ottopia-keepalived-exporter.service lib/systemd/system

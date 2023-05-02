@@ -1,0 +1,19 @@
+[Unit]
+Description=Ottopia Keepalived Exporter Service
+PartOf=
+After=keepalived.service
+
+[Service]
+Type=simple
+User=ottopia_keepalived
+WorkingDirectory=/opt/ottopia/keepalived-exporter
+ExecStart=/opt/ottopia/keepalived-exporter/keepalived-exporter -web.listen-address ":58084" -ka.json
+ExecStop=/bin/kill -TERM $MAINPID
+Restart=on-failure
+TimeoutStopSec=5
+StandardOutput=journal
+StandardInput=null
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
