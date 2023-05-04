@@ -1,3 +1,9 @@
+ottopia-keepalived-exporter (0.5.1) unstable; urgency=medium
+
+  * Bump version
+
+ -- Noam Barkaee <noam@silver-surfer>  Thu, 04 May 2023 14:45:08 +0300
+
 ottopia-keepalived-exporter (0.5.0-1) unstable; urgency=medium
 
   * Initial packaging work with dpkg-buildpackage.
