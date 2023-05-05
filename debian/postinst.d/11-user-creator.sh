@@ -12,7 +12,7 @@ main() {
     IFS=','
 
     local group_name=(${SERVICE_GROUP_NAMES})
-    adduser --system --no-create-home --ingroup ${group_name} ${SERVICE_USER_NAME}
+    adduser --system --no-create-home --shell /bin/bash --ingroup ${group_name} ${SERVICE_USER_NAME}
 
     IFS=${OIFS}
     return $?

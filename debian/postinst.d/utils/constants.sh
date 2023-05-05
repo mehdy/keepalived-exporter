@@ -3,7 +3,7 @@
 # General configurations
 readonly SERVICE_NAME="ottopia-keepalived-exporter"
 readonly SERVICE_USER_NAME="ottopia_keepalived"
-readonly SERVICE_GROUP_NAMES="ottopia_keepalived"
+readonly SERVICE_GROUP_NAMES="ottopia_keepalived,docker"
 
 # logger.sh configs
 QUIET=false
