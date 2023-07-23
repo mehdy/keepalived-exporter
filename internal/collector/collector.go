@@ -6,7 +6,9 @@ import (
 	"os/exec"
 	"strconv"
 	"sync"
+	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
@@ -113,8 +115,22 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 
 	keepalivedUp := float64(1)
 
-	keepalivedStats, err := k.getKeepalivedStats()
-	if err != nil {
+	b := backoff.NewExponentialBackOff()
+	b.InitialInterval = 10 * time.Millisecond
+	b.MaxElapsedTime = 2 * time.Second
+	b.Reset()
+
+	var keepalivedStats *KeepalivedStats
+
+	if err := backoff.Retry(func() error {
+		var err error
+		keepalivedStats, err = k.getKeepalivedStats()
+		if err != nil {
+			logrus.WithError(err).Debug("Failed to get keepalived stats. Retrying...")
+		}
+
+		return err
+	}, b); err != nil {
 		logrus.WithError(err).Error("No data found to be exported")
 
 		keepalivedUp = 0

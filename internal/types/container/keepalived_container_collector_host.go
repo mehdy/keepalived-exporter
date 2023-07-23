@@ -127,7 +127,7 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 		return nil, err
 	}
 
-	f, err := utils.OpenFileWithRetry(k.jsonPath)
+	f, err := os.Open(k.jsonPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.jsonPath).Error("Failed to open keepalived.json")
 
@@ -146,7 +146,7 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 		return nil, err
 	}
 
-	f, err := utils.OpenFileWithRetry(k.statsPath)
+	f, err := os.Open(k.statsPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.statsPath).Error("Failed to open keepalived.stats")
 
@@ -165,7 +165,7 @@ func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VR
 		return nil, err
 	}
 
-	f, err := utils.OpenFileWithRetry(k.dataPath)
+	f, err := os.Open(k.dataPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
 
