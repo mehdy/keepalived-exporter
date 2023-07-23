@@ -207,39 +207,41 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		vrrpStats, err := k.collector.StatsVrrps()
-		if err != nil {
-			return nil, err
-		}
 
-		vrrpData, err := k.collector.DataVrrps()
-		if err != nil {
-			return nil, err
-		}
+		return stats, nil
+	}
 
-		if len(vrrpData) != len(vrrpStats) {
-			logrus.Error("keepalived.data and keepalived.stats datas are not synced")
+	stats.Scripts, err = k.collector.ScriptVrrps()
+	if err != nil {
+		return nil, err
+	}
 
-			return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
-		}
+	vrrpStats, err := k.collector.StatsVrrps()
+	if err != nil {
+		return nil, err
+	}
 
-		for instance, vData := range vrrpData {
-			if vStat, ok := vrrpStats[instance]; ok {
-				stats.VRRPs = append(stats.VRRPs, VRRP{
-					Data:  *vData,
-					Stats: *vStat,
-				})
-			} else {
-				logrus.WithField("instance", instance).Error("There is no stats found for instance")
+	vrrpData, err := k.collector.DataVrrps()
+	if err != nil {
+		return nil, err
+	}
 
-				return nil, errors.New("there is no stats found for instance")
-			}
-		}
+	if len(vrrpData) != len(vrrpStats) {
+		logrus.Error("keepalived.data and keepalived.stats datas are not synced")
 
-		stats.Scripts, err = k.collector.ScriptVrrps()
-		if err != nil {
-			return nil, err
+		return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
+	}
+
+	for instance, vData := range vrrpData {
+		if vStat, ok := vrrpStats[instance]; ok {
+			stats.VRRPs = append(stats.VRRPs, VRRP{
+				Data:  *vData,
+				Stats: *vStat,
+			})
+		} else {
+			logrus.WithField("instance", instance).Error("There is no stats found for instance")
+
+			return nil, errors.New("there is no stats found for instance")
 		}
 	}
 

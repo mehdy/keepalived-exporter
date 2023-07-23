@@ -13,8 +13,7 @@ linters:
     - gocognit
     - gocyclo
     - testpackage
-    - nestif  # FIXME
-    - gomnd  # FIXME
+    - gomnd # FIXME
 
 linters-settings:
   tagliatelle:
