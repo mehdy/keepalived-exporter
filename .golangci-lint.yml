@@ -13,6 +13,7 @@ linters:
     - gocognit
     - gocyclo
     - testpackage
+    - depguard
     - gomnd # FIXME
 
 linters-settings:
