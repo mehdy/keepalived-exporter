@@ -1,7 +1,7 @@
 PROJECT_NAME := keepalived-exporter
 PKG := "github.com/mehdy/$(PROJECT_NAME)"
 LINTER = golangci-lint
-LINTER_VERSION = 1.52.2
+LINTER_VERSION = 1.53.3
 CURRENT_LINTER_VERSION := $(shell golangci-lint version 2>/dev/null | awk '{ print $$4 }')
 
 BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
