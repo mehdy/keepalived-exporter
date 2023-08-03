@@ -43,6 +43,32 @@ func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHos
 	return k
 }
 
+func (k *KeepalivedHostCollectorHost) Refresh() error {
+	if k.useJSON {
+		if err := k.signal(k.SIGJSON); err != nil {
+			logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
+
+			return err
+		}
+
+		return nil
+	}
+
+	if err := k.signal(k.SIGSTATS); err != nil {
+		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
+
+		return err
+	}
+
+	if err := k.signal(k.SIGDATA); err != nil {
+		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
+
+		return err
+	}
+
+	return nil
+}
+
 func (k *KeepalivedHostCollectorHost) initSignals() {
 	if k.useJSON {
 		k.SIGJSON = k.sigNum("JSON")
@@ -123,12 +149,6 @@ func (k *KeepalivedHostCollectorHost) sigNum(sigString string) syscall.Signal {
 }
 
 func (k *KeepalivedHostCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
-	if err := k.signal(k.SIGJSON); err != nil {
-		logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
-
-		return nil, err
-	}
-
 	const fileName = "/tmp/keepalived.json"
 
 	f, err := os.Open(fileName)
@@ -143,12 +163,6 @@ func (k *KeepalivedHostCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
 }
 
 func (k *KeepalivedHostCollectorHost) StatsVrrps() (map[string]*collector.VRRPStats, error) {
-	if err := k.signal(k.SIGSTATS); err != nil {
-		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
-
-		return nil, err
-	}
-
 	const fileName = "/tmp/keepalived.stats"
 
 	f, err := os.Open(fileName)
@@ -163,12 +177,6 @@ func (k *KeepalivedHostCollectorHost) StatsVrrps() (map[string]*collector.VRRPSt
 }
 
 func (k *KeepalivedHostCollectorHost) DataVrrps() (map[string]*collector.VRRPData, error) {
-	if err := k.signal(k.SIGDATA); err != nil {
-		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
-
-		return nil, err
-	}
-
 	const fileName = "/tmp/keepalived.data"
 
 	f, err := os.Open(fileName)

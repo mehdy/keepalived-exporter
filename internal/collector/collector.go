@@ -14,6 +14,7 @@ import (
 )
 
 type Collector interface {
+	Refresh() error
 	ScriptVrrps() ([]VRRPScript, error)
 	DataVrrps() (map[string]*VRRPData, error)
 	StatsVrrps() (map[string]*VRRPStats, error)
@@ -217,6 +218,10 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 	}
 
 	var err error
+
+	if err := k.collector.Refresh(); err != nil {
+		return nil, err
+	}
 
 	if k.useJSON {
 		stats.VRRPs, err = k.collector.JSONVrrps()

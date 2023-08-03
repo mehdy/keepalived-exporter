@@ -56,6 +56,32 @@ func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerT
 	return k
 }
 
+func (k *KeepalivedContainerCollectorHost) Refresh() error {
+	if k.useJSON {
+		if err := k.signal(k.SIGJSON); err != nil {
+			logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
+
+			return err
+		}
+
+		return nil
+	}
+
+	if err := k.signal(k.SIGSTATS); err != nil {
+		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
+
+		return err
+	}
+
+	if err := k.signal(k.SIGDATA); err != nil {
+		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
+
+		return err
+	}
+
+	return nil
+}
+
 func (k *KeepalivedContainerCollectorHost) initPaths(containerTmpDir string) {
 	k.jsonPath = filepath.Join(containerTmpDir, "keepalived.json")
 	k.statsPath = filepath.Join(containerTmpDir, "keepalived.stats")
@@ -121,12 +147,6 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 
 // JSONVrrps send SIGJSON and parse the data to the list of collector.VRRP struct.
 func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
-	if err := k.signal(k.SIGJSON); err != nil {
-		logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
-
-		return nil, err
-	}
-
 	f, err := os.Open(k.jsonPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.jsonPath).Error("Failed to open keepalived.json")
@@ -140,12 +160,6 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 
 // StatsVrrps send SIGSTATS and parse the stats.
 func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.VRRPStats, error) {
-	if err := k.signal(k.SIGSTATS); err != nil {
-		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
-
-		return nil, err
-	}
-
 	f, err := os.Open(k.statsPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.statsPath).Error("Failed to open keepalived.stats")
@@ -159,12 +173,6 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 
 // DataVrrps send SIGDATA ans parse the data.
 func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VRRPData, error) {
-	if err := k.signal(k.SIGDATA); err != nil {
-		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
-
-		return nil, err
-	}
-
 	f, err := os.Open(k.dataPath)
 	if err != nil {
 		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
