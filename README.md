@@ -25,7 +25,7 @@ rpm -i keepalived-exporter-downloaded-pkg.rpm
 ### Binary releases
 
 ```bash
-export VERSION=1.3.1
+export VERSION=1.3.2
 wget https://github.com/mehdy/keepalived-exporter/releases/download/v${VERSION}/keepalived-exporter-${VERSION}.linux-amd64.tar.gz
 tar xvzf keepalived-exporter-${VERSION}.linux-amd64.tar.gz keepalived-exporter-${VERSION}.linux-amd64/keepalived-exporter
 sudo mv keepalived-exporter-${VERSION}.linux-amd64/keepalived-exporter /usr/local/bin/
