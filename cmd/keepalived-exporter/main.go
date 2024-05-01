@@ -10,8 +10,9 @@ import (
 	"github.com/mehdy/keepalived-exporter/internal/types/container"
 	"github.com/mehdy/keepalived-exporter/internal/types/host"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors/version"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/version"
+	common_version "github.com/prometheus/common/version"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,7 +30,7 @@ func main() {
 
 	if *versionFlag {
 		logrus.WithFields(logrus.Fields{
-			"commit": version.Revision, "version": version.Version, "build_time": version.BuildDate,
+			"commit": common_version.Revision, "version": common_version.Version, "build_time": common_version.BuildDate,
 		}).Info("Keepalived Exporter")
 
 		return
@@ -37,7 +38,11 @@ func main() {
 
 	var c collector.Collector
 	if *keepalivedContainerName != "" {
-		c = container.NewKeepalivedContainerCollectorHost(*keepalivedJSON, *keepalivedContainerName, *keepalivedContainerTmpDir)
+		c = container.NewKeepalivedContainerCollectorHost(
+			*keepalivedJSON,
+			*keepalivedContainerName,
+			*keepalivedContainerTmpDir,
+		)
 	} else {
 		c = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
 	}

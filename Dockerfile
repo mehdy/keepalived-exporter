@@ -1,4 +1,4 @@
-ARG GOVERSION=1.20
+ARG GOVERSION=1.22
 
 FROM golang:${GOVERSION}-alpine as builder
 
@@ -14,7 +14,7 @@ RUN make dep
 ADD . .
 RUN make build
 
-FROM alpine:3.17
+FROM alpine:3.19
 
 COPY --from=builder /build/keepalived-exporter /bin/keepalived-exporter
 
