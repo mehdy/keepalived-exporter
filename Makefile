@@ -1,7 +1,7 @@
 PROJECT_NAME := keepalived-exporter
 PKG := "github.com/mehdy/$(PROJECT_NAME)"
 LINTER = golangci-lint
-LINTER_VERSION = 1.53.3
+LINTER_VERSION = 1.57.2
 CURRENT_LINTER_VERSION := $(shell golangci-lint version 2>/dev/null | awk '{ print $$4 }')
 
 BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
@@ -28,7 +28,7 @@ ifneq ($(CURRENT_LINTER_VERSION), $(LINTER_VERSION))
 endif
 
 lint: lintdeps ## to lint the files
-	$(LINTER) run --config=.golangci-lint.yml ./...
+	$(LINTER) run --config=.golangci.yml ./...
 
 build: ## Build the binary file
 	@go build -v -ldflags="$(LD_FLAGS)" $(PKG)/cmd/$(PROJECT_NAME)
