@@ -98,6 +98,7 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 				val = strings.TrimSpace(l)
 			} else {
 				var args []string
+
 				switch {
 				case strings.Contains(l, prop):
 					args = strings.Split(strings.TrimSpace(l), prop)
@@ -111,6 +112,7 @@ func ParseVRRPData(i io.Reader) (map[string]*VRRPData, error) {
 				if isKeyArray(key) {
 					continue
 				}
+
 				val = strings.TrimSpace(args[1])
 			}
 
@@ -232,7 +234,9 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 
 			value, err := strconv.Atoi(val)
 			if err != nil {
-				logrus.WithFields(logrus.Fields{"key": key, "val": val}).WithError(err).Error("Unknown metric value from keepalived.stats")
+				logrus.WithFields(logrus.Fields{"key": key, "val": val}).
+					WithError(err).
+					Error("Unknown metric value from keepalived.stats")
 
 				return stats, err
 			}
@@ -283,7 +287,9 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 
 			value, err := strconv.Atoi(val)
 			if err != nil {
-				logrus.WithFields(logrus.Fields{"key": key, "val": val}).WithError(err).Error("Unknown metric value from keepalived.stats")
+				logrus.WithFields(logrus.Fields{"key": key, "val": val}).
+					WithError(err).
+					Error("Unknown metric value from keepalived.stats")
 
 				return stats, err
 			}

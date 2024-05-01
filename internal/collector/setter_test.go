@@ -59,8 +59,6 @@ func TestSetGArpDelay(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		t.Run(tc.delay, func(t *testing.T) {
 			t.Parallel()
 
@@ -86,8 +84,6 @@ func TestSetVRID(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		t.Run(tc.vrid, func(t *testing.T) {
 			t.Parallel()
 

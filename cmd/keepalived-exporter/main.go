@@ -52,7 +52,7 @@ func main() {
 	prometheus.MustRegister(version.NewCollector("keepalived_exporter"))
 
 	http.Handle(*metricsPath, promhttp.Handler())
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
 		_, err := w.Write([]byte(`<html>
 		<head><title>Keepalived Exporter</title></head>
 		<body>
