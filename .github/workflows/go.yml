@@ -73,5 +73,9 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
 
-      - name: Check lints
-        run: sudo make lint
+      - name: Golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: v1.57.2
+          args: --timeout 3m
+          skip-pkg-cache: true

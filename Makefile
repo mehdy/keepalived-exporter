@@ -28,7 +28,7 @@ ifneq ($(CURRENT_LINTER_VERSION), $(LINTER_VERSION))
 endif
 
 lint: lintdeps ## to lint the files
-	$(LINTER) run --config=.golangci-lint.yml ./...
+	$(LINTER) run --config=.golangci.yml ./...
 
 build: ## Build the binary file
 	@go build -v -ldflags="$(LD_FLAGS)" $(PKG)/cmd/$(PROJECT_NAME)
