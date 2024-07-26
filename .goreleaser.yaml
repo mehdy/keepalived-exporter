@@ -1,3 +1,4 @@
+version: 2
 before:
   hooks:
     - make dep
@@ -13,12 +14,9 @@ builds:
       - -X github.com/prometheus/common/version.Branch={{.Branch}}
       - -X github.com/prometheus/common/version.BuildDate={{.Date}}
     main: ./cmd/keepalived-exporter
-archives:
-  - name_template: "{{ .ProjectName }}-{{ .Version }}.{{ .Os }}-{{ .Arch }}"
 nfpms:
   - id: keepalived-exporter
     package_name: keepalived-exporter
-    file_name_template: "{{ .ProjectName }}-{{ .Version }}.{{ .Os }}-{{ .Arch }}"
     homepage: https://github.com/mehdy/keepalived-exporter
     maintainer: Mehdi Khoshnoodi <mehdy.khoshnoody@gmail.com>
     description: Prometheus exporter for keepalived
