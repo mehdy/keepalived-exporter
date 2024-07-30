@@ -7,8 +7,11 @@ import (
 	"regexp"
 	"strconv"
 	"syscall"
+	"strings"
 
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/api/types"
+    "github.com/docker/docker/api/types/strslice"
 	"github.com/hashicorp/go-version"
 	"github.com/mehdy/keepalived-exporter/internal/collector"
 	"github.com/mehdy/keepalived-exporter/internal/types/utils"
@@ -24,6 +27,7 @@ type KeepalivedContainerCollectorHost struct {
 	jsonPath      string
 	statsPath     string
 	dockerCli     *client.Client
+	pidPath       string
 
 	SIGJSON  syscall.Signal
 	SIGDATA  syscall.Signal
@@ -31,10 +35,11 @@ type KeepalivedContainerCollectorHost struct {
 }
 
 // NewKeepalivedContainerCollectorHost is creating new instance of KeepalivedContainerCollectorHost.
-func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerTmpDir string) *KeepalivedContainerCollectorHost {
+func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerTmpDir string, pidPath string) *KeepalivedContainerCollectorHost {
 	k := &KeepalivedContainerCollectorHost{
 		useJSON:       useJSON,
 		containerName: containerName,
+		pidPath: pidPath,
 	}
 
 	var err error
@@ -135,12 +140,42 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 // Signal sends signal to Keepalived process.
 func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
-	err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
-	if err != nil {
-		logrus.WithError(err).WithField("signal", int(signal)).Error("Failed to send signal")
+    logrus.WithField("signal", strconv.Itoa(int(signal))).Info("Signal Content")
 
-		return err
+	data, err := os.ReadFile(k.pidPath)
+	if err != nil {
+		logrus.WithField("path", k.pidPath).WithError(err).Error("Can't find keepalived pid. Use default kill command")
+		
+		err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
+		if err != nil {
+			logrus.WithError(err).WithField("signal", int(signal)).Error("Failed to send signal")
+		
+			return err
+		}
+		return nil
 	}
+
+	pid := strings.TrimSuffix(string(data), "\n")
+    logrus.WithField("pid", pid).Info("Find pid")
+
+    cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
+    execConfig := types.ExecConfig{
+        Cmd:          cmd,     // The command to execute inside the container
+        AttachStdout: true,    // To get the output
+        AttachStderr: true,    // To see any errors
+    }
+
+    // Create the execution instance
+    execIDResp, err := k.dockerCli.ContainerExecCreate(context.Background(), k.containerName, execConfig)
+    if err != nil {
+		logrus.WithError(err).Error("Error creating exec instance")
+    }
+
+    // Start the execution of the created command
+    err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, types.ExecStartCheck{})
+    if err != nil {
+	    logrus.WithError(err).Error("Error starting exec command")
+    }	
 
 	return nil
 }

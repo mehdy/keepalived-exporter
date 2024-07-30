@@ -42,6 +42,7 @@ func main() {
 			*keepalivedJSON,
 			*keepalivedContainerName,
 			*keepalivedContainerTmpDir,
+			*keepalivedPID,
 		)
 	} else {
 		c = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
