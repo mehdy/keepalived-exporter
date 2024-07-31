@@ -140,8 +140,6 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 // Signal sends signal to Keepalived process.
 func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
-    logrus.WithField("signal", strconv.Itoa(int(signal))).Info("Signal Content")
-
 	data, err := os.ReadFile(k.pidPath)
 	if err != nil {
 		logrus.WithField("path", k.pidPath).WithError(err).Error("Can't find keepalived pid. Use default kill command")
@@ -156,13 +154,13 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	}
 
 	pid := strings.TrimSuffix(string(data), "\n")
-    logrus.WithField("pid", pid).Info("Find pid")
+    logrus.WithField("pid", pid).Info("Pid found")
 
     cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
     execConfig := types.ExecConfig{
-        Cmd:          cmd,     // The command to execute inside the container
-        AttachStdout: true,    // To get the output
-        AttachStderr: true,    // To see any errors
+        Cmd:          cmd, 
+        AttachStdout: true,
+        AttachStderr: true,
     }
 
     // Create the execution instance
