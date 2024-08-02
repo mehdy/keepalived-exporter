@@ -11,7 +11,7 @@ import (
 
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/api/types"
-    "github.com/docker/docker/api/types/strslice"
+	"github.com/docker/docker/api/types/strslice"
 	"github.com/hashicorp/go-version"
 	"github.com/mehdy/keepalived-exporter/internal/collector"
 	"github.com/mehdy/keepalived-exporter/internal/types/utils"
@@ -155,26 +155,26 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	}
 
 	pid := strings.TrimSuffix(string(data), "\n")
-    logrus.WithField("pid", pid).Info("Pid found")
-
-    cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
-    execConfig := types.ExecConfig{
-        Cmd:          cmd, 
-        AttachStdout: true,
-        AttachStderr: true,
-    }
-
-    // Create the execution instance
-    execIDResp, err := k.dockerCli.ContainerExecCreate(context.Background(), k.containerName, execConfig)
-    if err != nil {
-		logrus.WithError(err).Error("Error creating exec instance")
-    }
-
-    // Start the execution of the created command
-    err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, types.ExecStartCheck{})
-    if err != nil {
-	    logrus.WithError(err).Error("Error starting exec command")
-    }	
+	logrus.WithField("pid", pid).Info("Pid found")
+	
+	cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
+	execConfig := types.ExecConfig{
+		Cmd:          cmd, 
+		AttachStdout: true,
+		AttachStderr: true,
+	}
+	
+	// Create the execution instance
+	execIDResp, err := k.dockerCli.ContainerExecCreate(context.Background(), k.containerName, execConfig)
+	if err != nil {
+	logrus.WithError(err).Error("Error creating exec instance")
+	}
+	
+	// Start the execution of the created command
+	err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, types.ExecStartCheck{})
+	if err != nil {
+	logrus.WithError(err).Error("Error starting exec command")
+	}	
 
 	return nil
 }
