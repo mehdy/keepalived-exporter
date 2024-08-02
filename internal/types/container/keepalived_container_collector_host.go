@@ -150,6 +150,7 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 		
 			return err
 		}
+		
 		return nil
 	}
 
