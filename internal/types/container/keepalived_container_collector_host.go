@@ -167,13 +167,13 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	// Create the execution instance
 	execIDResp, err := k.dockerCli.ContainerExecCreate(context.Background(), k.containerName, execConfig)
 	if err != nil {
-	logrus.WithError(err).Error("Error creating exec instance")
+		logrus.WithError(err).Error("Error creating exec instance")
 	}
 	
 	// Start the execution of the created command
 	err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, types.ExecStartCheck{})
 	if err != nil {
-	logrus.WithError(err).Error("Error starting exec command")
+		logrus.WithError(err).Error("Error starting exec command")
 	}	
 
 	return nil
