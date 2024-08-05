@@ -4,9 +4,8 @@ linters:
     - lll
     - varnamelen
     - wrapcheck
-    - goerr113
+    - err113
     - gochecknoglobals
-    - exhaustivestruct
     - exhaustruct
     - cyclop
     - funlen
@@ -14,7 +13,10 @@ linters:
     - gocyclo
     - testpackage
     - depguard
-    - gomnd # FIXME
+    - gomnd
+    - mnd
+    - execinquery
+    - maintidx
 
 linters-settings:
   tagliatelle:

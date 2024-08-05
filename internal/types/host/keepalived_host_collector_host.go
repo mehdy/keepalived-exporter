@@ -87,7 +87,9 @@ func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, 
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		logrus.WithFields(logrus.Fields{"stderr": stderr.String(), "stdout": stdout.String()}).WithError(err).Error("Error getting keepalived version")
+		logrus.WithFields(logrus.Fields{"stderr": stderr.String(), "stdout": stdout.String()}).
+			WithError(err).
+			Error("Error getting keepalived version")
 
 		return nil, errors.New("error getting keepalived version")
 	}
@@ -142,7 +144,9 @@ func (k *KeepalivedHostCollectorHost) sigNum(sigString string) syscall.Signal {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		logrus.WithFields(logrus.Fields{"signal": sigString, "stderr": stderr.String()}).WithError(err).Fatal("Error getting signum")
+		logrus.WithFields(logrus.Fields{"signal": sigString, "stderr": stderr.String()}).
+			WithError(err).
+			Fatal("Error getting signum")
 	}
 
 	return syscall.Signal(parseSigNum(stdout, sigString))

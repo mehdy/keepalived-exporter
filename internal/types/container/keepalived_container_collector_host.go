@@ -31,7 +31,10 @@ type KeepalivedContainerCollectorHost struct {
 }
 
 // NewKeepalivedContainerCollectorHost is creating new instance of KeepalivedContainerCollectorHost.
-func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerTmpDir string) *KeepalivedContainerCollectorHost {
+func NewKeepalivedContainerCollectorHost(
+	useJSON bool,
+	containerName, containerTmpDir string,
+) *KeepalivedContainerCollectorHost {
 	k := &KeepalivedContainerCollectorHost{
 		useJSON:       useJSON,
 		containerName: containerName,
@@ -119,7 +122,9 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 	stdout, err := k.dockerExecCmd(sigNumCommand)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"signal": sigString, "container": k.containerName}).WithError(err).Fatal("Error getting signum")
+		logrus.WithFields(logrus.Fields{"signal": sigString, "container": k.containerName}).
+			WithError(err).
+			Fatal("Error getting signum")
 	}
 
 	reg := regexp.MustCompile("[^0-9]+")
@@ -127,7 +132,9 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 	signum, err := strconv.ParseInt(strSigNum, 10, 32)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"signal": sigString, "signum": stdout.String()}).WithError(err).Fatal("Error parsing signum result")
+		logrus.WithFields(logrus.Fields{"signal": sigString, "signum": stdout.String()}).
+			WithError(err).
+			Fatal("Error parsing signum result")
 	}
 
 	return syscall.Signal(signum)

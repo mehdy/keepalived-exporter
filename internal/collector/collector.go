@@ -93,7 +93,13 @@ func NewKeepalivedCollector(useJSON bool, scriptPath string, collector Collector
 	return kc
 }
 
-func (k *KeepalivedCollector) newConstMetric(ch chan<- prometheus.Metric, name string, valueType prometheus.ValueType, value float64, lableValues ...string) {
+func (k *KeepalivedCollector) newConstMetric(
+	ch chan<- prometheus.Metric,
+	name string,
+	valueType prometheus.ValueType,
+	value float64,
+	lableValues ...string,
+) {
 	pm, err := prometheus.NewConstMetric(
 		k.metrics[name],
 		valueType,
@@ -144,21 +150,141 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	for _, vrrp := range keepalivedStats.VRRPs {
-		k.newConstMetric(ch, "keepalived_advertisements_received_total", prometheus.CounterValue, float64(vrrp.Stats.AdvertRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_advertisements_sent_total", prometheus.CounterValue, float64(vrrp.Stats.AdvertSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_become_master_total", prometheus.CounterValue, float64(vrrp.Stats.BecomeMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_release_master_total", prometheus.CounterValue, float64(vrrp.Stats.ReleaseMaster), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_packet_length_errors_total", prometheus.CounterValue, float64(vrrp.Stats.PacketLenErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_advertisements_interval_errors_total", prometheus.CounterValue, float64(vrrp.Stats.AdvertIntervalErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_ip_ttl_errors_total", prometheus.CounterValue, float64(vrrp.Stats.IPTTLErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_invalid_type_received_total", prometheus.CounterValue, float64(vrrp.Stats.InvalidTypeRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_address_list_errors_total", prometheus.CounterValue, float64(vrrp.Stats.AddrListErr), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_authentication_invalid_total", prometheus.CounterValue, float64(vrrp.Stats.InvalidAuthType), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_authentication_mismatch_total", prometheus.CounterValue, float64(vrrp.Stats.AuthTypeMismatch), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_authentication_failure_total", prometheus.CounterValue, float64(vrrp.Stats.AuthFailure), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_priority_zero_received_total", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroRcvd), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_priority_zero_sent_total", prometheus.CounterValue, float64(vrrp.Stats.PRIZeroSent), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
-		k.newConstMetric(ch, "keepalived_gratuitous_arp_delay_total", prometheus.CounterValue, float64(vrrp.Data.GArpDelay), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID))
+		k.newConstMetric(
+			ch,
+			"keepalived_advertisements_received_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.AdvertRcvd),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_advertisements_sent_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.AdvertSent),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_become_master_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.BecomeMaster),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_release_master_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.ReleaseMaster),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_packet_length_errors_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.PacketLenErr),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_advertisements_interval_errors_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.AdvertIntervalErr),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_ip_ttl_errors_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.IPTTLErr),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_invalid_type_received_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.InvalidTypeRcvd),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_address_list_errors_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.AddrListErr),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_authentication_invalid_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.InvalidAuthType),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_authentication_mismatch_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.AuthTypeMismatch),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_authentication_failure_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.AuthFailure),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_priority_zero_received_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.PRIZeroRcvd),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_priority_zero_sent_total",
+			prometheus.CounterValue,
+			float64(vrrp.Stats.PRIZeroSent),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
+		k.newConstMetric(
+			ch,
+			"keepalived_gratuitous_arp_delay_total",
+			prometheus.CounterValue,
+			float64(vrrp.Data.GArpDelay),
+			vrrp.Data.IName,
+			vrrp.Data.Intf,
+			strconv.Itoa(vrrp.Data.VRID),
+		)
 
 		for _, ip := range vrrp.Data.VIPs {
 			ipAddr, intf, ok := ParseVIP(ip)
@@ -166,7 +292,16 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				continue
 			}
 
-			k.newConstMetric(ch, "keepalived_vrrp_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
+			k.newConstMetric(
+				ch,
+				"keepalived_vrrp_state",
+				prometheus.GaugeValue,
+				float64(vrrp.Data.State),
+				vrrp.Data.IName,
+				intf,
+				strconv.Itoa(vrrp.Data.VRID),
+				ipAddr,
+			)
 
 			if k.scriptPath != "" {
 				checkScript := float64(0)
@@ -174,7 +309,16 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 					checkScript = 1
 				}
 
-				k.newConstMetric(ch, "keepalived_exporter_check_script_status", prometheus.GaugeValue, checkScript, vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
+				k.newConstMetric(
+					ch,
+					"keepalived_exporter_check_script_status",
+					prometheus.GaugeValue,
+					checkScript,
+					vrrp.Data.IName,
+					intf,
+					strconv.Itoa(vrrp.Data.VRID),
+					ipAddr,
+				)
 			}
 		}
 
@@ -185,12 +329,30 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				continue
 			}
 
-			k.newConstMetric(ch, "keepalived_vrrp_excluded_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, intf, strconv.Itoa(vrrp.Data.VRID), ipAddr)
+			k.newConstMetric(
+				ch,
+				"keepalived_vrrp_excluded_state",
+				prometheus.GaugeValue,
+				float64(vrrp.Data.State),
+				vrrp.Data.IName,
+				intf,
+				strconv.Itoa(vrrp.Data.VRID),
+				ipAddr,
+			)
 		}
 
 		// record vrrp_state metric even when VIPs are not defined, to support old keepalived release
 		if len(vrrp.Data.VIPs) == 0 {
-			k.newConstMetric(ch, "keepalived_vrrp_state", prometheus.GaugeValue, float64(vrrp.Data.State), vrrp.Data.IName, vrrp.Data.Intf, strconv.Itoa(vrrp.Data.VRID), "")
+			k.newConstMetric(
+				ch,
+				"keepalived_vrrp_state",
+				prometheus.GaugeValue,
+				float64(vrrp.Data.State),
+				vrrp.Data.IName,
+				vrrp.Data.Intf,
+				strconv.Itoa(vrrp.Data.VRID),
+				"",
+			)
 		}
 	}
 
@@ -278,7 +440,9 @@ func (k *KeepalivedCollector) checkScript(vip string) bool {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		logrus.WithFields(logrus.Fields{"VIP": vip, "stdout": stdout.String(), "stderr": stderr.String()}).WithError(err).Error("Check script failed")
+		logrus.WithFields(logrus.Fields{"VIP": vip, "stdout": stdout.String(), "stderr": stderr.String()}).
+			WithError(err).
+			Error("Check script failed")
 
 		return false
 	}
@@ -296,26 +460,126 @@ func (k *KeepalivedCollector) Describe(ch chan<- *prometheus.Desc) {
 func (k *KeepalivedCollector) fillMetrics() {
 	commonLabels := []string{"iname", "intf", "vrid"}
 	k.metrics = map[string]*prometheus.Desc{
-		"keepalived_up":                                   prometheus.NewDesc("keepalived_up", "Status", nil, nil),
-		"keepalived_vrrp_state":                           prometheus.NewDesc("keepalived_vrrp_state", "State of vrrp", []string{"iname", "intf", "vrid", "ip_address"}, nil),
-		"keepalived_vrrp_excluded_state":                  prometheus.NewDesc("keepalived_vrrp_excluded_state", "State of vrrp with excluded VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
-		"keepalived_exporter_check_script_status":         prometheus.NewDesc("keepalived_exporter_check_script_status", "Check Script status for each VIP", []string{"iname", "intf", "vrid", "ip_address"}, nil),
-		"keepalived_gratuitous_arp_delay_total":           prometheus.NewDesc("keepalived_gratuitous_arp_delay_total", "Gratuitous ARP delay", commonLabels, nil),
-		"keepalived_advertisements_received_total":        prometheus.NewDesc("keepalived_advertisements_received_total", "Advertisements received", commonLabels, nil),
-		"keepalived_advertisements_sent_total":            prometheus.NewDesc("keepalived_advertisements_sent_total", "Advertisements sent", commonLabels, nil),
-		"keepalived_become_master_total":                  prometheus.NewDesc("keepalived_become_master_total", "Became master", commonLabels, nil),
-		"keepalived_release_master_total":                 prometheus.NewDesc("keepalived_release_master_total", "Released master", commonLabels, nil),
-		"keepalived_packet_length_errors_total":           prometheus.NewDesc("keepalived_packet_length_errors_total", "Packet length errors", commonLabels, nil),
-		"keepalived_advertisements_interval_errors_total": prometheus.NewDesc("keepalived_advertisements_interval_errors_total", "Advertisement interval errors", commonLabels, nil),
-		"keepalived_ip_ttl_errors_total":                  prometheus.NewDesc("keepalived_ip_ttl_errors_total", "TTL errors", commonLabels, nil),
-		"keepalived_invalid_type_received_total":          prometheus.NewDesc("keepalived_invalid_type_received_total", "Invalid type errors", commonLabels, nil),
-		"keepalived_address_list_errors_total":            prometheus.NewDesc("keepalived_address_list_errors_total", "Address list errors", commonLabels, nil),
-		"keepalived_authentication_invalid_total":         prometheus.NewDesc("keepalived_authentication_invalid_total", "Authentication invalid", commonLabels, nil),
-		"keepalived_authentication_mismatch_total":        prometheus.NewDesc("keepalived_authentication_mismatch_total", "Authentication mismatch", commonLabels, nil),
-		"keepalived_authentication_failure_total":         prometheus.NewDesc("keepalived_authentication_failure_total", "Authentication failure", commonLabels, nil),
-		"keepalived_priority_zero_received_total":         prometheus.NewDesc("keepalived_priority_zero_received_total", "Priority zero received", commonLabels, nil),
-		"keepalived_priority_zero_sent_total":             prometheus.NewDesc("keepalived_priority_zero_sent_total", "Priority zero sent", commonLabels, nil),
-		"keepalived_script_status":                        prometheus.NewDesc("keepalived_script_status", "Tracker Script Status", []string{"name"}, nil),
-		"keepalived_script_state":                         prometheus.NewDesc("keepalived_script_state", "Tracker Script State", []string{"name"}, nil),
+		"keepalived_up": prometheus.NewDesc("keepalived_up", "Status", nil, nil),
+		"keepalived_vrrp_state": prometheus.NewDesc(
+			"keepalived_vrrp_state",
+			"State of vrrp",
+			[]string{"iname", "intf", "vrid", "ip_address"},
+			nil,
+		),
+		"keepalived_vrrp_excluded_state": prometheus.NewDesc(
+			"keepalived_vrrp_excluded_state",
+			"State of vrrp with excluded VIP",
+			[]string{"iname", "intf", "vrid", "ip_address"},
+			nil,
+		),
+		"keepalived_exporter_check_script_status": prometheus.NewDesc(
+			"keepalived_exporter_check_script_status",
+			"Check Script status for each VIP",
+			[]string{"iname", "intf", "vrid", "ip_address"},
+			nil,
+		),
+		"keepalived_gratuitous_arp_delay_total": prometheus.NewDesc(
+			"keepalived_gratuitous_arp_delay_total",
+			"Gratuitous ARP delay",
+			commonLabels,
+			nil,
+		),
+		"keepalived_advertisements_received_total": prometheus.NewDesc(
+			"keepalived_advertisements_received_total",
+			"Advertisements received",
+			commonLabels,
+			nil,
+		),
+		"keepalived_advertisements_sent_total": prometheus.NewDesc(
+			"keepalived_advertisements_sent_total",
+			"Advertisements sent",
+			commonLabels,
+			nil,
+		),
+		"keepalived_become_master_total": prometheus.NewDesc(
+			"keepalived_become_master_total",
+			"Became master",
+			commonLabels,
+			nil,
+		),
+		"keepalived_release_master_total": prometheus.NewDesc(
+			"keepalived_release_master_total",
+			"Released master",
+			commonLabels,
+			nil,
+		),
+		"keepalived_packet_length_errors_total": prometheus.NewDesc(
+			"keepalived_packet_length_errors_total",
+			"Packet length errors",
+			commonLabels,
+			nil,
+		),
+		"keepalived_advertisements_interval_errors_total": prometheus.NewDesc(
+			"keepalived_advertisements_interval_errors_total",
+			"Advertisement interval errors",
+			commonLabels,
+			nil,
+		),
+		"keepalived_ip_ttl_errors_total": prometheus.NewDesc(
+			"keepalived_ip_ttl_errors_total",
+			"TTL errors",
+			commonLabels,
+			nil,
+		),
+		"keepalived_invalid_type_received_total": prometheus.NewDesc(
+			"keepalived_invalid_type_received_total",
+			"Invalid type errors",
+			commonLabels,
+			nil,
+		),
+		"keepalived_address_list_errors_total": prometheus.NewDesc(
+			"keepalived_address_list_errors_total",
+			"Address list errors",
+			commonLabels,
+			nil,
+		),
+		"keepalived_authentication_invalid_total": prometheus.NewDesc(
+			"keepalived_authentication_invalid_total",
+			"Authentication invalid",
+			commonLabels,
+			nil,
+		),
+		"keepalived_authentication_mismatch_total": prometheus.NewDesc(
+			"keepalived_authentication_mismatch_total",
+			"Authentication mismatch",
+			commonLabels,
+			nil,
+		),
+		"keepalived_authentication_failure_total": prometheus.NewDesc(
+			"keepalived_authentication_failure_total",
+			"Authentication failure",
+			commonLabels,
+			nil,
+		),
+		"keepalived_priority_zero_received_total": prometheus.NewDesc(
+			"keepalived_priority_zero_received_total",
+			"Priority zero received",
+			commonLabels,
+			nil,
+		),
+		"keepalived_priority_zero_sent_total": prometheus.NewDesc(
+			"keepalived_priority_zero_sent_total",
+			"Priority zero sent",
+			commonLabels,
+			nil,
+		),
+		"keepalived_script_status": prometheus.NewDesc(
+			"keepalived_script_status",
+			"Tracker Script Status",
+			[]string{"name"},
+			nil,
+		),
+		"keepalived_script_state": prometheus.NewDesc(
+			"keepalived_script_state",
+			"Tracker Script State",
+			[]string{"name"},
+			nil,
+		),
 	}
 }
