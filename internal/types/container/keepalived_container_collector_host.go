@@ -35,7 +35,10 @@ type KeepalivedContainerCollectorHost struct {
 }
 
 // NewKeepalivedContainerCollectorHost is creating new instance of KeepalivedContainerCollectorHost.
-func NewKeepalivedContainerCollectorHost(useJSON bool, containerName, containerTmpDir string, pidPath string) *KeepalivedContainerCollectorHost {
+func NewKeepalivedContainerCollectorHost(
+	useJSON bool,
+	containerName, containerTmpDir, pidPath string,
+) *KeepalivedContainerCollectorHost {
 	k := &KeepalivedContainerCollectorHost{
 		useJSON:       useJSON,
 		containerName: containerName,
@@ -124,7 +127,9 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 	stdout, err := k.dockerExecCmd(sigNumCommand)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"signal": sigString, "container": k.containerName}).WithError(err).Fatal("Error getting signum")
+		logrus.WithFields(logrus.Fields{"signal": sigString, "container": k.containerName}).
+			WithError(err).
+			Fatal("Error getting signum")
 	}
 
 	reg := regexp.MustCompile("[^0-9]+")
@@ -132,7 +137,9 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 	signum, err := strconv.ParseInt(strSigNum, 10, 32)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"signal": sigString, "signum": stdout.String()}).WithError(err).Fatal("Error parsing signum result")
+		logrus.WithFields(logrus.Fields{"signal": sigString, "signum": stdout.String()}).
+			WithError(err).
+			Fatal("Error parsing signum result")
 	}
 
 	return syscall.Signal(signum)
@@ -142,7 +149,7 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	data, err := os.ReadFile(k.pidPath)
 	if err != nil {
-		logrus.WithField("path", k.pidPath).WithError(err).Error("Can't find keepalived pid. Use default kill command")
+		logrus.WithField("path", k.pidPath).WithError(err).Error("Can't find keepalived pid. Send signal to default process")
 		
 		err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
 		if err != nil {
