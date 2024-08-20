@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"syscall"
 	"strings"
+	"syscall"
 
-	"github.com/docker/docker/client"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/strslice"
+	"github.com/docker/docker/client"
 	"github.com/hashicorp/go-version"
 	"github.com/mehdy/keepalived-exporter/internal/collector"
 	"github.com/mehdy/keepalived-exporter/internal/types/utils"
@@ -175,12 +175,16 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	execIDResp, err := k.dockerCli.ContainerExecCreate(context.Background(), k.containerName, execConfig)
 	if err != nil {
 		logrus.WithError(err).Error("Error creating exec instance")
+		
+		return err
 	}
 	
 	// Start the execution of the created command
 	err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, types.ExecStartCheck{})
 	if err != nil {
 		logrus.WithError(err).Error("Error starting exec command")
+		
+		return err
 	}	
 
 	return nil
