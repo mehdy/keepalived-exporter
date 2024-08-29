@@ -42,7 +42,7 @@ func NewKeepalivedContainerCollectorHost(
 	k := &KeepalivedContainerCollectorHost{
 		useJSON:       useJSON,
 		containerName: containerName,
-		pidPath: pidPath,
+		pidPath:       pidPath,
 	}
 
 	var err error
@@ -150,42 +150,42 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	data, err := os.ReadFile(k.pidPath)
 	if err != nil {
 		logrus.WithField("path", k.pidPath).WithError(err).Error("Can't find keepalived pid. Send signal to default process")
-		
+
 		err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
 		if err != nil {
 			logrus.WithError(err).WithField("signal", int(signal)).Error("Failed to send signal")
-		
+
 			return err
 		}
-		
+
 		return nil
 	}
 
 	pid := strings.TrimSuffix(string(data), "\n")
 	logrus.WithField("pid", pid).Info("Pid found")
-	
+
 	cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
 	execConfig := types.ExecConfig{
-		Cmd:          cmd, 
+		Cmd:          cmd,
 		AttachStdout: true,
 		AttachStderr: true,
 	}
-	
+
 	// Create the execution instance
 	execIDResp, err := k.dockerCli.ContainerExecCreate(context.Background(), k.containerName, execConfig)
 	if err != nil {
 		logrus.WithError(err).Error("Error creating exec instance")
-		
+
 		return err
 	}
-	
+
 	// Start the execution of the created command
 	err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, types.ExecStartCheck{})
 	if err != nil {
 		logrus.WithError(err).Error("Error starting exec command")
-		
+
 		return err
-	}	
+	}
 
 	return nil
 }
