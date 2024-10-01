@@ -6,7 +6,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/docker/docker v26.1.5+incompatible
 	github.com/hashicorp/go-version v1.7.0
-	github.com/prometheus/client_golang v1.20.3
+	github.com/prometheus/client_golang v1.20.4
 	github.com/prometheus/common v0.59.1
 	github.com/sirupsen/logrus v1.9.3
 )
