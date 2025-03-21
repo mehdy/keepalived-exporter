@@ -58,7 +58,7 @@ type VRRPData struct {
 	GArpDelay    int      `json:"garp_delay"`
 	VRID         int      `json:"vrid"`
 	VIPs         []string `json:"vips"`
-	ExcludedVIPs []string `json:"excluded_vips"`
+	ExcludedVIPs []string `json:"evips"`
 }
 
 // VRRPScript represents Keepalived script about VRRP.
