@@ -1,7 +1,7 @@
 PROJECT_NAME := keepalived-exporter
 PKG := "github.com/mehdy/$(PROJECT_NAME)"
 LINTER = golangci-lint
-LINTER_VERSION = 1.59.1
+LINTER_VERSION = 2.0.0
 CURRENT_LINTER_VERSION := $(shell golangci-lint version 2>/dev/null | awk '{ print $$4 }')
 
 BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
@@ -24,7 +24,7 @@ dep: ## Get the dependencies
 
 lintdeps: ## golangci-lint dependencies
 ifneq ($(CURRENT_LINTER_VERSION), $(LINTER_VERSION))
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v$(LINTER_VERSION)
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v$(LINTER_VERSION)
 endif
 
 lint: lintdeps ## to lint the files

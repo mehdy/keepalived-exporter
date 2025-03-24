@@ -9,7 +9,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/hashicorp/go-version"
@@ -165,7 +165,7 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	logrus.WithField("pid", pid).Info("Pid found")
 
 	cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
-	execConfig := types.ExecConfig{
+	execConfig := container.ExecOptions{
 		Cmd:          cmd,
 		AttachStdout: true,
 		AttachStderr: true,
@@ -180,7 +180,7 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	}
 
 	// Start the execution of the created command
-	err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, types.ExecStartCheck{})
+	err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, container.ExecStartOptions{})
 	if err != nil {
 		logrus.WithError(err).Error("Error starting exec command")
 
@@ -198,7 +198,12 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseJSON(f)
 }
@@ -211,7 +216,12 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseStats(f)
 }
@@ -224,7 +234,12 @@ func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VR
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseVRRPData(f)
 }
@@ -237,7 +252,12 @@ func (k *KeepalivedContainerCollectorHost) ScriptVrrps() ([]collector.VRRPScript
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseVRRPScript(f), nil
 }

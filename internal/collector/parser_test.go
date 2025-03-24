@@ -70,7 +70,7 @@ func TestV215ParseVRRPData(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck
 
 	vrrpData, err := ParseVRRPData(f)
 	if err != nil {
@@ -136,7 +136,7 @@ func TestV2010ParseVRRPData(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck
 
 	vrrpData, err := ParseVRRPData(f)
 	if err != nil {
@@ -177,7 +177,7 @@ func TestV215ParseVRRPScript(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck
 
 	vrrpScripts := ParseVRRPScript(f)
 
@@ -208,7 +208,7 @@ func TestV2010ParseVRRPScript(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck
 
 	vrrpScripts := ParseVRRPScript(f)
 
@@ -239,7 +239,7 @@ func TestV215ParseStats(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck
 
 	stats, err := ParseStats(f)
 	if err != nil {
@@ -323,7 +323,7 @@ func TestV135ParseVRRPData(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck
 
 	vrrpData, err := ParseVRRPData(f)
 	if err != nil {
@@ -364,7 +364,7 @@ func TestV135ParseVRRPScript(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck
 
 	vrrpScripts := ParseVRRPScript(f)
 
@@ -395,7 +395,7 @@ func TestV135ParseStats(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck
 
 	stats, err := ParseStats(f)
 	if err != nil {
@@ -478,7 +478,7 @@ func TestV227ParseVRRPData(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck
 
 	vrrpData, err := ParseVRRPData(f)
 	if err != nil {

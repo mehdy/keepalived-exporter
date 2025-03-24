@@ -161,7 +161,12 @@ func (k *KeepalivedHostCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseJSON(f)
 }
@@ -175,7 +180,12 @@ func (k *KeepalivedHostCollectorHost) StatsVrrps() (map[string]*collector.VRRPSt
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseStats(f)
 }
@@ -189,7 +199,12 @@ func (k *KeepalivedHostCollectorHost) DataVrrps() (map[string]*collector.VRRPDat
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseVRRPData(f)
 }
@@ -203,7 +218,12 @@ func (k *KeepalivedHostCollectorHost) ScriptVrrps() ([]collector.VRRPScript, err
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseVRRPScript(f), nil
 }
