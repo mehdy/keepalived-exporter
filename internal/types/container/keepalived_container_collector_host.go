@@ -198,7 +198,12 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseJSON(f)
 }
@@ -211,7 +216,12 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseStats(f)
 }
@@ -224,7 +234,12 @@ func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VR
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseVRRPData(f)
 }
@@ -237,7 +252,12 @@ func (k *KeepalivedContainerCollectorHost) ScriptVrrps() ([]collector.VRRPScript
 
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			logrus.WithError(err).Error("Failed to close file")
+		}
+	}()
 
 	return collector.ParseVRRPScript(f), nil
 }
