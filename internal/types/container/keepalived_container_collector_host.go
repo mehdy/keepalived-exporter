@@ -9,7 +9,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/hashicorp/go-version"
@@ -165,7 +165,7 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	logrus.WithField("pid", pid).Info("Pid found")
 
 	cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
-	execConfig := types.ExecConfig{
+	execConfig := container.ExecOptions{
 		Cmd:          cmd,
 		AttachStdout: true,
 		AttachStderr: true,
@@ -180,7 +180,7 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 	}
 
 	// Start the execution of the created command
-	err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, types.ExecStartCheck{})
+	err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, container.ExecStartOptions{})
 	if err != nil {
 		logrus.WithError(err).Error("Error starting exec command")
 

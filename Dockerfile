@@ -1,6 +1,4 @@
-ARG GOVERSION=1.22
-
-FROM golang:${GOVERSION}-alpine as builder
+FROM golang:1.24.1-alpine as builder
 
 WORKDIR /build
 
@@ -14,7 +12,7 @@ RUN make dep
 ADD . .
 RUN make build
 
-FROM alpine:3.19
+FROM alpine:3.21.3
 
 COPY --from=builder /build/keepalived-exporter /bin/keepalived-exporter
 
