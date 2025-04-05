@@ -1,5 +1,5 @@
+version: "2"
 linters:
-  enable-all: true
   disable:
     - lll
     - varnamelen
@@ -13,13 +13,11 @@ linters:
     - gocyclo
     - testpackage
     - depguard
-    - gomnd
     - mnd
-    - execinquery
     - maintidx
 
-linters-settings:
-  tagliatelle:
-    case:
-      rules:
-        json: snake
+  settings:
+    tagliatelle:
+      case:
+        rules:
+          json: snake
