@@ -4,7 +4,7 @@ go 1.24.1
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/docker/docker v28.0.2+incompatible
+	github.com/docker/docker v28.0.4+incompatible
 	github.com/hashicorp/go-version v1.7.0
 	github.com/prometheus/client_golang v1.21.1
 	github.com/prometheus/common v0.63.0
