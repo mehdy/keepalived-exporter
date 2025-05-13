@@ -37,7 +37,14 @@ func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHos
 	if k.version, err = k.getKeepalivedVersion(); err != nil {
 		logrus.WithError(err).Warn("Version detection failed. Assuming it's the latest one.")
 	}
-
+	
+	if useJSON {
+		supported, err := isEnableJsonSupported()
+        	if err != nil {
+			logrus.WithError(err).Warn("Json support detection failed. Please check keepalivedJSON flag")
+        	}
+	}
+	
 	k.initSignals()
 
 	return k
@@ -95,6 +102,22 @@ func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, 
 	}
 
 	return utils.ParseVersion(stderr.String())
+}
+
+func isEnableJsonSupported() (bool, error) {
+        cmd := exec.Command("keepalived", "--version")
+        output, err := cmd.CombinedOutput()
+        if err != nil {
+                return false, fmt.Errorf("failed to execute keepalived --version: %v", err)
+        }
+
+        outputStr := string(output)
+
+        if strings.Contains(outputStr, "--enable-json") {
+                return true, nil
+        }
+
+        return false, fmt.Errorf("keepalived does not turn on the enable-json switch")
 }
 
 // Signal sends signal to Keepalived process.
