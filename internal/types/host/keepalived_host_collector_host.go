@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"fmt"
 
 	"github.com/hashicorp/go-version"
 	"github.com/mehdy/keepalived-exporter/internal/collector"
@@ -39,9 +40,10 @@ func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHos
 	}
 	
 	if useJSON {
-		supported, err := isEnableJsonSupported()
+		err = isEnableJSONSupported()
         	if err != nil {
-			logrus.WithError(err).Warn("Json support detection failed. Please check keepalivedJSON flag")
+			logrus.WithError(err).Warn("JSON support detection failed. Please check keepalivedJSON flag")
+			return nil
         	}
 	}
 	
@@ -104,20 +106,20 @@ func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, 
 	return utils.ParseVersion(stderr.String())
 }
 
-func isEnableJsonSupported() (bool, error) {
+func isEnableJSONSupported() error {
         cmd := exec.Command("keepalived", "--version")
         output, err := cmd.CombinedOutput()
         if err != nil {
-                return false, fmt.Errorf("failed to execute keepalived --version: %v", err)
+                return fmt.Errorf("failed to execute keepalived --version: %v", err)
         }
 
         outputStr := string(output)
 
         if strings.Contains(outputStr, "--enable-json") {
-                return true, nil
+                return nil
         }
 
-        return false, fmt.Errorf("keepalived does not turn on the enable-json switch")
+        return fmt.Errorf("keepalived does not turn on the enable-json switch")
 }
 
 // Signal sends signal to Keepalived process.
