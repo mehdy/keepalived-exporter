@@ -31,13 +31,20 @@ nfpms:
       - deb
       - rpm
     bindir: /usr/bin
-dockers:
-  - image_templates:
-      - mehdy/keepalived-exporter:latest
-      - mehdy/keepalived-exporter:{{ .Tag }}
-      - ghcr.io/mehdy/keepalived-exporter:latest
-      - ghcr.io/mehdy/keepalived-exporter:{{ .Tag }}
-    dockerfile: deployments/release/Dockerfile
+kos:
+  - repositories:
+      - ghcr.io/mehdy/keepalived-exporter
+      - mehdy/keepalived-exporter
+    tags:
+      - latest
+      - "{{ .Tag }}"
+    platforms:
+      - linux/arm/v6
+      - linux/arm/v7
+      - linux/arm64
+      - linux/amd64
+      - linux/386
+    base_image: alpine
 checksum:
   name_template: "checksums.txt"
 snapshot:
