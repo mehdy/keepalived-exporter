@@ -45,6 +45,7 @@ kos:
       - linux/amd64
       - linux/386
     base_image: alpine
+    bare: true
 checksum:
   name_template: "checksums.txt"
 snapshot:
