@@ -28,7 +28,7 @@ type KeepalivedHostCollectorHost struct {
 }
 
 // NewKeepalivedHostCollectorHost is creating new instance of KeepalivedHostCollectorHost.
-func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHostCollectorHost {
+func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) (*KeepalivedHostCollectorHost, error) {
 	k := &KeepalivedHostCollectorHost{
 		useJSON: useJSON,
 		pidPath: pidPath,
@@ -43,13 +43,13 @@ func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHos
 		err = isEnableJSONSupported()
         	if err != nil {
 			logrus.WithError(err).Warn("JSON support detection failed. Please check keepalivedJSON flag")
-			return nil
+			return nil, err
         	}
 	}
 	
 	k.initSignals()
 
-	return k
+	return k, nil
 }
 
 func (k *KeepalivedHostCollectorHost) Refresh() error {
