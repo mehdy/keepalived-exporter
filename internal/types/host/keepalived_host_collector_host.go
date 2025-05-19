@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"fmt"
 
 	"github.com/hashicorp/go-version"
 	"github.com/mehdy/keepalived-exporter/internal/collector"
@@ -27,7 +28,7 @@ type KeepalivedHostCollectorHost struct {
 }
 
 // NewKeepalivedHostCollectorHost is creating new instance of KeepalivedHostCollectorHost.
-func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHostCollectorHost {
+func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) (*KeepalivedHostCollectorHost, error) {
 	k := &KeepalivedHostCollectorHost{
 		useJSON: useJSON,
 		pidPath: pidPath,
@@ -37,10 +38,18 @@ func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHos
 	if k.version, err = k.getKeepalivedVersion(); err != nil {
 		logrus.WithError(err).Warn("Version detection failed. Assuming it's the latest one.")
 	}
-
+	
+	if useJSON {
+		err = isEnableJSONSupported()
+        	if err != nil {
+			logrus.WithError(err).Warn("JSON support detection failed. Please check keepalivedJSON flag")
+			return nil, err
+        	}
+	}
+	
 	k.initSignals()
 
-	return k
+	return k, nil
 }
 
 func (k *KeepalivedHostCollectorHost) Refresh() error {
@@ -95,6 +104,22 @@ func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, 
 	}
 
 	return utils.ParseVersion(stderr.String())
+}
+
+func isEnableJSONSupported() error {
+        cmd := exec.Command("keepalived", "--version")
+        output, err := cmd.CombinedOutput()
+        if err != nil {
+                return fmt.Errorf("failed to execute keepalived --version: %v", err)
+        }
+
+        outputStr := string(output)
+
+        if strings.Contains(outputStr, "--enable-json") {
+                return nil
+        }
+
+        return fmt.Errorf("keepalived does not turn on the enable-json switch")
 }
 
 // Signal sends signal to Keepalived process.

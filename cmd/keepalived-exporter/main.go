@@ -37,6 +37,7 @@ func main() {
 	}
 
 	var c collector.Collector
+	var err error
 	if *keepalivedContainerName != "" {
 		c = container.NewKeepalivedContainerCollectorHost(
 			*keepalivedJSON,
@@ -45,7 +46,11 @@ func main() {
 			*keepalivedPID,
 		)
 	} else {
-		c = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
+		c, err = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
+		if err != nil {
+			logrus.WithError(err).Error("Could not get KeepalivedHostCollectorHost struct")
+			os.Exit(1)
+		}
 	}
 
 	keepalivedCollector := collector.NewKeepalivedCollector(*keepalivedJSON, *keepalivedCheckScript, c)
