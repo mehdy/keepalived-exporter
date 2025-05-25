@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"log/slog"
 
 	"github.com/docker/docker/api/types/container"
-	"github.com/sirupsen/logrus"
 )
 
 func (k *KeepalivedContainerCollectorHost) dockerExecCmd(cmd []string) (*bytes.Buffer, error) {
@@ -16,14 +16,14 @@ func (k *KeepalivedContainerCollectorHost) dockerExecCmd(cmd []string) (*bytes.B
 		Cmd:          cmd,
 	})
 	if err != nil {
-		logrus.WithError(err).WithField("CMD", cmd).Error("Error creating exec container")
+		slog.Error("Error creating exec container", "CMD", cmd, "error", err)
 
 		return nil, err
 	}
 
 	response, err := k.dockerCli.ContainerExecAttach(context.Background(), rst.ID, container.ExecStartOptions{})
 	if err != nil {
-		logrus.WithError(err).WithField("CMD", cmd).Error("Error attaching a connection to an exec process")
+		slog.Error("Error attaching a connection to an exec process", "CMD", cmd, "error", err)
 
 		return nil, err
 	}
@@ -31,7 +31,10 @@ func (k *KeepalivedContainerCollectorHost) dockerExecCmd(cmd []string) (*bytes.B
 
 	data, err := io.ReadAll(response.Reader)
 	if err != nil {
-		logrus.WithError(err).WithField("CMD", cmd).Error("Error reading response from docker command")
+		slog.Error("Error reading response from docker command",
+			"error", err,
+			"CMD", cmd,
+		)
 
 		return nil, err
 	}

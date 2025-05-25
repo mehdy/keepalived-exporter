@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -13,7 +14,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/collectors/version"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	common_version "github.com/prometheus/common/version"
-	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -30,9 +30,12 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		logrus.WithFields(logrus.Fields{
-			"commit": common_version.Revision, "version": common_version.Version, "build_time": common_version.BuildDate,
-		}).Info("Keepalived Exporter")
+		slog.Info("Keepalived Exporter Version",
+			"version", common_version.Version,
+			"revision", common_version.Revision,
+			"build_date", common_version.BuildDate,
+			"goversion", common_version.GoVersion,
+		)
 
 		return
 	}
@@ -53,11 +56,13 @@ func main() {
 	if *keepalivedJSON {
 		jsonSupport, err := c.HasJSONSignalSupport()
 		if err != nil {
-			logrus.WithError(err).Fatal("Error checking JSON signal support")
+			slog.Error("Error checking JSON signal support", "error", err)
+			os.Exit(1)
 		}
 
 		if !jsonSupport {
-			logrus.Fatal("Keepalived does not support JSON signal")
+			slog.Error("Keepalived does not support JSON signal. Please use a version that supports it.")
+			os.Exit(1)
 		}
 	}
 
@@ -75,18 +80,21 @@ func main() {
 		</body>
 		</html>`))
 		if err != nil {
-			logrus.WithError(err).Warn("Error on returning home page")
+			slog.Warn("Error writing response", "error", err)
 		}
 	})
 
-	logrus.Info("Listening on address: ", *listenAddr)
+	slog.Info("Starting Keepalived Exporter",
+		"version", common_version.Version,
+		"address", *listenAddr,
+	)
 
 	server := &http.Server{
 		Addr:              *listenAddr,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	if err := server.ListenAndServe(); err != nil {
-		logrus.WithError(err).Error("Error starting HTTP server")
+		slog.Error("Failed to start HTTP server", "error", err)
 		os.Exit(1)
 	}
 }

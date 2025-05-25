@@ -1,10 +1,11 @@
 package utils
 
 import (
+	"log/slog"
+	"os"
 	"syscall"
 
 	"github.com/hashicorp/go-version"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -21,7 +22,11 @@ func HasSigNumSupport(version *version.Version) bool {
 func GetDefaultSignal(sigString string) syscall.Signal {
 	sig, ok := defaultSignals[sigString]
 	if !ok {
-		logrus.WithField("signal", sigString).Fatal("Unsupported signal for your keepalived")
+		slog.Error("Unsupported signal for your keepalived",
+			"signal", sigString,
+			"supportedSignals", defaultSignals,
+		)
+		os.Exit(1)
 	}
 
 	return sig

@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"strconv"
 	"strings"
 
-	"github.com/sirupsen/logrus"
+	"slices"
 )
 
 var (
@@ -63,13 +64,14 @@ func ParseJSON(i io.Reader) ([]VRRP, error) {
 // isKeyArray checks if key is array in keepalived.data file.
 func isKeyArray(key string) bool {
 	supportedKeys := []string{"Virtual IP"}
-	for _, supportedKey := range supportedKeys {
-		if supportedKey == key {
-			return true
-		}
+	if slices.Contains(supportedKeys, key) {
+		return true
 	}
 
-	logrus.WithField("Key", key).Debug("Unsupported array key")
+	slog.Debug("Unsupported array key",
+		"Key", key,
+		"SupportedKeys", supportedKeys,
+	)
 
 	return false
 }
@@ -234,9 +236,11 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 
 			value, err := strconv.Atoi(val)
 			if err != nil {
-				logrus.WithFields(logrus.Fields{"key": key, "val": val}).
-					WithError(err).
-					Error("Unknown metric value from keepalived.stats")
+				slog.Error("Unknown metric value from keepalived.stats",
+					"key", key,
+					"val", val,
+					"error", err,
+				)
 
 				return stats, err
 			}
@@ -287,9 +291,11 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 
 			value, err := strconv.Atoi(val)
 			if err != nil {
-				logrus.WithFields(logrus.Fields{"key": key, "val": val}).
-					WithError(err).
-					Error("Unknown metric value from keepalived.stats")
+				slog.Error("Unknown metric value from keepalived.stats",
+					"key", key,
+					"val", val,
+					"error", err,
+				)
 
 				return stats, err
 			}
@@ -309,7 +315,11 @@ func ParseStats(i io.Reader) (map[string]*VRRPStats, error) {
 func ParseVIP(vip string) (string, string, bool) {
 	args := strings.Split(vip, " ")
 	if len(args) < 3 {
-		logrus.WithField("VIP", vip).Error("Failed to parse VIP from keepalived data")
+		slog.Error("Failed to parse VIP from keepalived data",
+			"VIP", vip,
+			"ExpectedArgs", 3,
+			"GotArgs", len(args),
+		)
 
 		return "", "", false
 	}
