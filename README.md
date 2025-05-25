@@ -80,8 +80,8 @@ Volume docker socket (`/var/run/docker.sock`) to Keepalived Exporter cotnainer i
 
 ```bash
 docker pull ghcr.io/mehdy/keepalived-exporter
-docker run -v keepalived-data:/tmp/ -v run:/var/run/ ... $KEEPALIVED_IMAGE
-docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -v run/keepalived.pid:/var/run/keepalived.pid:ro -p 9165:9165 ghcr.io/mehdy/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
+docker run -v keepalived-data:/tmp/ ... $KEEPALIVED_IMAGE
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -p 9165:9165 ghcr.io/mehdy/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
 ```
 
 ## Metrics

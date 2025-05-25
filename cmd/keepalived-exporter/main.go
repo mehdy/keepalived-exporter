@@ -21,6 +21,7 @@ func main() {
 	metricsPath := flag.String("web.telemetry-path", "/metrics", "A path under which to expose metrics.")
 	keepalivedJSON := flag.Bool("ka.json", false, "Send SIGJSON and decode JSON file instead of parsing text files.")
 	keepalivedPID := flag.String("ka.pid-path", "/var/run/keepalived.pid", "A path for Keepalived PID")
+	keepalivedContainerPID := flag.String("ka.container.pid-path", "", "A path for Keepalived PID in container mode")
 	keepalivedCheckScript := flag.String("cs", "", "Health Check script path to be execute for each VIP")
 	keepalivedContainerName := flag.String("container-name", "", "Keepalived container name")
 	keepalivedContainerTmpDir := flag.String("container-tmp-dir", "/tmp", "Keepalived container tmp volume path")
@@ -42,7 +43,7 @@ func main() {
 			*keepalivedJSON,
 			*keepalivedContainerName,
 			*keepalivedContainerTmpDir,
-			*keepalivedPID,
+			*keepalivedContainerPID,
 		)
 	} else {
 		c = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
