@@ -20,6 +20,7 @@ type Collector interface {
 	StatsVrrps() (map[string]*VRRPStats, error)
 	JSONVrrps() ([]VRRP, error)
 	HasVRRPScriptStateSupport() bool
+	HasJSONSignalSupport() (bool, error)
 }
 
 // KeepalivedCollector implements prometheus.Collector interface and stores required info to collect data.

@@ -37,7 +37,6 @@ func main() {
 	}
 
 	var c collector.Collector
-	var err error
 	if *keepalivedContainerName != "" {
 		c = container.NewKeepalivedContainerCollectorHost(
 			*keepalivedJSON,
@@ -46,10 +45,18 @@ func main() {
 			*keepalivedPID,
 		)
 	} else {
-		c, err = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
+		c = host.NewKeepalivedHostCollectorHost(*keepalivedJSON, *keepalivedPID)
+	}
+
+	// json support check
+	if *keepalivedJSON {
+		jsonSupport, err := c.HasJSONSignalSupport()
 		if err != nil {
-			logrus.WithError(err).Error("Could not get KeepalivedHostCollectorHost struct")
-			os.Exit(1)
+			logrus.WithError(err).Fatal("Error checking JSON signal support")
+		}
+
+		if !jsonSupport {
+			logrus.Fatal("Keepalived does not support JSON signal")
 		}
 	}
 

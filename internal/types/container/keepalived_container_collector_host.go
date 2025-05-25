@@ -266,3 +266,20 @@ func (k *KeepalivedContainerCollectorHost) ScriptVrrps() ([]collector.VRRPScript
 func (k *KeepalivedContainerCollectorHost) HasVRRPScriptStateSupport() bool {
 	return utils.HasVRRPScriptStateSupport(k.version)
 }
+
+func (k *KeepalivedContainerCollectorHost) HasJSONSignalSupport() (bool, error) {
+	// exec command to check if SIGJSON is supported
+	cmd := strslice.StrSlice{"keepalived", "--version"}
+	output, err := k.dockerExecCmd(cmd)
+	if err != nil {
+		return false, err
+	}
+
+	if strings.Contains(output.String(), "--enable-json") {
+		return true, nil
+	}
+
+	logrus.Error("Keepalived does not support JSON signal. Please check if it was compiled with --enable-json option")
+
+	return false, nil
+}
