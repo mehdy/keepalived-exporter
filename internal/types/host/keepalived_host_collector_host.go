@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
-	"fmt"
 
 	"github.com/hashicorp/go-version"
 	"github.com/mehdy/keepalived-exporter/internal/collector"
@@ -28,7 +27,7 @@ type KeepalivedHostCollectorHost struct {
 }
 
 // NewKeepalivedHostCollectorHost is creating new instance of KeepalivedHostCollectorHost.
-func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) (*KeepalivedHostCollectorHost, error) {
+func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) *KeepalivedHostCollectorHost {
 	k := &KeepalivedHostCollectorHost{
 		useJSON: useJSON,
 		pidPath: pidPath,
@@ -38,18 +37,10 @@ func NewKeepalivedHostCollectorHost(useJSON bool, pidPath string) (*KeepalivedHo
 	if k.version, err = k.getKeepalivedVersion(); err != nil {
 		logrus.WithError(err).Warn("Version detection failed. Assuming it's the latest one.")
 	}
-	
-	if useJSON {
-		err = isEnableJSONSupported()
-        	if err != nil {
-			logrus.WithError(err).Warn("JSON support detection failed. Please check keepalivedJSON flag")
-			return nil, err
-        	}
-	}
-	
+
 	k.initSignals()
 
-	return k, nil
+	return k
 }
 
 func (k *KeepalivedHostCollectorHost) Refresh() error {
@@ -106,20 +97,23 @@ func (k *KeepalivedHostCollectorHost) getKeepalivedVersion() (*version.Version, 
 	return utils.ParseVersion(stderr.String())
 }
 
-func isEnableJSONSupported() error {
-        cmd := exec.Command("keepalived", "--version")
-        output, err := cmd.CombinedOutput()
-        if err != nil {
-                return fmt.Errorf("failed to execute keepalived --version: %v", err)
-        }
+func (k *KeepalivedHostCollectorHost) HasJSONSignalSupport() (bool, error) {
+	cmd := exec.Command("keepalived", "--version")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		logrus.WithError(err).WithField("output", string(output)).
+			Error("Failed to run keepalived --version command")
 
-        outputStr := string(output)
+		return false, err
+	}
 
-        if strings.Contains(outputStr, "--enable-json") {
-                return nil
-        }
+	if strings.Contains(string(output), "--enable-json") {
+		return true, nil
+	}
 
-        return fmt.Errorf("keepalived does not turn on the enable-json switch")
+	logrus.Error("Keepalived does not support JSON signal. Please check if it was compiled with --enable-json option")
+
+	return false, nil
 }
 
 // Signal sends signal to Keepalived process.
