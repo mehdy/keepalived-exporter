@@ -9,7 +9,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/hashicorp/go-version"
@@ -145,49 +144,43 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 	return syscall.Signal(signum)
 }
 
-// Signal sends signal to Keepalived process.
-func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
-	data, err := os.ReadFile(k.pidPath)
+func (k *KeepalivedContainerCollectorHost) dockerExecSignal(signal syscall.Signal) error {
+	pidData, err := os.ReadFile(k.pidPath)
 	if err != nil {
-		logrus.WithField("path", k.pidPath).WithError(err).Info("Can't find keepalived pid. Falling back to the default process.")
-
-		err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
-		if err != nil {
-			logrus.WithError(err).WithField("signal", int(signal)).Error("Failed to send signal")
-
-			return err
-		}
-
-		return nil
-	}
-
-	pid := strings.TrimSuffix(string(data), "\n")
-	logrus.WithField("pid", pid).Info("Pid found")
-
-	cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
-	execConfig := container.ExecOptions{
-		Cmd:          cmd,
-		AttachStdout: true,
-		AttachStderr: true,
-	}
-
-	// Create the execution instance
-	execIDResp, err := k.dockerCli.ContainerExecCreate(context.Background(), k.containerName, execConfig)
-	if err != nil {
-		logrus.WithError(err).Error("Error creating exec instance")
+		logrus.WithField("path", k.pidPath).WithError(err).Error("Failed to read keepalived pid file")
 
 		return err
 	}
 
-	// Start the execution of the created command
-	err = k.dockerCli.ContainerExecStart(context.Background(), execIDResp.ID, container.ExecStartOptions{})
+	pid := strings.TrimSpace(string(pidData))
+	cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
+
+	_, err = k.dockerExecCmd(cmd)
+
+	return err
+}
+
+func (k *KeepalivedContainerCollectorHost) dockerSignal(signal syscall.Signal) error {
+	err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
 	if err != nil {
-		logrus.WithError(err).Error("Error starting exec command")
+		logrus.WithError(err).WithFields(logrus.Fields{
+			"container": k.containerName,
+			"signal":    int(signal),
+		}).Error("Failed to send signal")
 
 		return err
 	}
 
 	return nil
+}
+
+// Signal sends signal to Keepalived process.
+func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
+	if k.pidPath != "" {
+		return k.dockerExecSignal(signal)
+	}
+
+	return k.dockerSignal(signal)
 }
 
 // JSONVrrps send SIGJSON and parse the data to the list of collector.VRRP struct.

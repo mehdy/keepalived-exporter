@@ -76,12 +76,28 @@ Set the `--container-name` to the Keepalived container name and set `--container
 
 ### Keepalived and Keepalived Exporter on docker
 
+We support two methods to signal keepalived running in a container.
+
+#### Using Docker Signal
+
+This is when the keepalived is running with PID 1 in the container so we can use the standard docker API to send signal to the keepalived process.
+
 Volume docker socket (`/var/run/docker.sock`) to Keepalived Exporter cotnainer in the same path and pass the args like as using Keepalived on container
 
 ```bash
 docker pull ghcr.io/mehdy/keepalived-exporter
-docker run -v keepalived-data:/tmp/ -v run:/var/run/ ... $KEEPALIVED_IMAGE
-docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -v run/keepalived.pid:/var/run/keepalived.pid:ro -p 9165:9165 ghcr.io/mehdy/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
+docker run -v keepalived-data:/tmp/ ... $KEEPALIVED_IMAGE
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -p 9165:9165 ghcr.io/mehdy/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data"
+```
+
+#### Exec to container with PID path
+
+In case the keepalived process is not running with PID 1, this method will exec to the container and use the provided PID path to send the signal.
+
+```bash
+docker pull ghcr.io/mehdy/keepalived-exporter
+docker run -v keepalived-data:/tmp/ -v keepalived-pid:/var/run/ ... $KEEPALIVED_IMAGE
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v keepalived-data:/tmp/keepalived-data:ro -v keepalived-pid:/var/run/:ro -p 9165:9165 ghcr.io/mehdy/keepalived-exporter --container-name keepalived --container-tmp-dir "/tmp/keepalived-data" --ka.container.pid-path "/var/run/keepalived.pid"
 ```
 
 ## Metrics
