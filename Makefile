@@ -42,5 +42,3 @@ unused: dep
 
 clean: ## Remove previous build and release files
 	@rm -f $(PROJECT_NAME)
-	@rm -f $(RELEASE_FILENAME).zip
-	@rm -f $(RELEASE_FILENAME).tar.gz
