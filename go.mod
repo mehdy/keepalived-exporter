@@ -8,7 +8,6 @@ require (
 	github.com/hashicorp/go-version v1.7.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/common v0.64.0
-	github.com/sirupsen/logrus v1.9.3
 )
 
 require (

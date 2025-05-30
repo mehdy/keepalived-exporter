@@ -3,6 +3,7 @@ package collector
 import (
 	"bytes"
 	"errors"
+	"log/slog"
 	"os/exec"
 	"strconv"
 	"sync"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/sirupsen/logrus"
 )
 
 type Collector interface {
@@ -108,7 +108,13 @@ func (k *KeepalivedCollector) newConstMetric(
 		lableValues...,
 	)
 	if err != nil {
-		logrus.WithError(err).Errorf("Failed to register %q metric", name)
+		slog.Error("Failed to create new const metric",
+			"name", name,
+			"valueType", valueType,
+			"value", value,
+			"lableValues", lableValues,
+			"error", err,
+		)
 
 		return
 	}
@@ -134,12 +140,15 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 		var err error
 		keepalivedStats, err = k.getKeepalivedStats()
 		if err != nil {
-			logrus.WithError(err).Debug("Failed to get keepalived stats. Retrying...")
+			slog.Debug("Failed to get keepalived stats",
+				"error", err,
+				"retryAfter", b.NextBackOff().String(),
+			)
 		}
 
 		return err
 	}, b); err != nil {
-		logrus.WithError(err).Error("No data found to be exported")
+		slog.Error("No data found to be exported", "error", err)
 
 		keepalivedUp = 0
 	}
@@ -359,14 +368,20 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 
 	for _, script := range keepalivedStats.Scripts {
 		if scriptStatus, ok := script.getIntStatus(); !ok {
-			logrus.WithFields(logrus.Fields{"status": script.Status, "name": script.Name}).Warn("Unknown status")
+			slog.Warn("Unknown script status",
+				"status", script.Status,
+				"name", script.Name,
+			)
 		} else {
 			k.newConstMetric(ch, "keepalived_script_status", prometheus.GaugeValue, float64(scriptStatus), script.Name)
 		}
 
 		if k.collector.HasVRRPScriptStateSupport() {
 			if scriptState, ok := script.getIntState(); !ok {
-				logrus.WithFields(logrus.Fields{"state": script.State, "name": script.Name}).Warn("Unknown state")
+				slog.Warn("Unknown script state",
+					"state", script.State,
+					"name", script.Name,
+				)
 			} else {
 				k.newConstMetric(ch, "keepalived_script_state", prometheus.GaugeValue, float64(scriptState), script.Name)
 			}
@@ -411,7 +426,10 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 	}
 
 	if len(vrrpData) != len(vrrpStats) {
-		logrus.Error("keepalived.data and keepalived.stats datas are not synced")
+		slog.Error("keepalived.data and keepalived.stats datas are not synced",
+			"dataCount", len(vrrpData),
+			"statsCount", len(vrrpStats),
+		)
 
 		return nil, errors.New("keepalived.data and keepalived.stats datas are not synced")
 	}
@@ -423,7 +441,9 @@ func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
 				Stats: *vStat,
 			})
 		} else {
-			logrus.WithField("instance", instance).Error("There is no stats found for instance")
+			slog.Error("keepalived.stats does not contain stats for instance",
+				"instance", instance,
+			)
 
 			return nil, errors.New("there is no stats found for instance")
 		}
@@ -441,9 +461,12 @@ func (k *KeepalivedCollector) checkScript(vip string) bool {
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		logrus.WithFields(logrus.Fields{"VIP": vip, "stdout": stdout.String(), "stderr": stderr.String()}).
-			WithError(err).
-			Error("Check script failed")
+		slog.Error("Check script failed",
+			"VIP", vip,
+			"stdout", stdout.String(),
+			"stderr", stderr.String(),
+			"error", err,
+		)
 
 		return false
 	}

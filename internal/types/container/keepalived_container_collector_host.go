@@ -2,6 +2,7 @@ package container
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -14,7 +15,6 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/mehdy/keepalived-exporter/internal/collector"
 	"github.com/mehdy/keepalived-exporter/internal/types/utils"
-	"github.com/sirupsen/logrus"
 )
 
 // KeepalivedContainerCollectorHost implements Collector for when Keepalived is on container and Keepalived Exporter is on a host.
@@ -48,12 +48,13 @@ func NewKeepalivedContainerCollectorHost(
 
 	k.dockerCli, err = client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
-		logrus.WithError(err).Fatal("Error creating docker env client")
+		slog.Error("Error creating docker env client", "error", err)
+		os.Exit(1)
 	}
 
 	k.version, err = k.getKeepalivedVersion()
 	if err != nil {
-		logrus.WithError(err).Warn("Version detection failed. Assuming it's the latest one.")
+		slog.Warn("Version detection failed. Assuming it's the latest one.", "error", err)
 	}
 
 	k.initSignals()
@@ -66,7 +67,7 @@ func NewKeepalivedContainerCollectorHost(
 func (k *KeepalivedContainerCollectorHost) Refresh() error {
 	if k.useJSON {
 		if err := k.signal(k.SIGJSON); err != nil {
-			logrus.WithError(err).Error("Failed to send JSON signal to keepalived")
+			slog.Error("Failed to send JSON signal to keepalived", "error", err)
 
 			return err
 		}
@@ -75,13 +76,13 @@ func (k *KeepalivedContainerCollectorHost) Refresh() error {
 	}
 
 	if err := k.signal(k.SIGSTATS); err != nil {
-		logrus.WithError(err).Error("Failed to send STATS signal to keepalived")
+		slog.Error("Failed to send STATS signal to keepalived", "error", err)
 
 		return err
 	}
 
 	if err := k.signal(k.SIGDATA); err != nil {
-		logrus.WithError(err).Error("Failed to send DATA signal to keepalived")
+		slog.Error("Failed to send DATA signal to keepalived", "error", err)
 
 		return err
 	}
@@ -126,9 +127,12 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 	stdout, err := k.dockerExecCmd(sigNumCommand)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"signal": sigString, "container": k.containerName}).
-			WithError(err).
-			Fatal("Error getting signum")
+		slog.Error("Error executing command to get signal number",
+			"signal", sigString,
+			"container", k.containerName,
+			"error", err,
+		)
+		os.Exit(1)
 	}
 
 	reg := regexp.MustCompile("[^0-9]+")
@@ -136,9 +140,13 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 
 	signum, err := strconv.ParseInt(strSigNum, 10, 32)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{"signal": sigString, "signum": stdout.String()}).
-			WithError(err).
-			Fatal("Error parsing signum result")
+		slog.Error("Error parsing signal number",
+			"signal", sigString,
+			"signum", strSigNum,
+			"container", k.containerName,
+			"error", err,
+		)
+		os.Exit(1)
 	}
 
 	return syscall.Signal(signum)
@@ -147,7 +155,10 @@ func (k *KeepalivedContainerCollectorHost) sigNum(sigString string) syscall.Sign
 func (k *KeepalivedContainerCollectorHost) dockerExecSignal(signal syscall.Signal) error {
 	pidData, err := os.ReadFile(k.pidPath)
 	if err != nil {
-		logrus.WithField("path", k.pidPath).WithError(err).Error("Failed to read keepalived pid file")
+		slog.Error("Failed to read keepalived pid file",
+			"error", err,
+			"path", k.pidPath,
+		)
 
 		return err
 	}
@@ -163,10 +174,11 @@ func (k *KeepalivedContainerCollectorHost) dockerExecSignal(signal syscall.Signa
 func (k *KeepalivedContainerCollectorHost) dockerSignal(signal syscall.Signal) error {
 	err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
 	if err != nil {
-		logrus.WithError(err).WithFields(logrus.Fields{
-			"container": k.containerName,
-			"signal":    int(signal),
-		}).Error("Failed to send signal")
+		slog.Error("Failed to send signal to keepalived container",
+			"container", k.containerName,
+			"signal", int(signal),
+			"error", err,
+		)
 
 		return err
 	}
@@ -187,14 +199,20 @@ func (k *KeepalivedContainerCollectorHost) signal(signal syscall.Signal) error {
 func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error) {
 	f, err := os.Open(k.jsonPath)
 	if err != nil {
-		logrus.WithError(err).WithField("path", k.jsonPath).Error("Failed to open keepalived.json")
+		slog.Error("Failed to open keepalived.json",
+			"error", err,
+			"path", k.jsonPath,
+		)
 
 		return nil, err
 	}
 	defer func() {
 		err := f.Close()
 		if err != nil {
-			logrus.WithError(err).Error("Failed to close file")
+			slog.Error("Failed to close keepalived.json file",
+				"error", err,
+				"path", k.jsonPath,
+			)
 		}
 	}()
 
@@ -205,14 +223,20 @@ func (k *KeepalivedContainerCollectorHost) JSONVrrps() ([]collector.VRRP, error)
 func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.VRRPStats, error) {
 	f, err := os.Open(k.statsPath)
 	if err != nil {
-		logrus.WithError(err).WithField("path", k.statsPath).Error("Failed to open keepalived.stats")
+		slog.Error("Failed to open keepalived.stats",
+			"error", err,
+			"path", k.statsPath,
+		)
 
 		return nil, err
 	}
 	defer func() {
 		err := f.Close()
 		if err != nil {
-			logrus.WithError(err).Error("Failed to close file")
+			slog.Error("Failed to close keepalived.stats file",
+				"error", err,
+				"path", k.statsPath,
+			)
 		}
 	}()
 
@@ -223,14 +247,20 @@ func (k *KeepalivedContainerCollectorHost) StatsVrrps() (map[string]*collector.V
 func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VRRPData, error) {
 	f, err := os.Open(k.dataPath)
 	if err != nil {
-		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
+		slog.Error("Failed to open keepalived.data",
+			"error", err,
+			"path", k.dataPath,
+		)
 
 		return nil, err
 	}
 	defer func() {
 		err := f.Close()
 		if err != nil {
-			logrus.WithError(err).Error("Failed to close file")
+			slog.Error("Failed to close keepalived.data file",
+				"error", err,
+				"path", k.dataPath,
+			)
 		}
 	}()
 
@@ -241,14 +271,20 @@ func (k *KeepalivedContainerCollectorHost) DataVrrps() (map[string]*collector.VR
 func (k *KeepalivedContainerCollectorHost) ScriptVrrps() ([]collector.VRRPScript, error) {
 	f, err := os.Open(k.dataPath)
 	if err != nil {
-		logrus.WithError(err).WithField("path", k.dataPath).Error("Failed to open keepalived.data")
+		slog.Error("Failed to open keepalived.data",
+			"error", err,
+			"path", k.dataPath,
+		)
 
 		return nil, err
 	}
 	defer func() {
 		err := f.Close()
 		if err != nil {
-			logrus.WithError(err).Error("Failed to close file")
+			slog.Error("Failed to close keepalived.data file",
+				"error", err,
+				"path", k.dataPath,
+			)
 		}
 	}()
 
@@ -272,7 +308,10 @@ func (k *KeepalivedContainerCollectorHost) HasJSONSignalSupport() (bool, error) 
 		return true, nil
 	}
 
-	logrus.Error("Keepalived does not support JSON signal. Please check if it was compiled with --enable-json option")
+	slog.Error("Keepalived does not support JSON signal. Please check if it was compiled with --enable-json option",
+		"container", k.containerName,
+		"version", k.version,
+	)
 
 	return false, nil
 }
