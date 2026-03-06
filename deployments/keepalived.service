@@ -1,0 +1,14 @@
+[Unit]
+Description=Prometheus Keepalived exporter
+After=network.target keepalived.service
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/default/keepalived
+ExecStart=/usr/bin/keepalived-exporter $OPTIONS
+KillMode=process
+Restart=on-failure
+RestartSec=30s
+
+[Install]
+WantedBy=multi-user.target
