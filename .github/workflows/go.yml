@@ -11,16 +11,11 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        go: ['1.24']
-
     steps:
-      - name: Set up Go ${{ matrix.go }}
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
+          go-version-file: go.mod
         id: go
 
       - name: Check out code into the Go module directory
@@ -35,16 +30,11 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        go: ['1.24']
-
     steps:
-      - name: Set up Go ${{ matrix.go }}
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
+          go-version-file: go.mod
         id: go
 
       - name: Check out code into the Go module directory
@@ -62,16 +52,11 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        go: ['1.24']
-
     steps:
-      - name: Set up Go ${{ matrix.go }}
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
+          go-version-file: go.mod
         id: go
 
       - name: Check out code into the Go module directory
