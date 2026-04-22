@@ -10,8 +10,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/docker/docker/api/types/strslice"
-	"github.com/docker/docker/client"
+	"github.com/moby/moby/client"
 	"github.com/hashicorp/go-version"
 	"github.com/mehdy/keepalived-exporter/internal/collector"
 	"github.com/mehdy/keepalived-exporter/internal/types/utils"
@@ -46,7 +45,7 @@ func NewKeepalivedContainerCollectorHost(
 
 	var err error
 
-	k.dockerCli, err = client.NewClientWithOpts(client.FromEnv)
+	k.dockerCli, err = client.New(client.FromEnv)
 	if err != nil {
 		slog.Error("Error creating docker env client", "error", err)
 		os.Exit(1)
@@ -164,7 +163,7 @@ func (k *KeepalivedContainerCollectorHost) dockerExecSignal(signal syscall.Signa
 	}
 
 	pid := strings.TrimSpace(string(pidData))
-	cmd := strslice.StrSlice{"kill", "-" + strconv.Itoa(int(signal)), pid}
+	cmd := []string{"kill", "-" + strconv.Itoa(int(signal)), pid}
 
 	_, err = k.dockerExecCmd(cmd)
 
@@ -172,7 +171,7 @@ func (k *KeepalivedContainerCollectorHost) dockerExecSignal(signal syscall.Signa
 }
 
 func (k *KeepalivedContainerCollectorHost) dockerSignal(signal syscall.Signal) error {
-	err := k.dockerCli.ContainerKill(context.Background(), k.containerName, strconv.Itoa(int(signal)))
+	_, err := k.dockerCli.ContainerKill(context.Background(), k.containerName, client.ContainerKillOptions{Signal: strconv.Itoa(int(signal))})
 	if err != nil {
 		slog.Error("Failed to send signal to keepalived container",
 			"container", k.containerName,
@@ -298,7 +297,7 @@ func (k *KeepalivedContainerCollectorHost) HasVRRPScriptStateSupport() bool {
 
 func (k *KeepalivedContainerCollectorHost) HasJSONSignalSupport() (bool, error) {
 	// exec command to check if SIGJSON is supported
-	cmd := strslice.StrSlice{"keepalived", "--version"}
+	cmd := []string{"keepalived", "--version"}
 	output, err := k.dockerExecCmd(cmd)
 	if err != nil {
 		return false, err
