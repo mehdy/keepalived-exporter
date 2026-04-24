@@ -27,10 +27,26 @@ nfpms:
     maintainer: Mehdi Khoshnoodi <mehdy.khoshnoody@gmail.com>
     description: Prometheus exporter for keepalived
     license: GPL-3.0
+    depends:
+      - keepalived
     formats:
       - deb
       - rpm
     bindir: /usr/bin
+    contents:
+      - src: 'packaging/systemd/keepalived-exporter.service'
+        dst: '/usr/lib/systemd/system'
+        file_info:
+          mode: 0644
+      - src: 'packaging/systemd/keepalived-exporter.sysusers'
+        dst: '/usr/lib/sysusers.d/keepalived-exporter.sysusers'
+        file_info:
+          mode: 0644
+      - src: 'packaging/systemd/keepalived-exporter'
+        dst: '/etc/conf.d/keepalived-exporter'
+        type: config|noreplace
+        file_info:
+          mode: 0644
 kos:
   - repositories:
       - ghcr.io/mehdy/keepalived-exporter
