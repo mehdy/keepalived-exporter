@@ -1,0 +1,33 @@
+[Unit]
+Description=Prometheus Keepalived exporter
+Documentation=https://github.com/mehdy/keepalived-exporter
+Requires=network-online.target
+After=network-online.target nss-lookup.target basic.target keepalived.service
+Wants=network-online.target nss-lookup.target keepalived.service
+
+[Service]
+# Currently don't find a way to send signals to another systemd PID
+User=root
+Group=keepalived-exporter
+EnvironmentFile=-/etc/conf.d/keepalived-exporter
+ExecStart=/usr/bin/keepalived-exporter $KEEPALIVED_EXPORTER_ARGS
+ExecStop=/bin/kill -s SIGTERM $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+NoNewPrivileges=true
+# This exporter read /tmp/keepalived.json file. Seems this file produced by keepalived itself by signal?
+PrivateTmp=false
+ProtectHome=true
+ProtectSystem=full
+ProtectHostname=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictNamespaces=true
+MemoryDenyWriteExecute=true
+PrivateDevices=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target
