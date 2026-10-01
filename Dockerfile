@@ -12,7 +12,7 @@ RUN make dep
 ADD . .
 RUN make build
 
-FROM alpine:3.24.1
+FROM alpine:3.24.2
 
 COPY --from=builder /build/keepalived-exporter /bin/keepalived-exporter
 
